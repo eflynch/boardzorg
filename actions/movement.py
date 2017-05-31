@@ -4,9 +4,103 @@ import math
 from exceptions import IllegalAction, BadCommand
 
 from actions.action import Action
+from actions.bidding import get_faction_order
 
 
-class Shipment(Action):
+def ship_units(game_state, faction, units, space, sector):
+    if sector not in space.sectors:
+        raise BadCommand("You ain't going nowhere")
+    for u in units:
+        if u not in game_state.faction_state[faction].reserve_units:
+            raise BadCommand("Cannot place a unit which is unavailable")
+        game_state.faction_state[faction].reserve_units.remove(u)
+        if faction not in space.forces:
+            space.forces[faction] = {}
+        if sector not in space.forces[faction]:
+            space.forces[faction][sector] = []
+        space.forces[faction][sector].append(u)
+
+
+def move_units(game_state, faction, units, space_a, sector_a, space_b, sector_b):
+    if sector_b not in space_b.sectors:
+        raise BadCommand("You ain't going nowhere")
+
+    if sector_a not in sector_a.sectors:
+        raise BadCommand("You ain't coming from nowhere")
+
+    if faction not in space_b.forces:
+        space_b.forces[faction] = {}
+    if sector_b not in space_b.forces[faction]:
+        space_b.forces[faction][sector_b] = []
+
+    for u in units:
+        if u not in space_a.forces[faction][sector_a]:
+            raise BadCommand("You ain't got the troops")
+        space_a.forces[faction][sector_a].remove(u)
+        space_b.forces[faction][sector_a].append(u)
+
+    if all(space_a.forces[faction][s] == [] for s in space_a.forces[faction]):
+        del space_a.forces[faction]
+
+
+class KaramaBlockGuildTurnChoice(Action):
+    name = "karama-block-guild-turn-choice"
+    ck_round = "movement"
+
+    @classmethod
+    def _check(cls, game_state, faction):
+        if game_state.round_state.faction_turn is not None:
+            raise IllegalAction("Movement round already started")
+        if game_state.round_state.block_guild_turn_karama_used:
+            raise IllegalAction("This has already been done")
+        if faction in game_state.round_state.block_guild_turn_karama_pass:
+            raise IllegalAction("You have already passed this option")
+
+    def _execute(self, game_state):
+        new_game_state = deepcopy(game_state)
+        new_game_state.round_state.block_guild_turn_karama_used = True
+        new_game_state.round_state.faction_turn = get_faction_order(game_state)[0]
+        return new_game_state
+
+
+class KaramaPassBlockGuildTurnChoice(Action):
+    name = "karama-pass-block-guild-turn-choice"
+    ck_round = "movement"
+
+    @classmethod
+    def _check(cls, game_state, faction):
+        if game_state.round_state.faction_turn is not None:
+            raise IllegalAction("Movement round already started")
+        if game_state.round_state.block_guild_turn_karama_used:
+            raise IllegalAction("This has already been done")
+        if faction in game_state.round_state.block_guild_turn_karama_pass:
+            raise IllegalAction("You have already passed this option")
+
+    def _execute(self, game_state):
+        new_game_state = deepcopy(game_state)
+        new_game_state.round_state.block_guild_turn_karama_pass.append(self.faction)
+        return new_game_state
+
+
+class StartMovement(Action):
+    name = "start-movemen"
+    ck_round = "movement"
+
+    @classmethod
+    def _check(cls, game_state, faction):
+        if game_state.round_state.faction_turn is not None:
+            raise IllegalAction("Movement round already started")
+        if len(game_state.round_state.block_guild_turn_karama_pass) < 5:
+            raise IllegalAction("Waiting for karama passes")
+
+    def _execute(self, game_state):
+        pass
+
+
+class Ship(Action):
+    name = "ship"
+    ck_round = "movement"
+
     def parse_args(faction, args):
         parts = args.split(" ")
         if len(parts) != 3:
@@ -16,21 +110,17 @@ class Shipment(Action):
         units = [int(i) for i in units.split(",")]
         sector = int(sector)
 
-        return Shipment(faction, units, space, sector)
+        return Ship(faction, units, space, sector)
 
-    def __init__(self, faction, units, space, sector, karama=False):
+    def __init__(self, faction, units, space, sector):
         self.faction = faction
         self.units = units
         self.space = space
         self.sector = sector
-        self.karama = karama
 
     def _calculate_spice_cost(self, game_state):
         num_units = len(self.units)
         space = game_state.board_state.map_state[self.space]
-
-        if self.karama:
-            spice_cost = 0
 
         if self.faction == "guild" or "guild" in game_state.alliances[self.faction]:
             if space.is_stronghold:
@@ -45,29 +135,16 @@ class Shipment(Action):
 
         return spice_cost
 
-    def _move_units(self, game_state):
-        space = game_state.board_state.map_state[self.space]
-        for u in self.units:
-            if u not in game_state.faction_state[self.faction].reserve_units:
-                raise IllegalAction("Cannot ship unit which is unavailable")
-            game_state.faction_state[self.faction].reserve_units.remove(u)
-            if self.faction not in space.forces:
-                space.forces[self.faction] = {}
-            if self.sector not in space.forces[self.faction]:
-                space.forces[self.faction][self.sector] = []
-            space.forces[self.faction][self.sector].append(u)
+    @classmethod
+    def _check(cls, game_state, faction):
+        cls.check_turn(game_state, faction)
 
     def execute(self, game_state):
-        self.check_round(game_state, "movement")
-        self.check_turn(game_state)
         new_game_state = deepcopy(game_state)
 
         space = new_game_state.board_state.map_state[self.space]
         if space.is_stronghold and len(space.forces) > 1 and self.faction not in space.forces:
-            raise IllegalAction("Cannot ship into stronghold with 2 enemy factions")
-
-        if self.sector not in space.sectors:
-            raise IllegalAction("You ain't going nowhere")
+            raise BadCommand("Cannot ship into stronghold with 2 enemy factions")
 
         if new_game_state.board_state.storm_position == self.sector:
             if self.faction == "fremen":
@@ -83,7 +160,7 @@ class Shipment(Action):
         if new_game_state.faction_state[self.faction].spice < spice_cost:
             raise IllegalAction("Insufficient spice for this shipment")
 
-        self._move_units(new_game_state)
+        ship_units(new_game_state, self.faction, self.units, space, self.sector)
 
         if self.faction != "guild":
             new_game_state.faction_state[self.faction].spice -= spice_cost
