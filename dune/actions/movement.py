@@ -1,10 +1,13 @@
+# KaramaBlockGuildTurnChoice, KaramaPassBlockGuildTurnChoice
+# GuildPassTurn
+# TURN:
+    # KaramaCheapShipment, Ship, CrossPlanetShip, Movement
+
 from copy import deepcopy
 import math
 
-from exceptions import IllegalAction, BadCommand
-
-from actions.action import Action
-from actions.bidding import get_faction_order
+from dune.actions.action import Action
+from dune.exceptions import IllegalAction, BadCommand
 
 
 def ship_units(game_state, faction, units, space, sector):
@@ -59,7 +62,7 @@ class KaramaBlockGuildTurnChoice(Action):
     def _execute(self, game_state):
         new_game_state = deepcopy(game_state)
         new_game_state.round_state.block_guild_turn_karama_used = True
-        new_game_state.round_state.faction_turn = get_faction_order(game_state)[0]
+        # new_game_state.round_state.faction_turn = get_faction_order(game_state)[0]
         return new_game_state
 
 

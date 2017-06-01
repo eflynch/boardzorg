@@ -1,10 +1,9 @@
-from state.state import GameState
-from actions import get_valid_actions, get_supervisor_actions
-
-from exceptions import IllegalAction, BadCommand
-
-from queue import Queue
 import threading
+from queue import Queue
+
+from dune.actions.manager import get_valid_actions, get_supervisor_actions
+from dune.exceptions import IllegalAction, BadCommand
+from dune.state.state import GameState
 
 
 class SessionState:

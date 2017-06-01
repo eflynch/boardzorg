@@ -1,4 +1,4 @@
-from exceptions import IllegalAction
+from dune.exceptions import IllegalAction
 
 
 class ActionMeta(type):

@@ -1,11 +1,10 @@
 from copy import deepcopy
 
-from exceptions import IllegalAction, BadCommand
-
-from actions.action import Action
-from actions.bidding import get_faction_order
-from state.state import MovementState
-from state.leader import parse_leader
+from dune.actions import storm
+from dune.actions.action import Action
+from dune.exceptions import IllegalAction, BadCommand
+from dune.state.state import MovementState
+from dune.state.leader import parse_leader
 
 
 def leader_revivable(game_state, faction):
@@ -33,7 +32,7 @@ class StartRevival(Action):
 
     def _execute(self, game_state):
         new_game_state = deepcopy(game_state)
-        for faction in get_faction_order(game_state):
+        for faction in storm.get_faction_order(game_state):
             if game_state.faction_state[faction].tank_units:
                 new_game_state.round_state.faction_turn = faction
                 return new_game_state
@@ -109,7 +108,7 @@ class Revive(Action):
             new_game_state.faction_state[self.faction].tank_leaders.remove(self.leader)
             new_game_state.faction_state[self.faction].leaders.append(self.leader)
 
-        faction_order = get_faction_order(game_state)
+        faction_order = storm.get_faction_order(game_state)
         index = faction_order.index(self.faction) + 1
         if index < len(faction_order):
             new_game_state.round_state.faction_turn = faction_order[index]

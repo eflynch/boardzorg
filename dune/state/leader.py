@@ -1,4 +1,4 @@
-from exceptions import BadCommand
+from dune.exceptions import BadCommand
 
 LEADERS = {
     "atreides": [

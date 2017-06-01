@@ -1,28 +1,14 @@
 from copy import deepcopy
 
-from exceptions import IllegalAction
 
-from actions.action import Action
-from actions.setup import TOKEN_SECTORS
-
-from state.state import RevivalState
-
-
-def get_faction_order(game_state):
-    faction_order = []
-    storm_position = game_state.board_state.storm_position
-    for i in range(18):
-        sector = (storm_position + i + 1) % 18
-        if sector in TOKEN_SECTORS:
-            for f in game_state.faction_state:
-                faction_state = game_state.faction_state[f]
-                if faction_state.token_position == sector:
-                    faction_order.append(f)
-    return faction_order
+from dune.actions import storm
+from dune.actions.action import Action
+from dune.exceptions import IllegalAction
+from dune.state.state import RevivalState
 
 
 def next_bidder(game_state):
-    faction_order = get_faction_order(game_state)
+    faction_order = storm.get_faction_order(game_state)
     turn_index = faction_order.index(game_state.round_state.faction_turn)
     for i in range(6):
         next_bidder_candidate = faction_order[(turn_index + 1 + i) % 6]
@@ -34,7 +20,7 @@ def next_bidder(game_state):
 
 
 def next_first_bidder(game_state):
-    faction_order = get_faction_order(game_state)
+    faction_order = storm.get_faction_order(game_state)
     faction_index = game_state.round_state.total_for_auction - len(game_state.round_state.up_for_auction)
     return faction_order[faction_index]
 

@@ -1,9 +1,9 @@
 from copy import deepcopy
 from random import randint
 
-from actions.action import Action
-
-from state.state import SpiceState
+from dune.actions.action import Action
+from dune.constants import TOKEN_SECTORS
+from dune.state.state import SpiceState
 
 
 def destroy_in_path(game_state, sectors):
@@ -20,6 +20,19 @@ def destroy_in_path(game_state, sectors):
                             space.forces[faction][s] = []
                     if s == space.spice_sector:
                         space.spice = 0
+
+
+def get_faction_order(game_state):
+    faction_order = []
+    storm_position = game_state.board_state.storm_position
+    for i in range(18):
+        sector = (storm_position + i + 1) % 18
+        if sector in TOKEN_SECTORS:
+            for f in game_state.faction_state:
+                faction_state = game_state.faction_state[f]
+                if faction_state.token_position == sector:
+                    faction_order.append(f)
+    return faction_order
 
 
 class Storm(Action):

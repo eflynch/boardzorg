@@ -1,7 +1,8 @@
-from actions.action import Action
-from actions import nexus, bidding, spice, revival, movement
+from dune.actions.action import Action
+from dune.actions import nexus
+from dune.exceptions import IllegalAction
 
-from exceptions import IllegalAction
+from dune.actions import setup, storm, spice, nexus, bidding, revival, movement, battle, collection
 
 
 def get_supervisor_actions(game_state):

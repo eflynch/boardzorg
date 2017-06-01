@@ -2,11 +2,9 @@
 
 from copy import deepcopy
 
-from exceptions import IllegalAction, BadCommand
-
-from actions.action import Action
-
-from state.state import NexusState, BiddingState
+from dune.actions.action import Action
+from dune.exceptions import IllegalAction, BadCommand
+from dune.state.state import NexusState, BiddingState
 
 
 class Gift(Action):

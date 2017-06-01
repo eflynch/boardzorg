@@ -1,10 +1,10 @@
 from random import shuffle
 
-from state.leader import LEADERS
-from state.treachery import TREACHERY_CARDS
-from state.space import SPACES, SpaceState
-from state.spice import SPICE_CARDS
-from factions import FACTIONS
+from dune.state.leader import LEADERS
+from dune.state.treachery import TREACHERY_CARDS
+from dune.state.space import SPACES, SpaceState
+from dune.state.spice import SPICE_CARDS
+from dune.factions import FACTIONS
 
 
 class FactionState:

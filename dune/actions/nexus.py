@@ -7,13 +7,11 @@
 
 from copy import deepcopy
 
-from actions.action import Action
-from actions.movement import move_units
-
-from exceptions import IllegalAction, BadCommand
-
-from state.state import SpiceState
-from factions import FACTIONS
+from dune.actions.action import Action
+from dune.actions.movement import move_units
+from dune.exceptions import IllegalAction, BadCommand
+from dune.factions import FACTIONS
+from dune.state.state import SpiceState
 
 
 def fremen_allies_present(game_state):

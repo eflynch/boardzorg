@@ -1,7 +1,6 @@
 
-from session import SessionState
-
-from exceptions import IllegalAction
+from dune.session import SessionState
+from dune.exceptions import IllegalAction
 
 import random
 

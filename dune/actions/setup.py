@@ -15,17 +15,13 @@
 from copy import deepcopy
 from random import shuffle, randint
 
-from exceptions import IllegalAction, BadCommand
-from factions import FACTIONS
-from state.leader import LEADERS, parse_leader
-from state.state import SpiceState
-
-from actions.movement import ship_units
-from actions.storm import destroy_in_path
-
-from actions.action import Action
-
-TOKEN_SECTORS = [1, 4, 7, 10, 13, 16]
+from dune.actions import movement, storm
+from dune.actions.action import Action
+from dune.constants import TOKEN_SECTORS
+from dune.exceptions import IllegalAction, BadCommand
+from dune.factions import FACTIONS
+from dune.state.leader import LEADERS, parse_leader
+from dune.state.state import SpiceState
 
 
 def all_traitors_selected(game_state):
@@ -238,9 +234,9 @@ class FremenPlacement(Action):
         tabr = new_game_state.board_state.map_state["Sietch-Tabr"]
         west_wall = new_game_state.board_state.map_state["False-Wall-West"]
         south_wall = new_game_state.board_state.map_state["False-Wall-South"]
-        ship_units(new_game_state, self.faction, self.tabr_units, tabr, tabr.sectors[0])
-        ship_units(new_game_state, self.faction, self.west_units, west_wall, self.west_sector)
-        ship_units(new_game_state, self.faction, self.south_units, south_wall, self.south_sector)
+        movement.ship_units(new_game_state, self.faction, self.tabr_units, tabr, tabr.sectors[0])
+        movement.ship_units(new_game_state, self.faction, self.west_units, west_wall, self.west_sector)
+        movement.ship_units(new_game_state, self.faction, self.south_units, south_wall, self.south_sector)
 
         return new_game_state
 
@@ -272,7 +268,7 @@ class BeneGesseritPlacement(Action):
     def _execute(self, game_state):
         new_game_state = deepcopy(game_state)
         space = new_game_state.board_state.map_state[self.space]
-        ship_units(new_game_state, self.faction, [1], space, self.sector)
+        movement.ship_units(new_game_state, self.faction, [1], space, self.sector)
         return new_game_state
 
 
@@ -290,6 +286,6 @@ class StormPlacement(Action):
         new_game_state = deepcopy(game_state)
         new_game_state.board_state.storm_position = randint(0, 17)
         new_game_state.board_state.storm_advance = randint(0, 6)
-        destroy_in_path(new_game_state, [new_game_state.board_state.storm_position])
+        storm.destroy_in_path(new_game_state, [new_game_state.board_state.storm_position])
         new_game_state.round_state = SpiceState()
         return new_game_state
