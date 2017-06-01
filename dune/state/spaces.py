@@ -1,3 +1,5 @@
+from dune.state import State
+
 SPACES = [
     ('Arsunt', 'sand', None, None, (10, 11)),
     ('Basin', 'sand', None, None, (8,)),
@@ -44,7 +46,7 @@ SPACES = [
 ]
 
 
-class SpaceState:
+class SpaceState(State):
     def __init__(self, name, kind, spice_sector, spice_amount, sectors):
         # Properties
         self.name = name

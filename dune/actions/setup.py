@@ -19,9 +19,9 @@ from dune.actions import movement, storm
 from dune.actions.action import Action
 from dune.constants import TOKEN_SECTORS
 from dune.exceptions import IllegalAction, BadCommand
-from dune.factions import FACTIONS
-from dune.state.leader import LEADERS, parse_leader
-from dune.state.state import SpiceState
+from dune.state.factions import FACTIONS
+from dune.state.leaders import LEADERS, parse_leader
+from dune.state.rounds.spice import SpiceRound
 
 
 def all_traitors_selected(game_state):
@@ -287,5 +287,5 @@ class StormPlacement(Action):
         new_game_state.board_state.storm_position = randint(0, 17)
         new_game_state.board_state.storm_advance = randint(0, 6)
         storm.destroy_in_path(new_game_state, [new_game_state.board_state.storm_position])
-        new_game_state.round_state = SpiceState()
+        new_game_state.round_state = SpiceRound()
         return new_game_state

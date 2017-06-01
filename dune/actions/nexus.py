@@ -10,8 +10,8 @@ from copy import deepcopy
 from dune.actions.action import Action
 from dune.actions.movement import move_units
 from dune.exceptions import IllegalAction, BadCommand
-from dune.factions import FACTIONS
-from dune.state.state import SpiceState
+from dune.state.factions import FACTIONS
+from dune.state.rounds.spice import SpiceRound
 
 
 def fremen_allies_present(game_state):
@@ -174,7 +174,7 @@ class EndNexus(Action):
         space.forces = {}
         space.spice = 0
         new_game_state.board_state.shai_hulud = None
-        new_game_state.round_state = SpiceState()
+        new_game_state.round_state = SpiceRound()
         return new_game_state
 
 

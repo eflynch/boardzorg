@@ -3,7 +3,7 @@ from queue import Queue
 
 from dune.actions.manager import get_valid_actions, get_supervisor_actions
 from dune.exceptions import IllegalAction, BadCommand
-from dune.state.state import GameState
+from dune.state.game import GameState
 
 
 class SessionState:

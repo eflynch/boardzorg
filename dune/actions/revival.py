@@ -3,8 +3,8 @@ from copy import deepcopy
 from dune.actions import storm
 from dune.actions.action import Action
 from dune.exceptions import IllegalAction, BadCommand
-from dune.state.state import MovementState
-from dune.state.leader import parse_leader
+from dune.state.rounds.movement import MovementRound
+from dune.state.leaders import parse_leader
 
 
 def leader_revivable(game_state, faction):
@@ -40,7 +40,7 @@ class StartRevival(Action):
                 new_game_state.round_state.faction_turn = faction
                 return new_game_state
 
-        new_game_state.round_state = MovementState()
+        new_game_state.round_state = MovementRound()
         return new_game_state
 
 
@@ -113,6 +113,6 @@ class Revive(Action):
         if index < len(faction_order):
             new_game_state.round_state.faction_turn = faction_order[index]
         else:
-            new_game_state.round_state = MovementState()
+            new_game_state.round_state = MovementRound()
 
         return new_game_state

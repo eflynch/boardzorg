@@ -2,7 +2,9 @@ from dune.actions.action import Action
 from dune.actions import nexus
 from dune.exceptions import IllegalAction
 
-from dune.actions import setup, storm, spice, nexus, bidding, revival, movement, battle, collection
+# These unsed imports register the Action classes
+from dune.actions import setup, storm, spice, nexus, bidding  # noqa # pylint: disable=unused-import
+from dune.actions import revival, movement, battle, collection  # noqa # pylint: disable=unused-import
 
 
 def get_supervisor_actions(game_state):

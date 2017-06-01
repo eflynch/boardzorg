@@ -1,10 +1,9 @@
 from copy import deepcopy
 
-
 from dune.actions import storm
 from dune.actions.action import Action
 from dune.exceptions import IllegalAction
-from dune.state.state import RevivalState
+from dune.state.rounds.revival import RevivalRound
 
 
 def next_bidder(game_state):
@@ -365,5 +364,5 @@ class EndAuction(Action):
                 card = new_game_state.round_state.up_for_auction.pop()
                 new_game_state.treachery_deck.insert(0, card)
 
-        new_game_state.round_state = RevivalState()
+        new_game_state.round_state = RevivalRound()
         return new_game_state

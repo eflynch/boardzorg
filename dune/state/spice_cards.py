@@ -1,4 +1,3 @@
-
 SPICE_CARDS = [
     "Broken-Land",
     "Cielago-North",
