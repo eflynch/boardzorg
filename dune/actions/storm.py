@@ -7,9 +7,9 @@ from dune.state.rounds.spice import SpiceRound
 
 
 def destroy_in_path(game_state, sectors):
-    for space in game_state.board_state.map_state.values():
+    for space in game_state.map_state.values():
         if not set(space.sectors).isdisjoint(set(sectors)):
-            if space.type == "sand" or ("protected" in space.type and not game_state.board_state.shield_wall):
+            if space.type == "sand" or ("protected" in space.type and not game_state.shield_wall):
                 for s in set(space.sectors) & set(sectors):
                     for faction in space.forces:
                         space.forces[faction][s]
@@ -24,7 +24,7 @@ def destroy_in_path(game_state, sectors):
 
 def get_faction_order(game_state):
     faction_order = []
-    storm_position = game_state.board_state.storm_position
+    storm_position = game_state.storm_position
     for i in range(18):
         sector = (storm_position + i + 1) % 18
         if sector in TOKEN_SECTORS:
@@ -42,14 +42,14 @@ class Storm(Action):
     def _execute(self, game_state):
         new_game_state = deepcopy(game_state)
 
-        advance = new_game_state.board_state.storm_advance
+        advance = new_game_state.storm_advance
 
-        new_game_state.board_state.storm_position = (new_game_state.board_state.storm_position + advance) % 12
+        new_game_state.storm_position = (new_game_state.storm_position + advance) % 12
 
-        new_game_state.board_state.storm_advance = randint(1, 6)
+        new_game_state.storm_advance = randint(1, 6)
 
         destroy_in_path(new_game_state,
-                        range(game_state.board_state.storm_position, new_game_state.board_state.storm_position))
+                        range(game_state.storm_position, new_game_state.storm_position))
 
         new_game_state.round_state = SpiceRound()
 

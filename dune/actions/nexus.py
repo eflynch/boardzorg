@@ -10,7 +10,7 @@ from copy import deepcopy
 from dune.actions.action import Action
 from dune.actions.movement import move_units
 from dune.exceptions import IllegalAction, BadCommand
-from dune.state.factions import FACTIONS
+from dune.state.factions import FactionState
 from dune.state.rounds.spice import SpiceRound
 
 
@@ -34,7 +34,7 @@ def all_disjoint(sets):
 
 def alliances_work(game_state):
     sets = []
-    for f in FACTIONS:
+    for f in game_state.alliances:
         if f not in game_state.round_state.proposals:
             return False
         sets.append(frozenset(game_state.round_state.proposals[f] + [f]))
@@ -116,8 +116,8 @@ class ProposeAlliance(Action):
             raise BadCommand("Don't include yourself in your proposed alliance")
 
         for f in factions:
-            if f not in FACTIONS:
-                raise BadCommand("That's not real")
+            if f not in FactionState.ALL_FACTIONS:
+                raise BadCommand("That faction is not in the game")
 
         return ProposeAlliance(faction, factions)
 

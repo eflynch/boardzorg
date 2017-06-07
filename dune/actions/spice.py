@@ -4,7 +4,7 @@ from copy import deepcopy
 
 from dune.actions.action import Action
 from dune.exceptions import IllegalAction, BadCommand
-from dune.state import rounds
+from dune.state.rounds import nexus, bidding
 
 
 class Gift(Action):
@@ -60,7 +60,7 @@ class Bribe(Action):
 
     def _execute(self, game_state):
         if game_state.faction_state[self.faction].spice < self.spice:
-            raise IllegalAction("Insufficient spice for this bribe")
+            raise BadCommand("Insufficient spice for this bribe")
 
         new_game_state = deepcopy(game_state)
         new_game_state.faction_state[self.faction].spice -= self.spice
@@ -81,16 +81,16 @@ class SpiceBlow(Action):
             previous_space = None
             for c in new_game_state.spice_discard:
                 if not c != "Shai-Hulud":
-                    previous_space = new_game_state.board_state.map_state[c]
+                    previous_space = new_game_state.map_state[c]
                     break
 
-            new_game_state.board_state.shai_hulud = previous_space
-            new_game_state.round_state = rounds.nexus.NexusRound()
+            new_game_state.shai_hulud = previous_space
+            new_game_state.round_state = nexus.NexusRound()
         else:
-            space = new_game_state.board_state.map_state[card]
-            if new_game_state.board_state.storm_position != space.spice_sector:
+            space = new_game_state.map_state[card]
+            if new_game_state.storm_position != space.spice_sector:
                 space.spice = space.spice_amount
-            new_game_state.round_state = rounds.bidding.BiddingRound()
+            new_game_state.round_state = bidding.BiddingRound()
 
         new_game_state.spice_discard.insert(0, card)
 

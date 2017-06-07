@@ -2,18 +2,20 @@ from copy import deepcopy
 
 from dune.actions import storm
 from dune.actions.action import Action
-from dune.exceptions import IllegalAction
+from dune.exceptions import IllegalAction, BadCommand
 from dune.state.rounds.revival import RevivalRound
+from dune.state.rounds import bidding
 
 
 def next_bidder(game_state):
     faction_order = storm.get_faction_order(game_state)
-    turn_index = faction_order.index(game_state.round_state.faction_turn)
-    for i in range(6):
-        next_bidder_candidate = faction_order[(turn_index + 1 + i) % 6]
-        if next_bidder_candidate not in game_state.round_state.bids:
+    turn_index = faction_order.index(game_state.round_state.stage_state.substage_state.faction_turn)
+    num_factions = len(faction_order)
+    for i in range(num_factions):
+        next_bidder_candidate = faction_order[(turn_index + 1 + i) % num_factions]
+        if next_bidder_candidate not in game_state.round_state.stage_state.bids:
             return next_bidder_candidate
-        if game_state.round_state.bids[next_bidder_candidate] != "pass":
+        if game_state.round_state.stage_state.bids[next_bidder_candidate] != "pass":
             return next_bidder_candidate
     return None
 
@@ -22,6 +24,18 @@ def next_first_bidder(game_state):
     faction_order = storm.get_faction_order(game_state)
     faction_index = game_state.round_state.total_for_auction - len(game_state.round_state.up_for_auction)
     return faction_order[faction_index]
+
+
+def do_payment(game_state):
+    winner = game_state.round_state.stage_state.winner
+    bid = game_state.round_state.stage_state.winning_bid
+    game_state.faction_state[winner].spice -= bid
+    if winner != "emperor" and "emperor" in game_state.faction_state:
+        game_state.faction_state["emperor"].spice += bid
+    card = game_state.round_state.up_for_auction.pop(0)
+    game_state.faction_state[winner].treachery.append(card)
+
+    return game_state
 
 
 class ChoamCharity(Action):
@@ -54,27 +68,26 @@ class ChoamCharity(Action):
 class StartAuction(Action):
     name = "start-auction"
     ck_round = "bidding"
+    ck_stage = "setup"
     su = True
-
-    @classmethod
-    def _check(cls, game_state, faction):
-        if game_state.round_state.faction_turn is not None:
-            raise IllegalAction("Auction already started")
 
     def _execute(self, game_state):
         new_game_state = deepcopy(game_state)
-        for i in range(6):
+        for i in range(len(new_game_state.faction_state)):
             if new_game_state.treachery_deck:
                 c = new_game_state.treachery_deck.pop(0)
                 new_game_state.round_state.up_for_auction.append(c)
-        new_game_state.round_state.faction_turn = next_first_bidder(new_game_state)
         new_game_state.round_state.total_for_auction = len(new_game_state.round_state.up_for_auction)
+        new_game_state.round_state.stage_state = bidding.AuctionStage()
+        new_game_state.round_state.stage_state.substage_state.faction_turn = next_first_bidder(new_game_state)
         return new_game_state
 
 
 class Bid(Action):
     name = "bid"
     ck_round = "bidding"
+    ck_stage = "auction"
+    ck_substage = "bidding"
 
     @classmethod
     def parse_args(cls, faction, args):
@@ -90,9 +103,10 @@ class Bid(Action):
 
     @classmethod
     def _check(cls, game_state, faction):
-        cls.check_turn(game_state, faction)
-        if faction in game_state.round_state.bids:
-            if game_state.round_state.bids[faction] == "pass":
+        if game_state.round_state.stage_state.substage_state.faction_turn != faction:
+            raise IllegalAction("It's not your turn")
+        if faction in game_state.round_state.stage_state.bids:
+            if game_state.round_state.stage_state.bids[faction] == "pass":
                 raise IllegalAction("Cannot bid again once passed")
 
         if len(game_state.faction_state[faction].treachery) > 7:
@@ -102,17 +116,17 @@ class Bid(Action):
             raise IllegalAction("You cannot bid with this many treachery cards")
 
     def _execute(self, game_state):
-        highest = max([0] + [v for v in game_state.round_state.bids.values() if v != "pass"])
+        highest = max([0] + [v for v in game_state.round_state.stage_state.bids.values() if v != "pass"])
         if self.spice <= highest:
-            raise IllegalAction("Must bid higher than the highest bid")
+            raise BadCommand("Must bid higher than the highest bid")
 
         if self.spice > game_state.faction_state[self.faction].spice:
             if "Karama" not in game_state.faction_state[self.faction].treachery:
-                raise IllegalAction("Must not bid higher than you have spice")
+                raise BadCommand("Must not bid higher than you have spice")
 
         new_game_state = deepcopy(game_state)
-        new_game_state.round_state.bids[self.faction] = self.spice
-        new_game_state.round_state.faction_turn = next_bidder(new_game_state)
+        new_game_state.round_state.stage_state.bids[self.faction] = self.spice
+        new_game_state.round_state.stage_state.substage_state.faction_turn = next_bidder(new_game_state)
 
         return new_game_state
 
@@ -120,6 +134,8 @@ class Bid(Action):
 class Pass(Action):
     name = "pass"
     ck_round = "bidding"
+    ck_stage = "auction"
+    ck_substage = "bidding"
 
     @classmethod
     def parse_args(cls, faction, args):
@@ -130,231 +146,60 @@ class Pass(Action):
 
     @classmethod
     def _check(cls, game_state, faction):
-        cls.check_turn(game_state, faction)
+        if game_state.round_state.stage_state.substage_state.faction_turn != faction:
+            raise IllegalAction("It's not your turn")
 
     def execute(self, game_state):
         new_game_state = deepcopy(game_state)
-        new_game_state.round_state.bids[self.faction] = "pass"
-        new_game_state.round_state.faction_turn = next_bidder(new_game_state)
-        return new_game_state
-
-
-class KaramaFreeBid(Action):
-    name = "karama-free-bid"
-    ck_round = "bidding"
-
-    @classmethod
-    def _check(cls, game_state, faction):
-        if not game_state.round_state.winner:
-            raise IllegalAction("You need to win the bid first")
-        if faction != game_state.round_state.winner:
-            raise IllegalAction("You need to be the winner first")
-        if game_state.round_state.payment_done:
-            raise IllegalAction("Already payed for this")
-        if "Karama" not in game_state.faction_state[faction].treachery:
-            raise IllegalAction("You don't have a karama card")
-
-    def _execute(self, game_state):
-        new_game_state = deepcopy(game_state)
-        new_game_state.faction_state[self.faction].treachery.remove("Karama")
-        new_game_state.treachery_discard.insert(0, "Karama")
-        card = new_game_state.round_state.up_for_auction.pop(0)
-        new_game_state.faction_state[self.faction].treachery.append(card)
-        new_game_state.round_state.payment_done = True
-
-        return new_game_state
-
-
-class KaramaPassFreeBid(Action):
-    name = "karama-pass-free-bid"
-    ck_round = "bidding"
-
-    @classmethod
-    def _check(cls, game_state, faction):
-        if not game_state.round_state.winner:
-            raise IllegalAction("You need to win the bid first")
-        if faction != game_state.round_state.winner:
-            raise IllegalAction("You need to be the winner to bother with this")
-        if game_state.round_state.payment_done:
-            raise IllegalAction("Already payed for this")
-        if "Karama" not in game_state.faction_state[faction].treachery:
-            raise IllegalAction("You don't have a karama card anyways")
-
-    def _execute(self, game_state):
-        new_game_state = deepcopy(game_state)
-        new_game_state.round_state.payment_cancel_passed = True
-
-        return new_game_state
-
-
-class KaramaStopExtra(Action):
-    name = "karama-stop-extra"
-    ck_round = "bidding"
-
-    @classmethod
-    def _check(cls, game_state, faction):
-        if not game_state.round_state.payment_done:
-            raise IllegalAction("Wait till that shit's payed for")
-        if "Karama" not in game_state.faction_state[faction].treachery:
-            raise IllegalAction("You don't have a karama card anyways")
-        if game_state.round_state.winner != "harkonnen":
-            raise IllegalAction("This only matters to the harkonnen")
-        if not game_state.treachery_deck:
-            raise IllegalAction("No more cards anyways")
-        if len(game_state.faction_state["harkonnen"].treachery) >= 8:
-            raise IllegalAction("The harkonnen have no room for a new card")
-        if faction in game_state.round_state.karama_passes:
-            raise IllegalAction("You've already passed")
-
-    def _execute(self, game_state):
-        new_game_state = deepcopy(game_state)
-        new_game_state.round_state.extra_card_karama_used = True
-        return new_game_state
-
-
-class KaramPassStopExtra(Action):
-    name = "karama-pass-stop-extra"
-    ck_round = "bidding"
-
-    @classmethod
-    def _check(cls, game_state, faction):
-        if not game_state.round_state.payment_done:
-            raise IllegalAction("Wait till that shit's payed for")
-        if "Karama" not in game_state.faction_state[faction].treachery:
-            raise IllegalAction("You don't have a karama card anyways")
-        if game_state.round_state.winner != "harkonnen":
-            raise IllegalAction("This only matters to the harkonnen")
-        if not game_state.treachery_deck:
-            raise IllegalAction("No more cards anyways")
-        if len(game_state.faction_state["harkonnen"].treachery) >= 8:
-            raise IllegalAction("The harkonnen have no room for a new card")
-        if faction in game_state.round_state.karama_passes:
-            raise IllegalAction("You've already passed")
-
-    def _execute(self, game_state):
-        new_game_state = deepcopy(game_state)
-        new_game_state.round_state.karama_passes.append(self.faction)
+        new_game_state.round_state.stage_state.bids[self.faction] = "pass"
+        new_game_state.round_state.stage_state.substage_state.faction_turn = next_bidder(new_game_state)
         return new_game_state
 
 
 class ResolveWinner(Action):
     name = "resolve-winner"
     ck_round = "bidding"
+    ck_stage = "auction"
+    ck_substage = "bidding"
     su = True
 
     @classmethod
     def _check(cls, game_state, faction):
-        if len(game_state.round_state.bids) != 6:
+        if len(game_state.round_state.stage_state.bids) != len(game_state.faction_state):
             raise IllegalAction("Not everyone has bid")
 
-        if list(game_state.round_state.bids.values()).count("pass") < 5:
+        if list(game_state.round_state.stage_state.bids.values()).count("pass") < len(game_state.faction_state) - 1:
             raise IllegalAction("Not everyone has passed")
 
-        if list(game_state.round_state.bids.values()).count("pass") != 5:
+        if list(game_state.round_state.stage_state.bids.values()).count("pass") != len(game_state.faction_state) - 1:
             raise IllegalAction("No bid to resolve")
-
-        if game_state.round_state.winner:
-            raise IllegalAction("Winner already resolved")
 
     def _execute(self, game_state):
         new_game_state = deepcopy(game_state)
-        for f in new_game_state.round_state.bids:
-            bid = new_game_state.round_state.bids[f]
+        for f in new_game_state.round_state.stage_state.bids:
+            bid = new_game_state.round_state.stage_state.bids[f]
             if bid != "pass":
                 winner = f
                 break
 
-        new_game_state.round_state.winner = winner
-
-        if new_game_state.faction_state[winner].spice < bid:
-            new_game_state.faction_state[winner].treachery.remove("Karama")
-            new_game_state.treachery_discard.insert(0, "Karama")
-            card = new_game_state.round_state.up_for_auction.pop(0)
-            new_game_state.faction_state[winner].treachery.append(card)
-            new_game_state.round_state.payment_done = True
+        new_game_state.round_state.stage_state.substage_state = bidding.PaymentSubStage()
+        new_game_state.round_state.stage_state.winner = winner
+        new_game_state.round_state.stage_state.winning_bid = bid
 
         return new_game_state
 
 
-class ResolvePayment(Action):
-    name = "resolve-payment"
+class PassAuction(Action):
+    name = "pass-auction"
     ck_round = "bidding"
+    ck_stage = "auction"
+    ck_substage = "bidding"
     su = True
 
     @classmethod
     def _check(cls, game_state, faction):
-        if not game_state.round_state.winner:
-            raise IllegalAction("No winner determined")
-        if game_state.round_state.payment_done:
-            raise IllegalAction("Already Payed")
-        if "Karama" in game_state.faction_state[game_state.round_state.winner].treachery:
-            if not game_state.round_state.payment_cancel_passed:
-                raise IllegalAction("Waiting for karama pass")
-
-    def _execute(self, game_state):
-        new_game_state = deepcopy(game_state)
-        winner = new_game_state.round_state.winner
-        bid = new_game_state.round_state.bids[winner]
-
-        new_game_state.faction_state[winner].spice -= bid
-        if winner != "emperor":
-            new_game_state.faction_state["emperor"].spice += bid
-
-        card = new_game_state.round_state.up_for_auction.pop(0)
-        new_game_state.faction_state[winner].treachery.append(card)
-        new_game_state.round_state.payment_done = True
-
-        return new_game_state
-
-
-class ResolveBid(Action):
-    name = "resolve-bid"
-    ck_round = "bidding"
-    su = True
-
-    @classmethod
-    def _check(cls, game_state, faction):
-        if not game_state.round_state.payment_done:
-            raise IllegalAction("Waiting for payment")
-        if game_state.round_state.winner == "harkonnen":
-            if game_state.treachery_deck and len(game_state.faction_state["harkonnen"].treachery) < 8:
-                if not game_state.round_state.extra_card_karama_used and len(game_state.round_state.karama_passes) != 5:
-                    raise IllegalAction("Waiting for karama passes")
-
-    def _execute(self, game_state):
-        new_game_state = deepcopy(game_state)
-        winner = new_game_state.round_state.winner
-
-        if winner == "harkonnen":
-            if new_game_state.treachery_deck and len(new_game_state.faction_state["harkonnen"].treachery) < 8:
-                if not game_state.round_state.extra_card_karama_used:
-                    card = new_game_state.treachery_deck.pop(0)
-                    new_game_state.faction_state["harkonnen"].treachery.append(card)
-
-        new_game_state.round_state.faction_turn = next_first_bidder(new_game_state)
-        new_game_state.round_state.bids = {}
-        new_game_state.round_state.payment_done = False
-        new_game_state.round_state.payment_cancel_passed = False
-        new_game_state.round_state.winner = None
-        new_game_state.round_state.payment_cancel_passed = False
-        new_game_state.round_state.extra_card_karama_used = False
-        new_game_state.round_state.karama_passes = []
-
-        return new_game_state
-
-
-class EndAuction(Action):
-    name = "end-auction"
-    ck_round = "bidding"
-    su = True
-
-    @classmethod
-    def _check(cls, game_state, faction):
-        if game_state.round_state.faction_turn is None:
-            raise IllegalAction("The auction has yet to begin")
-        if game_state.round_state.up_for_auction:
-            if list(game_state.round_state.bids.values()).count("pass") != 6:
-                raise IllegalAction("Items still up for auction and not everyone has passed")
+        if list(game_state.round_state.stage_state.bids.values()).count("pass") != len(game_state.faction_state):
+            raise IllegalAction("Items still up for auction and not everyone has passed")
 
     def _execute(self, game_state):
         new_game_state = deepcopy(game_state)
@@ -365,4 +210,181 @@ class EndAuction(Action):
                 new_game_state.treachery_deck.insert(0, card)
 
         new_game_state.round_state = RevivalRound()
+        return new_game_state
+
+
+class EndAuction(Action):
+    name = "end-auction"
+    ck_round = "bidding"
+    ck_stage = "auction"
+    ck_substage = "bidding"
+    su = True
+
+    @classmethod
+    def _check(cls, game_state, faction):
+        if game_state.round_state.up_for_auction:
+            raise IllegalAction("Items still up for auction")
+
+    def _execute(self, game_state):
+        new_game_state = deepcopy(game_state)
+        new_game_state.round_state = RevivalRound()
+        return new_game_state
+
+
+class KaramaFreeBid(Action):
+    name = "karama-free-bid"
+    ck_round = "bidding"
+    ck_stage = "auction"
+    ck_substage = "payment"
+
+    @classmethod
+    def _check(cls, game_state, faction):
+        if faction != game_state.round_state.stage_state.winner:
+            raise IllegalAction("You need to be the winner first")
+        if "Karama" not in game_state.faction_state[faction].treachery:
+            raise IllegalAction("You don't have a karama card")
+
+    def _execute(self, game_state):
+        new_game_state = deepcopy(game_state)
+        new_game_state.faction_state[self.faction].treachery.remove("Karama")
+        new_game_state.treachery_discard.insert(0, "Karama")
+        card = new_game_state.round_state.up_for_auction.pop(0)
+        new_game_state.faction_state[self.faction].treachery.append(card)
+
+        new_game_state.round_state.stage_state.substage_state = bidding.CollectSubStage()
+
+        return new_game_state
+
+
+class Pay(Action):
+    name = "pay"
+    ck_round = "bidding"
+    ck_stage = "auction"
+    ck_substage = "payment"
+
+    @classmethod
+    def _check(cls, game_state, faction):
+        if faction != game_state.round_state.stage_state.winner:
+            raise IllegalAction("You need to be the winner first")
+
+    def _execute(self, game_state):
+        new_game_state = deepcopy(game_state)
+        do_payment(new_game_state)
+        new_game_state.round_state.stage_state.substage_state = bidding.CollectSubStage()
+
+        return new_game_state
+
+
+class AutoPay(Action):
+    name = "auto-pay"
+    ck_round = "bidding"
+    ck_stage = "auction"
+    ck_substage = "payment"
+    su = True
+
+    @classmethod
+    def _check(cls, game_state, faction):
+        if "Karama" in game_state.faction_state[game_state.round_state.stage_state.winner].treachery:
+            raise IllegalAction("Cannot auto-pay as they may want to use a Karama card")
+
+    def _execute(self, game_state):
+        new_game_state = deepcopy(game_state)
+        do_payment(new_game_state)
+        new_game_state.round_state.stage_state.substage_state = bidding.CollectSubStage()
+
+        return new_game_state
+
+
+class SkipCollect(Action):
+    name = "skip-collect"
+    ck_round = "bidding"
+    ck_stage = "auction"
+    ck_substage = "collect"
+    su = True
+
+    @classmethod
+    def _check(cls, game_state, faction):
+        if game_state.round_state.stage_state.winner == "harkonnen":
+            if game_state.treachery_deck and len(game_state.faction_state["harkonnen"].treachery) < 8:
+                raise IllegalAction("Cannot skip collection because the Harkonnen can collect")
+
+    def _execute(self, game_state):
+        new_game_state = deepcopy(game_state)
+        new_game_state.round_state.stage_state = bidding.AuctionStage()
+        new_game_state.round_state.stage_state.substage_state.faction_turn = next_first_bidder(new_game_state)
+        return new_game_state
+
+
+class KaramaStopExtra(Action):
+    name = "karama-stop-extra"
+    ck_round = "bidding"
+    ck_stage = "auction"
+    ck_substage = "collect"
+
+    @classmethod
+    def _check(cls, game_state, faction):
+        if "Karama" not in game_state.faction_state[faction].treachery:
+            raise IllegalAction("You don't have a karama card anyway")
+        if game_state.round_state.stage_state.winner != "harkonnen":
+            raise IllegalAction("This only matters to the harkonnen")
+        if not game_state.treachery_deck:
+            raise IllegalAction("No more cards anyways")
+        if len(game_state.faction_state["harkonnen"].treachery) >= 8:
+            raise IllegalAction("The harkonnen have no room for a new card")
+        if faction in game_state.round_state.stage_state.substage_state.karama_passes:
+            raise IllegalAction("You've already passed")
+
+    def _execute(self, game_state):
+        new_game_state = deepcopy(game_state)
+        new_game_state.round_state.stage_state = bidding.AuctionStage()
+        new_game_state.round_state.stage_state.substage_state.faction_turn = next_first_bidder(new_game_state)
+        return new_game_state
+
+
+class KaramPassStopExtra(Action):
+    name = "karama-pass-stop-extra"
+    ck_round = "bidding"
+
+    @classmethod
+    def _check(cls, game_state, faction):
+        if game_state.round_state.stage_state.winner != "harkonnen":
+            raise IllegalAction("This only matters to the harkonnen")
+        if not game_state.treachery_deck:
+            raise IllegalAction("No more cards anyways")
+        if len(game_state.faction_state["harkonnen"].treachery) >= 8:
+            raise IllegalAction("The harkonnen have no room for a new card")
+        if faction in game_state.round_state.stage_state.substage_state.karama_passes:
+            raise IllegalAction("You've already passed")
+
+    def _execute(self, game_state):
+        new_game_state = deepcopy(game_state)
+        new_game_state.round_state.stage_state.substage_state.karama_passes.append(self.faction)
+        return new_game_state
+
+
+class ResolveCollect(Action):
+    name = "resolve-collect"
+    ck_round = "bidding"
+    ck_stage = "auction"
+    ck_substage = "collect"
+    su = True
+
+    @classmethod
+    def _check(cls, game_state, faction):
+        if game_state.round_state.stage_state.winner != "harkonnen":
+            raise IllegalAction("Don't collect if Harkonnen didn't win")
+
+        if not game_state.treachery_deck or len(game_state.faction_state["harkonnen"].treachery) == 8:
+            raise IllegalAction("The Harkonnen cannot collect anyway")
+
+        if len(game_state.round_state.stage_state.substage_state.karama_passes) != len(game_state.faction_state) - 1:
+            raise IllegalAction("Waiting for karama passes")
+
+    def _execute(self, game_state):
+        new_game_state = deepcopy(game_state)
+
+        card = new_game_state.treachery_deck.pop(0)
+        new_game_state.faction_state["harkonnen"].treachery.append(card)
+        new_game_state.round_state.stage_state = bidding.AuctionStage()
+        new_game_state.round_state.stage_state.substage_state.faction_turn = next_first_bidder(new_game_state)
         return new_game_state

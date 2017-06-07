@@ -15,16 +15,15 @@ class GameState(State):
         if factions_playing is None:
             factions_playing = FactionState.ALL_FACTIONS
 
+        shuffle(treachery_cards)
+        self.treachery_deck = treachery_cards
+        self.treachery_discard = []
+
         spice_cards = SPICE_CARDS[:]
-        shuffle(spice_cards)
         while spice_cards[0] == "Shai-Hulud":
             shuffle(spice_cards)
-        shuffle(treachery_cards)
-
-        self.treachery_deck = treachery_cards
         self.spice_deck = spice_cards
         self.spice_discard = []
-        self.treachery_discard = []
 
         self.faction_state = {f: FactionState.from_name(f) for f in factions_playing}
         self.round_state = SetupRound()
@@ -39,3 +38,34 @@ class GameState(State):
         for state in self.faction_state.values():
             state.assert_valid()
         self.round_state.assert_valid()
+
+    def visible(self, faction):
+        visible = super().visible(self, faction)
+        visible["treachery_deck"] = {"length": len(self.treachery_deck)}
+        visible["treachery_discard"] = self.treachery_discard
+
+        visible["spice_deck"] = {"length": len(self.spice_deck)}
+        if faction == "atreides" and self.spice_deck:
+            visible["spice_deck"]["next"] = self.spice_deck[0]
+        visible["spice_discard"] = self.spice_discard
+
+        visible["faction_state"] = {
+            f: self.faction_state[f].visible(self, faction)
+            for f in self.faction_state
+        }
+
+        visible["round_state"] = self.round_state.visible(self, faction)
+
+        visible["alliances"] = self.alliances
+        visible["turn"] = self.turn
+        visible["shield_wall"] = self.shield_wall
+        visible["storm_position"] = self.storm_position
+
+        if faction == "fremen":
+            visible["storm_advance"] = self.storm_advance
+
+        visible["map_state"] = {
+            s: self.map_state[s].visible(self, faction) for s in self.map_state
+        }
+
+        return visible

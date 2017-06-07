@@ -23,6 +23,28 @@ class FactionState(State):
         assert self.spice >= 0
         assert self.bribe_spice >= 0
 
+    def visible(self, game_state, faction):
+        visible = super().visible(game_state, faction)
+        visible["leaders"] = self.leaders
+        visible["leader_death_count"] = self.leader_death_count
+        visible["tank_leaders"] = self.tank_leaders
+        visible["tank_units"] = self.tank_units
+        visible["reserve_units"] = self.reserve_units
+        visible["bribe_spice"] = self.bribe_spice
+        visible["token_position"] = self.token_position
+
+        if faction == self.name:
+            visible["spice"] = self.spice
+            visible["treachery"] = self.treachery
+            visible["traitors"] = self.traitors
+            visible["rejected_traitors"] = self.rejected_traitors
+
+        else:
+            if game_state.round_state.round == "bidding":
+                visible["treachery"] = {"length": len(self.treachery)}
+
+        return visible
+
     @staticmethod
     def from_name(faction):
         return {
@@ -44,6 +66,13 @@ class AtreidesState(FactionState):
         self.units_lost = 0
         self.kwizatz_haderach_available = False
         self.kwizatz_haderach_tanks = False
+
+    def visible(self, game_state, faction):
+        visible = super().visible(game_state, faction)
+        visible["units_lost"] = self.units_lost
+        visible["kwizatz_haderach_available"] = self.kwizatz_haderach_available
+        visible["kwizatz_haderach_tanks"] = self.kwizatz_haderach_tanks
+        return visible
 
 
 class GuildState(FactionState):
@@ -69,6 +98,12 @@ class BeneGesseritState(FactionState):
         self.prediction = (None, 0)
         self.spice = 5
         self.reserve_units = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+
+    def visible(self, game_state, faction):
+        visible = super().visible(game_state, faction)
+        if faction == self.name:
+            visible["prediction"] = self.prediction
+        return visible
 
 
 class HarkonnenState(FactionState):

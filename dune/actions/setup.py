@@ -19,23 +19,24 @@ from dune.actions import movement, storm
 from dune.actions.action import Action
 from dune.constants import TOKEN_SECTORS
 from dune.exceptions import IllegalAction, BadCommand
-from dune.state.factions import FACTIONS
 from dune.state.leaders import LEADERS, parse_leader
 from dune.state.rounds.spice import SpiceRound
+from dune.state.rounds import setup
 
 
 def all_traitors_selected(game_state):
-    return all([len(game_state.faction_state[f].traitors) == 1 for f in FACTIONS if f != "harkonnen"])
+    return all([len(game_state.faction_state[f].traitors) == 1 for f in game_state.faction_state if f != "harkonnen"])
 
 
 def all_tokens_placed(game_state):
-    return all([game_state.faction_state[f].token_position is not None for f in FACTIONS])
+    return all([game_state.faction_state[f].token_position is not None for f in game_state.faction_state])
 
 
 class BeneGesseritPrediction(Action):
     name = "predict"
     ck_round = "setup"
     ck_faction = "bene-gesserit"
+    ck_stage = "bene-gesserit-prediction"
 
     def __repr__(self):
         return "BeneGesseritPrediction: {} {}".format(self.other_faction, self.turn)
@@ -55,20 +56,34 @@ class BeneGesseritPrediction(Action):
         self.other_faction = other_faction
         self.turn = turn
 
-    @classmethod
-    def _check(cls, game_state, faction):
-        if game_state.faction_state["bene-gesserit"].prediction != (None, 0):
-            raise IllegalAction("Prediciton Already Made")
-
     def _execute(self, game_state):
         new_game_state = deepcopy(game_state)
         new_game_state.faction_state["bene-gesserit"].prediction = (self.other_faction, self.turn)
+        new_game_state.round_state.stage_state = setup.TokenPlacementStage()
+        return new_game_state
+
+
+class SkipBeneGesseritPrediction(Action):
+    name = "skip-predict"
+    ck_round = "setup"
+    ck_stage = "bene-gesserit-prediction"
+    su = True
+
+    @classmethod
+    def _check(cls, game_state, faction):
+        if "bene-gesserit" in game_state.faction_state:
+            raise IllegalAction("Bene-Gesserit are in the game so this cannot be skipped")
+
+    def _execute(self, game_state):
+        new_game_state = deepcopy(game_state)
+        new_game_state.round_state.stage_state = setup.TokenPlacementStage()
         return new_game_state
 
 
 class PlaceToken(Action):
     name = "place-token"
     ck_round = "setup"
+    ck_stage = "token-placement"
 
     @classmethod
     def parse_args(cls, faction, args):
@@ -80,18 +95,16 @@ class PlaceToken(Action):
 
     @classmethod
     def _check(cls, game_state, faction):
-        if game_state.faction_state["bene-gesserit"].prediction == (None, 0):
-            raise IllegalAction("Token Placement happens after Bene-Gesserit Prediction")
         if game_state.faction_state[faction].token_position is not None:
             raise IllegalAction("{} token already placed".format(faction))
 
     def _execute(self, game_state):
         if self.token_position not in TOKEN_SECTORS:
-            raise IllegalAction("Not a valid token position")
+            raise BadCommand("Not a valid token position")
 
-        for f in FACTIONS:
+        for f in game_state.faction_state:
             if game_state.faction_state[f].token_position == self.token_position:
-                raise IllegalAction("Token position already taken")
+                raise BadCommand("Token position already taken")
 
         new_game_state = deepcopy(game_state)
         new_game_state.faction_state[self.faction].token_position = self.token_position
@@ -101,16 +114,13 @@ class PlaceToken(Action):
 class DealTraitors(Action):
     name = "deal-traitors"
     ck_round = "setup"
+    ck_stage = "token-placement"
     su = True
 
     @classmethod
     def _check(cls, game_state, faction):
         if not all_tokens_placed(game_state):
             raise IllegalAction("Deal Traitors after tokens are placed")
-
-        for f in game_state.faction_state:
-            if game_state.faction_state[f].traitors:
-                raise IllegalAction("Traitors already dealt")
 
     def _execute(self, game_state):
         all_leaders = [item for sublist in LEADERS.values() for item in sublist]
@@ -121,12 +131,14 @@ class DealTraitors(Action):
             new_game_state.faction_state[f].traitors.append(all_leaders.pop())
             new_game_state.faction_state[f].traitors.append(all_leaders.pop())
             new_game_state.faction_state[f].traitors.append(all_leaders.pop())
+        new_game_state.round_state.stage_state = setup.TraitorStage()
         return new_game_state
 
 
 class SelectTraitor(Action):
     name = "select-traitor"
     ck_round = "setup"
+    ck_stage = "traitor"
 
     def parse_args(faction, args):
         traitor = parse_leader(args)
@@ -141,15 +153,14 @@ class SelectTraitor(Action):
         if faction == "harkonnen":
             raise IllegalAction("The Harkonnen keep all traitors")
 
-        if not game_state.faction_state[faction].traitors:
-            raise IllegalAction("Traitors have not been dealt")
-
         if len(game_state.faction_state[faction].traitors) == 1:
-            raise IllegalAction("Traitors has already been selected")
+            raise IllegalAction("Traitor has already been selected")
 
     def _execute(self, game_state):
         if self.traitor not in game_state.faction_state[self.faction].traitors:
-            raise IllegalAction("That traitor is not available for selection")
+            raise BadCommand(
+                "That traitor is not available for selection.\nValid Traitors are: {}".format(
+                    ", ".join([t[0] for t in game_state.faction_state[self.faction].traitors])))
 
         new_game_state = deepcopy(game_state)
         old_traitors = new_game_state.faction_state[self.faction].traitors
@@ -162,6 +173,7 @@ class SelectTraitor(Action):
 class DealTreachery(Action):
     name = "deal-treachery"
     ck_round = "setup"
+    ck_stage = "traitor"
     su = True
 
     def _deal_card(self, game_state, faction):
@@ -172,9 +184,6 @@ class DealTreachery(Action):
     def _check(cls, game_state, faction):
         if not all_traitors_selected(game_state):
             raise IllegalAction("Deal Treachery after leaders are selected")
-        for f in game_state.faction_state:
-            if game_state.faction_state[f].treachery:
-                raise IllegalAction("Treachery already dealt")
 
     def _execute(self, game_state):
         new_game_state = deepcopy(game_state)
@@ -182,6 +191,7 @@ class DealTreachery(Action):
             self._deal_card(new_game_state, f)
             if f == "harkonnen":
                 self._deal_card(new_game_state, f)
+        new_game_state.round_state.stage_state = setup.FremenPlacementStage()
         return new_game_state
 
 
@@ -189,6 +199,7 @@ class FremenPlacement(Action):
     name = "fremen-placement"
     ck_faction = "fremen"
     ck_round = "setup"
+    ck_stage = "fremen-placement"
 
     def parse_args(faction, args):
         ops = args.split(" ")
@@ -218,26 +229,36 @@ class FremenPlacement(Action):
         self.west_sector = west_sector
         self.south_sector = south_sector
 
-    @classmethod
-    def _check(cls, game_state, faction):
-        if not game_state.faction_state["bene-gesserit"].treachery:
-            raise IllegalAction("Fremen placement happens after Treachery is dealt")
-
-        if len(game_state.faction_state["fremen"].reserve_units) != 20:
-            raise IllegalAction("Fremen placement has already happened")
-
     def _execute(self, game_state):
         if len(self.tabr_units) + len(self.west_units) + len(self.south_units) != 10:
-            raise IllegalAction("Requires 10 units to be placed")
+            raise BadCommand("Requires 10 units to be placed")
 
         new_game_state = deepcopy(game_state)
-        tabr = new_game_state.board_state.map_state["Sietch-Tabr"]
-        west_wall = new_game_state.board_state.map_state["False-Wall-West"]
-        south_wall = new_game_state.board_state.map_state["False-Wall-South"]
+        tabr = new_game_state.map_state["Sietch-Tabr"]
+        west_wall = new_game_state.map_state["False-Wall-West"]
+        south_wall = new_game_state.map_state["False-Wall-South"]
         movement.ship_units(new_game_state, self.faction, self.tabr_units, tabr, tabr.sectors[0])
         movement.ship_units(new_game_state, self.faction, self.west_units, west_wall, self.west_sector)
         movement.ship_units(new_game_state, self.faction, self.south_units, south_wall, self.south_sector)
+        new_game_state.round_state.stage_state = setup.BeneGesseritPlacementStage()
 
+        return new_game_state
+
+
+class SkipFremenPlacement(Action):
+    name = "skip-fremen-placement"
+    ck_round = "setup"
+    ck_stage = "fremen-placement"
+    su = True
+
+    @classmethod
+    def _check(cls, game_state, faction):
+        if "fremen" in game_state.faction_state:
+            raise IllegalAction("Fremen are playing so placement cannot be skipped")
+
+    def _execute(self, game_state):
+        new_game_state = deepcopy(game_state)
+        new_game_state.round_state.stage_state = setup.BeneGesseritPlacementStage()
         return new_game_state
 
 
@@ -245,6 +266,7 @@ class BeneGesseritPlacement(Action):
     name = "bene-gesserit-placement"
     ck_faction = "bene-gesserit"
     ck_round = "setup"
+    ck_stage = "bene-gesserit-placement"
 
     @classmethod
     def parse_args(cls, faction, args):
@@ -257,35 +279,41 @@ class BeneGesseritPlacement(Action):
         self.space = space
         self.sector = sector
 
+    def _execute(self, game_state):
+        new_game_state = deepcopy(game_state)
+        space = new_game_state.map_state[self.space]
+        movement.ship_units(new_game_state, self.faction, [1], space, self.sector)
+        new_game_state.round_state.stage_state = setup.StormPlacementStage()
+        return new_game_state
+
+
+class SkipBeneGesseritPlacement(Action):
+    name = "skip-bene-gesserit-placement"
+    ck_round = "setup"
+    ck_stage = "bene-gesserit-placement"
+    su = True
+
     @classmethod
     def _check(cls, game_state, faction):
-        if len(game_state.faction_state["fremen"].reserve_units) == 20:
-            raise IllegalAction("Bene-Gesserit Placement happens after Fremen Placement")
-
-        if len(game_state.faction_state["bene-gesserit"].reserve_units) != 20:
-            raise IllegalAction("Bene-Gesserit Placement has already happened")
+        if "bene-gesserit" in game_state.faction_state:
+            raise IllegalAction("Bene-Gesserit are playing so placement cannot be skipped")
 
     def _execute(self, game_state):
         new_game_state = deepcopy(game_state)
-        space = new_game_state.board_state.map_state[self.space]
-        movement.ship_units(new_game_state, self.faction, [1], space, self.sector)
+        new_game_state.round_state.stage_state = setup.StormPlacementStage()
         return new_game_state
 
 
 class StormPlacement(Action):
     name = "storm-placement"
     ck_round = "setup"
+    ck_stage = "storm-placement"
     su = True
-
-    @classmethod
-    def _check(cls, game_state, faction):
-        if len(game_state.faction_state["bene-gesserit"].reserve_units) != 19:
-            raise IllegalAction("Bene-Gesserit Placement must happen before storm is placed")
 
     def _execute(self, game_state):
         new_game_state = deepcopy(game_state)
-        new_game_state.board_state.storm_position = randint(0, 17)
-        new_game_state.board_state.storm_advance = randint(0, 6)
-        storm.destroy_in_path(new_game_state, [new_game_state.board_state.storm_position])
+        new_game_state.storm_position = randint(0, 17)
+        new_game_state.storm_advance = randint(0, 6)
+        storm.destroy_in_path(new_game_state, [new_game_state.storm_position])
         new_game_state.round_state = SpiceRound()
         return new_game_state

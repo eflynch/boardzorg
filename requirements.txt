@@ -1,0 +1,2 @@
+coloredlogs==7.0
+Flask==0.12.2

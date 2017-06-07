@@ -1,17 +1,71 @@
-from dune.state.rounds import RoundState
+from dune.state.rounds import RoundState, StageState, SubStageState
+
+
+class SetupStage(StageState):
+    stage = "setup"
+
+
+class AuctionStage(StageState):
+    stage = "auction"
+
+    def __init__(self):
+        self.substage_state = BiddingSubStage()
+        self.bids = {}
+        self.winner = None
+        self.winning_bid = None
+
+    def visible(self, game_state, faction):
+        visible = super().visible(game_state, faction)
+        visible["bids"] = self.bids
+        visible["winner"] = self.winner
+        visible["winning_bid"] = self.winning_bid
+        visible["substage_state"] = self.substage_state.visible(game_state, faction)
+        return visible
+
+
+class BiddingSubStage(SubStageState):
+    substage = "bidding"
+
+    def __init__(self):
+        self.faction_turn = None
+
+    def visible(self, game_state, faction):
+        visible = super().visible(game_state, faction)
+        visible["faction_turn"] = self.faction_turn
+        return visible
+
+
+class PaymentSubStage(SubStageState):
+    substage = "payment"
+
+
+class CollectSubStage(SubStageState):
+    substage = "collect"
+
+    def __init__(self):
+        self.karama_passes = []
+
+    def visible(self, game_state, faction):
+        visible = super().visible(game_state, faction)
+        visible["karama_passes"] = self.karama_passes
+        return visible
 
 
 class BiddingRound(RoundState):
     def __init__(self):
         self.round = "bidding"
         self.bene_gesserit_charity_claimed = False
-        self.faction_turn = None
         self.total_for_auction = 0
+        self.stage_state = SetupStage()
         self.up_for_auction = []
-        self.bids = {}
-        self.payment_done = False
-        self.payment_cancel_passed = False
-        self.winner = None
-        self.prescience_cancel_karama = False
-        self.extra_card_karama_used = False
-        self.karama_pass = []
+
+    def visible(self, game_state, faction):
+        visible = super().visible(game_state, faction)
+        visible["bene_gesserit_charity_claimed"] = self.bene_gesserit_charity_claimed
+        visible["total_for_auction"] = self.total_for_auction
+        visible["stage_state"] = self.stage_state.visible(game_state, faction)
+        visible["up_for_auction"] = {"length": len(self.up_for_auction)}
+        if faction == "atreides" and self.up_for_auction:
+            visible["up_for_auction"]["next"] = self.up_for_auction[0]
+
+        return visible

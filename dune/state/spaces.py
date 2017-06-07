@@ -58,3 +58,14 @@ class SpaceState(State):
         # State
         self.spice = 0
         self.forces = {}
+
+    def visible(self, game_state, faction):
+        visible = super().visible(game_state, faction)
+        visible["type"] = self.type
+        visible["spice_sector"] = self.spice_sector
+        visible["spice_amount"] = self.spice_amount
+        visible["sectors"] = self.sectors
+        visible["spice"] = self.spice
+        visible["forces"] = self.forces
+
+        return visible

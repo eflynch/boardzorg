@@ -37,7 +37,7 @@ class Action(object, metaclass=ActionMeta):
             raise IllegalAction("Cannot do that when it's not your turn")
 
     @classmethod
-    def check_alliance(self, game_state, faction, ally):
+    def check_alliance(cls, game_state, faction, ally):
         if faction == ally:
             return True
         if ally in game_state.alliances[faction]:
@@ -45,7 +45,44 @@ class Action(object, metaclass=ActionMeta):
         return False
 
     @classmethod
+    def get_valid_actions(cls, game_state, faction):
+        valid_actions = {}
+        for action in cls.registry:
+            try:
+                cls.registry[action].check(game_state, faction)
+            except IllegalAction:
+                pass
+            else:
+                valid_actions[action] = cls.registry[action]
+
+        for action in cls.round_registry[game_state.round_state.round]:
+            try:
+                cls.round_registry[game_state.round_state.round][action].check(game_state, faction)
+            except IllegalAction:
+                pass
+            else:
+                valid_actions[action] = cls.round_registry[game_state.round_state.round][action]
+        return valid_actions
+
+    @classmethod
+    def get_action(cls, action_name):
+        if action_name in cls.registry:
+            return cls.registry[action_name]
+        for r in cls.round_registry:
+            if action_name in cls.round_registry[r]:
+                return cls.round_registry[r][action_name]
+        return None
+
+    @classmethod
     def check(cls, game_state, faction):
+        if hasattr(cls, "ck_substage"):
+            if not hasattr(game_state.round_state.stage_state, "substage_state"):
+                raise IllegalAction("Cannot do that in this stage")
+            if game_state.round_state.stage_state.substage_state.substage != cls.ck_substage:
+                raise IllegalAction("Cannot do that in this substage")
+        if hasattr(cls, "ck_stage"):
+            if game_state.round_state.stage_state.stage != cls.ck_stage:
+                raise IllegalAction("Cannot do that in this stage")
         if hasattr(cls, "ck_round"):
             if game_state.round_state.round != cls.ck_round:
                 raise IllegalAction("Cannot do that in this round")
@@ -68,3 +105,8 @@ class Action(object, metaclass=ActionMeta):
         if self._execute is None:
             return game_state
         return self._execute(game_state)
+
+
+# These unsed imports register the Action classes
+from dune.actions import setup, storm, spice, nexus, bidding  # noqa # pylint: disable=unused-import
+from dune.actions import revival, movement, battle, collection  # noqa # pylint: disable=unused-import
