@@ -42,10 +42,6 @@ class ChoamCharity(Action):
     name = "choam-charity"
     ck_round = "bidding"
 
-    @classmethod
-    def parse_args(cls, faction, args):
-        return ChoamCharity(faction)
-
     def __init__(self, faction):
         self.faction = faction
 
@@ -136,10 +132,6 @@ class Pass(Action):
     ck_round = "bidding"
     ck_stage = "auction"
     ck_substage = "bidding"
-
-    @classmethod
-    def parse_args(cls, faction, args):
-        return Pass(faction)
 
     def __init__(self, faction):
         self.faction = faction
@@ -257,7 +249,7 @@ class KaramaFreeBid(Action):
 
 
 class Pay(Action):
-    name = "pay"
+    name = "pay-bid"
     ck_round = "bidding"
     ck_stage = "auction"
     ck_substage = "payment"
@@ -266,26 +258,6 @@ class Pay(Action):
     def _check(cls, game_state, faction):
         if faction != game_state.round_state.stage_state.winner:
             raise IllegalAction("You need to be the winner first")
-
-    def _execute(self, game_state):
-        new_game_state = deepcopy(game_state)
-        do_payment(new_game_state)
-        new_game_state.round_state.stage_state.substage_state = bidding.CollectSubStage()
-
-        return new_game_state
-
-
-class AutoPay(Action):
-    name = "auto-pay"
-    ck_round = "bidding"
-    ck_stage = "auction"
-    ck_substage = "payment"
-    su = True
-
-    @classmethod
-    def _check(cls, game_state, faction):
-        if "Karama" in game_state.faction_state[game_state.round_state.stage_state.winner].treachery:
-            raise IllegalAction("Cannot auto-pay as they may want to use a Karama card")
 
     def _execute(self, game_state):
         new_game_state = deepcopy(game_state)
@@ -344,6 +316,8 @@ class KaramaStopExtra(Action):
 class KaramPassStopExtra(Action):
     name = "karama-pass-stop-extra"
     ck_round = "bidding"
+    ck_stage = "auction"
+    ck_substage = "collect"
 
     @classmethod
     def _check(cls, game_state, faction):

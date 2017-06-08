@@ -6,6 +6,8 @@ import random
 import json
 import logging
 
+logger = logging.getLogger(__name__)
+
 
 def translate_faction(faction):
     return {
@@ -22,12 +24,13 @@ def run_game(cmds):
     session = Session()
 
     for faction, cmd in cmds:
+        logger.debug(list(session.get_valid_actions(translate_faction(faction)).keys()))
         try:
             session.handle_cmd(translate_faction(faction), cmd)
         except IllegalAction as e:
-            print("    IllegalAction: ", e)
+            logger.error("    IllegalAction: {}".format(e))
         except BadCommand as e:
-            print("    BadComand: ", e)
+            logger.error("    BadComand: {}".format(e))
 
     final_state = session.game_log[-1]
 
@@ -60,6 +63,7 @@ CMDS = [
     ("g", "pass"),
     ("h", "bid 5"),
     ("a", "pass"),
+    ("h", "pay-bid"),
     ("a", "karama-pass-stop-extra"),
     ("b", "karama-pass-stop-extra"),
     ("e", "karama-pass-stop-extra"),
@@ -71,12 +75,14 @@ CMDS = [
     ("a", "pass"),
     ("e", "pass"),
     ("f", "pass"),
+    ("g", "pay-bid"),
     ("h", "bid 1"),
     ("b", "pass"),
     ("a", "pass"),
     ("e", "pass"),
     ("f", "pass"),
     ("g", "pass"),
+    ("h", "pay-bid"),
     ("g", "karama-stop-extra"),
     ("b", "pass"),
     ("a", "pass"),
@@ -84,6 +90,29 @@ CMDS = [
     ("f", "pass"),
     ("g", "pass"),
     ("h", "pass"),
+    ("b", "karama-pass-block-guild-turn-choice"),
+    ("a", "karama-pass-block-guild-turn-choice"),
+    ("f", "karama-pass-block-guild-turn-choice"),
+    ("e", "karama-pass-block-guild-turn-choice"),
+    ("h", "karama-pass-block-guild-turn-choice"),
+    ("b", "coexist-persist"),
+    ("g", "guild-pass-turn"),
+    ("f", "end-movement"),
+    ("g", "guild-pass-turn"),
+    ("h", "ship 1,1,1,1 Arrakeen 9"),
+    ("g", "karama-pass-stop-shipment"),
+    ("h", "pay-shipment"),
+    ("b", "send-spiritual-advisor"),
+    ("h", "karama-pass-stop-spiritual-advisor"),
+    ("b", "guild-pass-turn"),
+    ("g", "guild-pass-turn"),
+    ("g", "guild-pass-turn"),
+    ("b", "end-movement"),
+    ("g", "guild-pass-turn"),
+    ("a", "end-movement"),
+    ("g", "guild-pass-turn"),
+    ("e", "end-movement"),
+    ("g", "guild-pass-turn"),
 ]
 
 CMDS2 = [
@@ -134,7 +163,7 @@ CMDS2 = [
 
 
 if __name__ == "__main__":
-    logging.basicConfig(level=logging.DEBUG)
+    logging.basicConfig(level=logging.INFO)
     random.seed(0)
     run_game(CMDS)
     random.seed(0)

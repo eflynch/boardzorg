@@ -1,18 +1,23 @@
-# KaramaBlockGuildTurnChoice, KaramaPassBlockGuildTurnChoice
-# GuildPassTurn
-# TURN:
-    # KaramaCheapShipment, Ship, CrossPlanetShip, Movement
-
 from copy import deepcopy
 import math
 
 from dune.actions.action import Action
+from dune.actions import storm
 from dune.exceptions import IllegalAction, BadCommand
+from dune.state.rounds import movement, battle
 
 
 def ship_units(game_state, faction, units, space, sector):
     if sector not in space.sectors:
         raise BadCommand("You ain't going nowhere")
+
+    if game_state.storm_position == sector:
+        if faction == "fremen":
+            surviving_units = sorted(units)[:math.floor(len(units)/2)]
+            tanked_units = sorted(units)[math.floor(len(units)/2):]
+            units = surviving_units
+            game_state.faction_state[faction].tanked_units.extend(tanked_units)
+
     for u in units:
         if u not in game_state.faction_state[faction].reserve_units:
             raise BadCommand("Cannot place a unit which is unavailable")
@@ -46,128 +51,563 @@ def move_units(game_state, faction, units, space_a, sector_a, space_b, sector_b)
         del space_a.forces[faction]
 
 
+def spice_cost(game_state, faction, num_units, space):
+    if faction == "guild" or "guild" in game_state.alliances[faction]:
+        if "stronghold" in space.type:
+            spice_cost = math.ceil(num_units/2)
+        else:
+            spice_cost = num_units
+    else:
+        if "stronghold" in space.type:
+            spice_cost = num_units
+        else:
+            spice_cost = 2 * num_units
+
+    return spice_cost
+
+
 class KaramaBlockGuildTurnChoice(Action):
     name = "karama-block-guild-turn-choice"
     ck_round = "movement"
+    ck_stage = "setup"
 
     @classmethod
     def _check(cls, game_state, faction):
-        if game_state.round_state.faction_turn is not None:
-            raise IllegalAction("Movement round already started")
-        if game_state.round_state.block_guild_turn_karama_used:
-            raise IllegalAction("This has already been done")
-        if faction in game_state.round_state.block_guild_turn_karama_pass:
+        if faction == "guild":
+            raise IllegalAction("The guild cannot do that")
+        if faction in game_state.round_state.stage_state.karama_passes:
             raise IllegalAction("You have already passed this option")
 
     def _execute(self, game_state):
         new_game_state = deepcopy(game_state)
-        new_game_state.round_state.block_guild_turn_karama_used = True
-        # new_game_state.round_state.faction_turn = get_faction_order(game_state)[0]
+        new_game_state.round_state.guild_choice_blocked = True
+        faction_order = storm.get_faction_order(game_state)
+        new_game_state.round_state.faction_turn = faction_order[0]
+        new_game_state.round_state.turn_order = faction_order
+        new_game_state.round_state.stage_state = movement.CoexistStage()
         return new_game_state
 
 
 class KaramaPassBlockGuildTurnChoice(Action):
     name = "karama-pass-block-guild-turn-choice"
     ck_round = "movement"
+    ck_stage = "setup"
 
     @classmethod
     def _check(cls, game_state, faction):
-        if game_state.round_state.faction_turn is not None:
-            raise IllegalAction("Movement round already started")
-        if game_state.round_state.block_guild_turn_karama_used:
-            raise IllegalAction("This has already been done")
-        if faction in game_state.round_state.block_guild_turn_karama_pass:
+        if faction == "guild":
+            raise IllegalAction("The guild cannot do that")
+        if faction in game_state.round_state.stage_state.karama_passes:
             raise IllegalAction("You have already passed this option")
 
     def _execute(self, game_state):
         new_game_state = deepcopy(game_state)
-        new_game_state.round_state.block_guild_turn_karama_pass.append(self.faction)
+        new_game_state.round_state.stage_state.karama_passes.append(self.faction)
         return new_game_state
 
 
-class StartMovement(Action):
-    name = "start-movemen"
+class SkipKaramaGuildTurnChoice(Action):
+    name = "skip-karama-block-guild-turn-choice"
     ck_round = "movement"
+    ck_stage = "setup"
+    su = True
 
     @classmethod
     def _check(cls, game_state, faction):
-        if game_state.round_state.faction_turn is not None:
-            raise IllegalAction("Movement round already started")
-        if len(game_state.round_state.block_guild_turn_karama_pass) < 5:
-            raise IllegalAction("Waiting for karama passes")
+        if "guild" in game_state.faction_state:
+            if len(game_state.round_state.stage_state.karama_passes) != len(game_state.faction_state) - 1:
+                raise IllegalAction("Waiting for karama passes")
 
     def _execute(self, game_state):
-        pass
+        new_game_state = deepcopy(game_state)
+        faction_order = storm.get_faction_order(game_state)
+        if "guild" in faction_order:
+            faction_order.remove("guild")
+            faction_order.insert(0, "guild")
+        new_game_state.round_state.turn_order = faction_order
+        new_game_state.round_state.faction_turn = faction_order[0]
+        new_game_state.round_state.stage_state = movement.CoexistStage()
+        return new_game_state
 
 
-class Ship(Action):
-    name = "ship"
+class CoexistPlace(Action):
+    name = "coexist-place"
     ck_round = "movement"
+    ck_stage = "coexist"
+    ck_faction = "bene-gesserit"
 
-    def parse_args(faction, args):
-        parts = args.split(" ")
-        if len(parts) != 3:
-            raise BadCommand("Shipment Requires Different Arguments")
+    @classmethod
+    def parse_args(cls, faction, args):
+        spaces = args.split(" ")
+        return CoexistPlace(faction, spaces)
 
-        units, space, sector = parts
-        units = [int(i) for i in units.split(",")]
-        sector = int(sector)
-
-        return Ship(faction, units, space, sector)
-
-    def __init__(self, faction, units, space, sector):
+    def __init__(self, faction, spaces):
         self.faction = faction
-        self.units = units
-        self.space = space
-        self.sector = sector
+        self.spaces = spaces
 
-    def _calculate_spice_cost(self, game_state):
-        num_units = len(self.units)
-        space = game_state.board_state.map_state[self.space]
+    def _execute(self, game_state):
+        new_game_state = deepcopy(game_state)
+        for s in self.spaces:
+            space = new_game_state.map_state[s]
+            if "bene-gesserit" not in space.forces:
+                raise BadCommand("No forces to coexist")
+            space.coexist = True
 
-        if self.faction == "guild" or "guild" in game_state.alliances[self.faction]:
-            if space.is_stronghold:
-                spice_cost = math.ceil(num_units/2)
-            else:
-                spice_cost = num_units
-        else:
-            if space.is_stronghold:
-                spice_cost = num_units
-            else:
-                spice_cost = 2 * num_units
+        new_game_state.round_state.stage_state = movement.TurnStage()
+        return new_game_state
 
-        return spice_cost
+
+class CoexistPersist(Action):
+    name = "coexist-persist"
+    ck_round = "movement"
+    ck_stage = "coexist"
+    ck_faction = "bene-gesserit"
+
+    def _execute(self, game_state):
+        new_game_state = deepcopy(game_state)
+        for s in new_game_state.map_state:
+            space = new_game_state.map_state[s]
+            if "bene-gesserit" in space.forces:
+                space.coexist = space.was_coexist
+
+        new_game_state.round_state.stage_state = movement.TurnStage()
+        return new_game_state
+
+
+class SkipCoexist(Action):
+    name = "coexist-place"
+    ck_round = "movement"
+    ck_stage = "coexist"
+    su = True
+
+    @classmethod
+    def _check(cls, game_state, faction):
+        if "bene-gesserit" in game_state.faction_state:
+            raise IllegalAction("Cannot skip coexist if bene-gesserit are present")
+
+    def _execute(self, game_state):
+        new_game_state = deepcopy(game_state)
+        new_game_state.round_state.stage_state = movement.TurnStage()
+        return new_game_state
+
+
+class GuildPass(Action):
+    name = "guild-pass-turn"
+    ck_round = "movement"
+    ck_stage = "turn"
+    ck_faction = "guild"
+    ck_substage = "main"
+
+    @classmethod
+    def _check(cls, game_state, faction):
+        cls.check_turn(game_state, faction)
+        if game_state.round_state.guild_choice_blocked:
+            raise IllegalAction("The guild choice has been blocked by karama")
+        if game_state.round_state.stage_state.shipment_used:
+            raise IllegalAction("You have already started your turn")
+        if game_state.round_state.stage_state.movement_used:
+            raise IllegalAction("You have already started your turn")
+        if game_state.round_state.turn_order[-1] == "guild":
+            raise IllegalAction("You last fool")
+
+    def _execute(self, game_state):
+        new_game_state = deepcopy(game_state)
+        idx = new_game_state.round_state.turn_order.index("guild")
+        new_game_state.round_state.turn_order.remove("guild")
+        new_game_state.round_state.turn_order.insert(idx+1, "guild")
+        new_game_state.round_state.faction_turn = new_game_state.round_state.turn_order[idx]
+        return new_game_state
+
+
+class EndMovementTurn(Action):
+    name = "end-movement"
+    ck_round = "movement"
+    ck_stage = "turn"
+    ck_substage = "main"
 
     @classmethod
     def _check(cls, game_state, faction):
         cls.check_turn(game_state, faction)
 
+    def _execute(self, game_state):
+        new_game_state = deepcopy(game_state)
+        idx = new_game_state.round_state.turn_order.index(self.faction)
+        if idx == len(new_game_state.round_state.turn_order) - 1:
+            new_game_state.round_state = battle.BattleRound()
+            return new_game_state
+        new_game_state.round_state.faction_turn = new_game_state.round_state.turn_order[idx + 1]
+        new_game_state.round_state.stage_state = movement.TurnStage()
+        return new_game_state
+
+
+class AutoEndMovementTurn(Action):
+    name = "auto-end-movement"
+    ck_round = "movement"
+    ck_stage = "turn"
+    ck_substage = "main"
+    su = True
+
+    @classmethod
+    def _check(cls, game_state, faction):
+        if not game_state.round_state.stage_state.shipment_used:
+            raise IllegalAction("Shipment still possible")
+
+        if not game_state.round_state.stage_state.movement_used:
+            raise IllegalAction("Movement still possible")
+
+    def _execute(self, game_state):
+        new_game_state = deepcopy(game_state)
+        faction_turn = new_game_state.round_state.faction_turn
+        idx = new_game_state.round_state.turn_order.index(faction_turn)
+        if idx == len(new_game_state.round_state.turn_order) - 1:
+            new_game_state.round_state = battle.BattleRound()
+            return new_game_state
+        new_game_state.round_state.faction_turn = new_game_state.round_state.turn_order[idx + 1]
+        new_game_state.round_state.stage_state = movement.TurnStage()
+        return new_game_state
+
+
+class Ship(Action):
+    name = "ship"
+    ck_round = "movement"
+    ck_stage = "turn"
+    ck_substage = "main"
+
+    def parse_args(faction, args):
+        parts = args.split(" ")
+        if len(parts) == 3:
+            units, space, sector = parts
+            coexist = False
+        elif len(parts) == 4:
+            units, space, sector, coexist = parts
+            coexist = coexist == "coexist"
+        else:
+            raise BadCommand("Shipment Requires Different Arguments")
+
+        units = [int(i) for i in units.split(",")]
+        sector = int(sector)
+
+        return Ship(faction, units, space, sector, coexist)
+
+    def __init__(self, faction, units, space, sector, coexist):
+        self.faction = faction
+        self.units = units
+        self.space = space
+        self.sector = sector
+        self.coexist = coexist
+
+    @classmethod
+    def _check(cls, game_state, faction):
+        cls.check_turn(game_state, faction)
+        if faction == "fremen":
+            raise IllegalAction("Fremen cannot ship")
+        if game_state.round_state.stage_state.shipment_used:
+            raise IllegalAction("You have already shipped this turn")
+
     def execute(self, game_state):
         new_game_state = deepcopy(game_state)
 
-        space = new_game_state.board_state.map_state[self.space]
-        if space.is_stronghold and len(space.forces) > 1 and self.faction not in space.forces:
-            raise BadCommand("Cannot ship into stronghold with 2 enemy factions")
+        space = new_game_state.map_state[self.space]
+        if "stronghold" in space.type:
+            if len(space.forces) > 1:
+                if self.faction not in space.forces:
+                    if not self.coexist:
+                        raise BadCommand("Cannot ship into stronghold with 2 enemy factions")
 
-        if new_game_state.board_state.storm_position == self.sector:
-            if self.faction == "fremen":
-                surviving_units = sorted(self.units)[:math.floor(len(self.units)/2)]
-                tanked_units = sorted(self.units)[math.floor(len(self.units)/2):]
-                self.units = surviving_units
-                new_game_state.faction_state["fremen"].tanked_units.extend(tanked_units)
-            else:
+        if new_game_state.storm_position == self.sector:
+            if self.faction != "fremen":
                 raise IllegalAction("Only the Fremen can ship into the storm")
 
-        spice_cost = self._calculate_spice_cost(new_game_state)
+        min_cost = spice_cost(new_game_state, self.faction, len(self.units), space)
 
-        if new_game_state.faction_state[self.faction].spice < spice_cost:
-            raise IllegalAction("Insufficient spice for this shipment")
+        if "Karama" in new_game_state.faction_state[self.faction].treachery:
+            min_cost = spice_cost(new_game_state, "guild", len(self.units), space)
+        if new_game_state.faction_state[self.faction].spice < min_cost:
+            raise BadCommand("Insufficient spice for this shipment")
 
-        ship_units(new_game_state, self.faction, self.units, space, self.sector)
-
-        if self.faction != "guild":
-            new_game_state.faction_state[self.faction].spice -= spice_cost
-            if "guild" in new_game_state.faction_state:
-                new_game_state.faction_state["guild"].spice += spice_cost
+        new_game_state.round_state.stage_state.substage_state = movement.ShipSubStage()
+        new_game_state.round_state.stage_state.substage_state.units = self.units
+        new_game_state.round_state.stage_state.substage_state.space = self.space
+        new_game_state.round_state.stage_state.substage_state.sector = self.sector
+        new_game_state.round_state.stage_state.substage_state.coexist = self.coexist
 
         return new_game_state
+
+
+class KaramaStopShipment(Action):
+    name = "karama-stop-shipment"
+    ck_round = "movement"
+    ck_stage = "turn"
+    ck_substage = "ship"
+    ck_faction = "guild"
+
+    @classmethod
+    def _check(cls, game_state, faction):
+        if game_state.round_state.stage_state.substage_state.subsubstage != "halt":
+            raise IllegalAction("Wrong subsubstage yo")
+        if game_state.round_state.faction_turn == "guild":
+            raise IllegalAction("No stopping yourself guild")
+
+    def _execute(self, game_state, faction):
+        new_game_state = deepcopy(game_state)
+        new_game_state.round_state.stage_state.shipment_used = True
+        new_game_state.round_state.stage_state.substage = movement.MainSubStage()
+        return new_game_state
+
+
+class KaramaPassStopShipment(Action):
+    name = "karama-pass-stop-shipment"
+    ck_round = "movement"
+    ck_stage = "turn"
+    ck_substage = "ship"
+    ck_faction = "guild"
+
+    @classmethod
+    def _check(cls, game_state, faction):
+        if game_state.round_state.stage_state.substage_state.subsubstage != "halt":
+            raise IllegalAction("Wrong subsubstage yo")
+        if game_state.round_state.faction_turn == "guild":
+            raise IllegalAction("No stopping yourself guild")
+
+    def _execute(self, game_state):
+        new_game_state = deepcopy(game_state)
+        new_game_state.round_state.stage_state.substage_state.subsubstage = "pay"
+        return new_game_state
+
+
+class SkipStopShipment(Action):
+    name = "skip-stop-shipment"
+    ck_round = "movement"
+    ck_stage = "turn"
+    ck_substage = "ship"
+    su = True
+
+    @classmethod
+    def _check(cls, game_state, faction):
+        if game_state.round_state.stage_state.substage_state.subsubstage != "halt":
+            raise IllegalAction("Wrong subsubstage yo")
+        if game_state.round_state.faction_turn != "guild":
+            if "guild" in game_state.faction_state:
+                raise IllegalAction("Waiting to see if guild stops it")
+
+    def _execute(self, game_state):
+        new_game_state = deepcopy(game_state)
+        new_game_state.round_state.stage_state.substage_state.subsubstage = "pay"
+        return new_game_state
+
+
+class KaramaCheapShipment(Action):
+    name = "karama-cheap-shipment"
+    ck_round = "movement"
+    ck_stage = "turn"
+    ck_substage = "ship"
+
+    @classmethod
+    def _check(cls, game_state, faction):
+        cls.check_turn(game_state, faction)
+        if "Karma" not in game_state.faction_state[faction].treachery:
+            raise IllegalAction("You need a karama card to do that")
+        if game_state.round_state.stage_state.substage_state.subsubstage != "pay":
+            raise IllegalAction("Wrong subsubstage yo")
+        if game_state.round_state.faction_turn == "guild":
+            raise IllegalAction("No cheap shipment for the guild")
+
+    def _execute(self, game_state):
+        new_game_state = deepcopy(game_state)
+        new_game_state.round_state.stage_state.substage_state.subsubstage = "guide"
+
+        units = new_game_state.round_state.stage_state.substage_state.units
+        s = new_game_state.round_state.stage_state.substage_state.space
+        space = new_game_state.map_state[s]
+        sector = new_game_state.round_state.stage_state.substage_state.sector
+        coexist = new_game_state.round_state.stage_state.substage_state.coexist
+
+        cost = spice_cost(new_game_state, "guild", len(units), space)
+
+        new_game_state.faction_state[self.faction].treachery.remove("Karama")
+        new_game_state.treachery_discard.insert(0, "Karama")
+
+        ship_units(new_game_state, self.faction, units, space, sector)
+        new_game_state.faction_state[self.faction].spice -= cost
+        space.coexist = coexist
+
+        return new_game_state
+
+
+class PayShipment(Action):
+    name = "pay-shipment"
+    ck_round = "movement"
+    ck_stage = "turn"
+    ck_substage = "ship"
+
+    @classmethod
+    def _check(cls, game_state, faction):
+        cls.check_turn(game_state, faction)
+        if game_state.round_state.stage_state.substage_state.subsubstage != "pay":
+            raise IllegalAction("Wrong subsubstage yo")
+
+    def _execute(self, game_state):
+        new_game_state = deepcopy(game_state)
+        new_game_state.round_state.stage_state.substage_state.subsubstage = "guide"
+
+        units = new_game_state.round_state.stage_state.substage_state.units
+        s = new_game_state.round_state.stage_state.substage_state.space
+        space = new_game_state.map_state[s]
+        sector = new_game_state.round_state.stage_state.substage_state.sector
+        coexist = new_game_state.round_state.stage_state.substage_state.coexist
+
+        cost = spice_cost(new_game_state, self.faction, len(units), space)
+        if cost > new_game_state.faction_state[self.faction].spice:
+            raise BadCommand("You cannot pay full price for this shipment")
+
+        ship_units(new_game_state, self.faction, units, space, sector)
+        new_game_state.faction_state[self.faction].spice -= cost
+        if self.faction != "guild":
+            if "guild" in new_game_state.faction_state:
+                new_game_state.faction_state["guild"].spice += cost
+        space.coexist = coexist
+
+        return new_game_state
+
+
+class SendSpiritualAdvisor(Action):
+    name = "send-spiritual-advisor"
+    ck_round = "movement"
+    ck_stage = "turn"
+    ck_substage = "ship"
+    ck_faction = "bene-gesserit"
+
+    @classmethod
+    def _check(cls, game_state, faction):
+        if game_state.round_state.stage_state.substage_state.subsubstage != "guide":
+            raise IllegalAction("Wrong subsubstage yo")
+        if game_state.round_state.faction_turn == "bene-gesserit":
+            raise IllegalAction("No guiding yourself guild")
+        if not game_state.faction_state["bene-gesserit"].reserve_units:
+            raise IllegalAction("You need units to send as advisors")
+
+    def _execute(self, game_state):
+        new_game_state = deepcopy(game_state)
+        new_game_state.round_state.stage_state.substage_state.subsubstage = "halt-guide"
+        return new_game_state
+
+
+class PassSendSpiritualAdvisor(Action):
+    name = "pass-send-spiritual-advisor"
+    ck_round = "movement"
+    ck_stage = "turn"
+    ck_substage = "ship"
+    ck_faction = "bene-gesserit"
+
+    @classmethod
+    def _check(cls, game_state, faction):
+        if game_state.round_state.stage_state.substage_state.subsubstage != "guide":
+            raise IllegalAction("Wrong subsubstage yo")
+        if game_state.round_state.faction_turn == "bene-gesserit":
+            raise IllegalAction("No guiding yourself guild")
+
+    def _execute(self, game_state):
+        new_game_state = deepcopy(game_state)
+        new_game_state.round_state.stage_state.shipment_used = True
+        new_game_state.round_state.stage_state.substage = movement.MainSubStage()
+        return new_game_state
+
+
+class SkipSendSpiritualAdvisor(Action):
+    name = "skip-send-spiritual-advisor"
+    ck_round = "movement"
+    ck_stage = "turn"
+    ck_substage = "ship"
+    su = True
+
+    @classmethod
+    def _check(cls, game_state, faction):
+        if game_state.round_state.stage_state.substage_state.subsubstage != "guide":
+            raise IllegalAction("Wrong subsubstage yo")
+        if "bene-gesserit" in game_state.faction_state:
+            if game_state.faction_state["bene-gesserit"].reserve_units:
+                if game_state.round_state.faction_turn != "bene-gesserit":
+                    raise IllegalAction("Cannot auto skip spiritual guide")
+
+    def _execute(self, game_state):
+        new_game_state = deepcopy(game_state)
+        new_game_state.round_state.stage_state.shipment_used = True
+        new_game_state.round_state.stage_state.substage = movement.MainSubStage()
+        return new_game_state
+
+
+class KarmaStopSpiritualAdvisor(Action):
+    name = "karama-stop-spiritual-advisor"
+    ck_round = "movement"
+    ck_stage = "turn"
+    ck_substage = "ship"
+
+    @classmethod
+    def _check(cls, game_state, faction):
+        cls.check_turn(game_state, faction)
+        if game_state.round_state.stage_state.substage_state.subsubstage != "halt-guide":
+            raise IllegalAction("Wrong subsubstage yo")
+        if "Karama" not in game_state.faction_state[faction].treachery:
+            raise IllegalAction("You need a Karama card")
+
+    def _execute(self, game_state):
+        new_game_state = deepcopy(game_state)
+        new_game_state.faction_state[self.faction].treachery.remove("Karama")
+        new_game_state.treachery_discard.insert(0, "Karama")
+        new_game_state.round_state.stage_state.shipment_used = True
+        new_game_state.round_state.stage_state.substage = movement.MainSubStage()
+        return new_game_state
+
+
+class KarmaPassStopSpiritualAdvisor(Action):
+    name = "karama-pass-stop-spiritual-advisor"
+    ck_round = "movement"
+    ck_stage = "turn"
+    ck_substage = "ship"
+
+    @classmethod
+    def _check(cls, game_state, faction):
+        cls.check_turn(game_state, faction)
+        if game_state.round_state.stage_state.substage_state.subsubstage != "halt-guide":
+            raise IllegalAction("Wrong subsubstage yo")
+
+    def _execute(self, game_state):
+        new_game_state = deepcopy(game_state)
+        s = new_game_state.round_state.stage_state.substage_state.space
+        space = new_game_state.map_state[s]
+        sector = new_game_state.round_state.stage_state.substage_state.sector
+        space.coexist = True
+        if self.faction not in space.forces:
+            space.forces[self.faction] = []
+        if sector not in space.forces[self.faction]:
+            space.forces[self.faction][sector] = []
+        u = new_game_state.faction_state[self.faction].reserve_units.pop(0)
+        space.forces[self.faction][sector].append(u)
+        new_game_state.round_state.stage_state.shipment_used = True
+        new_game_state.round_state.stage_state.substage = movement.MainSubStage()
+        return new_game_state
+
+
+class Move(Action):
+    name = "move"
+    ck_round = "movement"
+    ck_stage = "turn"
+    ck_substage = "main"
+
+    def __init__(self, faction, units, space_a, sector_a, space_b, sector_b, coexist):
+        self.faction = faction
+        self.units = units
+        self.space_a = space_a
+        self.space_b = space_b
+        self.sector_a = sector_a
+        self.sector_b = sector_b
+        self.coexist = coexist
+
+    @classmethod
+    def _check(cls, game_state, faction):
+        cls.check_turn(game_state, faction)
+        if game_state.round_state.stage_state.movement_used:
+            raise IllegalAction("You have already moved this turn")
+
+    def _execute(self, game_state):
+        pass
