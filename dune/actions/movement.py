@@ -5,6 +5,7 @@ from dune.actions.action import Action
 from dune.actions import storm
 from dune.exceptions import IllegalAction, BadCommand
 from dune.state.rounds import movement, battle
+from dune.map.map import MapGraph
 
 
 def ship_units(game_state, faction, units, space, sector):
@@ -33,22 +34,41 @@ def move_units(game_state, faction, units, space_a, sector_a, space_b, sector_b)
     if sector_b not in space_b.sectors:
         raise BadCommand("You ain't going nowhere")
 
-    if sector_a not in sector_a.sectors:
+    if sector_a not in space_a.sectors:
         raise BadCommand("You ain't coming from nowhere")
+
+    if game_state.storm_position == sector_b:
+        if faction == "fremen":
+            surviving_units = sorted(units)[:math.floor(len(units)/2)]
+            tanked_units = sorted(units)[math.floor(len(units)/2):]
+            units = surviving_units
+            game_state.faction_state[faction].tanked_units.extend(tanked_units)
+        else:
+            raise BadCommand("You cannot move into the storm")
+    if game_state.storm_position == sector_a:
+        if faction != "fremen":
+            raise BadCommand("You cannot move from the storm")
 
     if faction not in space_b.forces:
         space_b.forces[faction] = {}
     if sector_b not in space_b.forces[faction]:
         space_b.forces[faction][sector_b] = []
 
+    if faction not in space_a.forces:
+        raise BadCommand("You don't have anything there")
+    if sector_a not in space_a.forces[faction]:
+        raise BadCommand("You don't have anything there")
+
     for u in units:
         if u not in space_a.forces[faction][sector_a]:
             raise BadCommand("You ain't got the troops")
         space_a.forces[faction][sector_a].remove(u)
-        space_b.forces[faction][sector_a].append(u)
+        space_b.forces[faction][sector_b].append(u)
 
     if all(space_a.forces[faction][s] == [] for s in space_a.forces[faction]):
         del space_a.forces[faction]
+    if "bene-gesserit" not in space_a.forces:
+        space_a.coexist = False
 
 
 def spice_cost(game_state, faction, num_units, space):
@@ -175,7 +195,7 @@ class CoexistPersist(Action):
 
 
 class SkipCoexist(Action):
-    name = "coexist-place"
+    name = "coexist-skip"
     ck_round = "movement"
     ck_stage = "coexist"
     su = True
@@ -273,7 +293,8 @@ class Ship(Action):
     ck_stage = "turn"
     ck_substage = "main"
 
-    def parse_args(faction, args):
+    @classmethod
+    def parse_args(cls, faction, args):
         parts = args.split(" ")
         if len(parts) == 3:
             units, space, sector = parts
@@ -509,7 +530,7 @@ class PassSendSpiritualAdvisor(Action):
     def _execute(self, game_state):
         new_game_state = deepcopy(game_state)
         new_game_state.round_state.stage_state.shipment_used = True
-        new_game_state.round_state.stage_state.substage = movement.MainSubStage()
+        new_game_state.round_state.stage_state.substage_state = movement.MainSubStage()
         return new_game_state
 
 
@@ -532,7 +553,7 @@ class SkipSendSpiritualAdvisor(Action):
     def _execute(self, game_state):
         new_game_state = deepcopy(game_state)
         new_game_state.round_state.stage_state.shipment_used = True
-        new_game_state.round_state.stage_state.substage = movement.MainSubStage()
+        new_game_state.round_state.stage_state.substage_state = movement.MainSubStage()
         return new_game_state
 
 
@@ -555,7 +576,7 @@ class KarmaStopSpiritualAdvisor(Action):
         new_game_state.faction_state[self.faction].treachery.remove("Karama")
         new_game_state.treachery_discard.insert(0, "Karama")
         new_game_state.round_state.stage_state.shipment_used = True
-        new_game_state.round_state.stage_state.substage = movement.MainSubStage()
+        new_game_state.round_state.stage_state.substage_state = movement.MainSubStage()
         return new_game_state
 
 
@@ -584,7 +605,7 @@ class KarmaPassStopSpiritualAdvisor(Action):
         u = new_game_state.faction_state[self.faction].reserve_units.pop(0)
         space.forces[self.faction][sector].append(u)
         new_game_state.round_state.stage_state.shipment_used = True
-        new_game_state.round_state.stage_state.substage = movement.MainSubStage()
+        new_game_state.round_state.stage_state.substage_state = movement.MainSubStage()
         return new_game_state
 
 
@@ -593,6 +614,26 @@ class Move(Action):
     ck_round = "movement"
     ck_stage = "turn"
     ck_substage = "main"
+
+    @classmethod
+    def parse_args(cls, faction, args):
+        parts = args.split(" ")
+        if len(parts) == 5:
+            units, space_a, sector_a, space_b, sector_b = parts
+            coexist = False
+        elif len(parts) == 6:
+            units, space_a, sector_a, space_b, sector_b, coexist = parts
+            coexist = coexist == "coexist"
+        else:
+            raise BadCommand("wrong number of args")
+
+        if coexist and faction != "bene-gesserit":
+            raise BadCommand("Only the bene-gesserit may coexist")
+
+        units = [int(u) for u in units.split(",")]
+        sector_a = int(sector_a)
+        sector_b = int(sector_b)
+        return Move(faction, units, space_a, sector_a, space_b, sector_b, coexist)
 
     def __init__(self, faction, units, space_a, sector_a, space_b, sector_b, coexist):
         self.faction = faction
@@ -610,4 +651,187 @@ class Move(Action):
             raise IllegalAction("You have already moved this turn")
 
     def _execute(self, game_state):
-        pass
+
+        new_game_state = deepcopy(game_state)
+        m = MapGraph()
+        if self.faction == "fremen":
+            m.deadend_sector(new_game_state.storm_position)
+        else:
+            m.remove_sector(new_game_state.storm_position)
+        for space in new_game_state.map_state.values():
+            if "stronghold" in space.type:
+                if self.faction not in space.forces:
+                    if len(space.forces) - (1 if space.coexist else 0) > 1:
+                        m.remove_space(space.name)
+
+        allowed_distance = 1
+        if self.faction == "fremen":
+            allowed_distance = 2
+        # TODO: Handle ornithopters
+        if m.distance(self.space_a, self.sector_a, self.space_b, self.sector_b) > allowed_distance:
+            raise BadCommand("You cannot move there")
+
+        space_a = new_game_state.map_state[self.space_a]
+        space_b = new_game_state.map_state[self.space_b]
+        move_units(new_game_state, self.faction, self.units, space_a, self.sector_a, space_b, self.sector_b)
+
+        if self.coexist and self.faction == "bene-gesserit":
+            space_b.coexist = True
+
+        new_game_state.round_state.stage_state.movement_used = True
+
+        return new_game_state
+
+
+class CrossShip(Action):
+    name = "cross-ship"
+    ck_round = "movement"
+    ck_stage = "turn"
+    ck_substage = "main"
+
+    @classmethod
+    def parse_args(cls, faction, args):
+        parts = args.split(" ")
+        if len(parts) == 5:
+            units, space_a, sector_a, space_b, sector_b = parts
+        else:
+            raise BadCommand("wrong number of args")
+
+        units = [int(u) for u in units.split(",")]
+        sector_a = int(sector_a)
+        sector_b = int(sector_b)
+        return CrossShip(faction, units, space_a, sector_a, space_b, sector_b)
+
+    def __init__(self, faction, units, space_a, sector_a, space_b, sector_b):
+        self.faction = faction
+        self.units = units
+        self.space_a = space_a
+        self.space_b = space_b
+        self.sector_a = sector_a
+        self.sector_b = sector_b
+
+    @classmethod
+    def _check(cls, game_state, faction):
+        cls.check_turn(game_state, faction)
+        cls.check_alliance(game_state, faction, "guild")
+        if game_state.round_state.stage_state.shipment_used:
+            raise IllegalAction("You have already shipped this turn")
+
+    def _execute(self, game_state):
+        new_game_state = deepcopy(game_state)
+
+        space_a = new_game_state.map_state[self.space_a]
+        space_b = new_game_state.map_state[self.space_b]
+        cost = spice_cost(new_game_state, self.faction, len(self.units), space_b)
+        if new_game_state.faction_state[self.faction].spice < cost:
+            raise BadCommand("You don't have enough spice")
+        new_game_state.faction_state[self.faction].spice -= cost
+        if self.faction != "guild":
+            if "guild" in new_game_state.faction_state:
+                new_game_state.faction_state["guild"] += cost
+        move_units(new_game_state, self.faction, self.units, space_a, self.sector_a, space_b, self.sector_b)
+
+        new_game_state.round_state.stage_state.shipment_used = True
+
+        return new_game_state
+
+
+class ReverseShip(Action):
+    name = "reverse-ship"
+    ck_round = "movement"
+    ck_stage = "turn"
+    ck_substage = "main"
+
+    @classmethod
+    def parse_args(cls, faction, args):
+        parts = args.split(" ")
+        if len(parts) == 3:
+            units, space, sector = parts
+        else:
+            raise BadCommand("wrong number of args")
+
+        units = [int(u) for u in units.split(",")]
+        sector = int(sector)
+        return ReverseShip(faction, units, space, sector)
+
+    def __init__(self, faction, units, space, sector):
+        self.faction = faction
+        self.units = units
+        self.space = space
+        self.sector = sector
+
+    @classmethod
+    def _check(cls, game_state, faction):
+        cls.check_turn(game_state, faction)
+        cls.check_alliance(game_state, faction, "guild")
+        if game_state.round_state.stage_state.shipment_used:
+            raise IllegalAction("You have already shipped this turn")
+
+    def _execute(self, game_state):
+        new_game_state = deepcopy(game_state)
+        if self.sector == new_game_state.storm_position:
+            raise BadCommand("You cannot ship out of the storm")
+
+        space = new_game_state.map_state[self.space]
+        cost = math.ceil(len(self.units)/2)
+        if new_game_state.faction_state[self.faction].spice < cost:
+            raise BadCommand("You don't have enough spice")
+        new_game_state.faction_state[self.faction].spice -= cost
+        if self.faction != "guild":
+            if "guild" in new_game_state.faction_state:
+                new_game_state.faction_state["guild"] += cost
+        for u in self.units:
+            if u not in space.forces[self.faction][self.sector]:
+                raise BadCommand("That unit isn't even there!")
+            space.forces[self.faction][self.sector].remove(u)
+            new_game_state.faction_state[self.faction].reserve_units.append(u)
+
+        new_game_state.round_state.stage_state.shipment_used = True
+
+        return new_game_state
+
+
+class Deploy(Action):
+    name = "deploy"
+    ck_round = "movement"
+    ck_stage = "turn"
+    ck_substage = "main"
+    ck_faction = "fremen"
+
+    @classmethod
+    def parse_args(cls, faction, args):
+        parts = args.split(" ")
+        if len(parts) == 3:
+            units, space, sector = parts
+        else:
+            raise BadCommand("wrong number of args")
+
+        units = [int(u) for u in units.split(",")]
+        sector = int(sector)
+        return Deploy(faction, units, space, sector)
+
+    def __init__(self, faction, units, space, sector):
+        self.faction = faction
+        self.units = units
+        self.space = space
+        self.sector = sector
+
+    @classmethod
+    def _check(cls, game_state, faction):
+        cls.check_turn(game_state, faction)
+        if game_state.round_state.stage_state.shipment_used:
+            raise IllegalAction("You have already shipped this turn")
+
+    def _execute(self, game_state):
+
+        new_game_state = deepcopy(game_state)
+        m = MapGraph()
+        if m.distance("Great-Flat", 14, self.space, self.sector) > 2:
+            raise BadCommand("You cannot deploy there")
+
+        space = new_game_state.map_state[self.space]
+        ship_units(new_game_state, self.faction, self.units, space, self.sector)
+
+        new_game_state.round_state.stage_state.shipment_used = True
+
+        return new_game_state

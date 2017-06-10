@@ -33,6 +33,12 @@ class GameState(State):
         self.storm_advance = 0
         self.shield_wall = True
         self.map_state = {s[0]: SpaceState(*s) for s in SPACES}
+        if "atreides" in factions_playing:
+            self.map_state["Arrakeen"].forces["atreides"] = {9: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]}
+        if "harkonnen" in factions_playing:
+            self.map_state["Carthag"].forces["harkonnen"] = {10: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]}
+        if "guild" in factions_playing:
+            self.map_state["Tueks-Sietch"].forces["guild"] = {4: [1, 1, 1, 1, 1]}
 
     def assert_valid(self):
         for state in self.faction_state.values():

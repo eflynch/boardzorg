@@ -104,15 +104,15 @@ CMDS = [
     ("h", "pay-shipment"),
     ("b", "send-spiritual-advisor"),
     ("h", "karama-pass-stop-spiritual-advisor"),
-    ("b", "guild-pass-turn"),
-    ("g", "guild-pass-turn"),
+    ("h", "move 1,1,1,1 Arrakeen 9 Imperial-Basin 9"),
     ("g", "guild-pass-turn"),
     ("b", "end-movement"),
     ("g", "guild-pass-turn"),
     ("a", "end-movement"),
     ("g", "guild-pass-turn"),
     ("e", "end-movement"),
-    ("g", "guild-pass-turn"),
+    ("g", "cross-ship 1,1,1 Tueks-Sietch 4 Sietch-Tabr 13"),
+    ("g", "move 1,1 Tueks-Sietch 4 Pasty-Mesa 6"),
 ]
 
 CMDS2 = [
@@ -163,8 +163,8 @@ CMDS2 = [
 
 
 if __name__ == "__main__":
-    logging.basicConfig(level=logging.INFO)
+    logging.basicConfig(level=logging.DEBUG)
     random.seed(0)
     run_game(CMDS)
     random.seed(0)
-    run_game(CMDS2)
+    # run_game(CMDS2)

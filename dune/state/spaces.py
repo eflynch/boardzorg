@@ -194,6 +194,9 @@ EDGES = [
 
 
 class SpaceState(State):
+    def __repr__(self):
+        return "<SpaceState {} ({}) >".format(self.name, " ".join(self.forces))
+
     def __init__(self, name, kind, spice_sector, spice_amount, sectors):
         # Properties
         self.name = name

@@ -52,3 +52,31 @@
     * A KARAMA look at b entire plan
 
   * COLLECTION
+
+
+## Special Treachery ##
+
+    * ANY TIME:
+      * Tleilaxu Ghola
+      * Truthtrance
+
+    * STORM
+      * Weather Control
+      * Family Atomics
+
+    * SPICE
+      * Harvester
+      * Thumper
+
+    * NEXUS
+
+    * BIDDING
+
+    * REVIVAL
+
+    * MOVEMENT
+      * Harj
+
+    * BATTLE
+
+    * COLLECTION
