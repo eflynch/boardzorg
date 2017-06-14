@@ -181,7 +181,7 @@ CMDS2 = [
 
 
 if __name__ == "__main__":
-    logging.basicConfig(level=logging.INFO)
+    logging.basicConfig(level=logging.DEBUG)
     random.seed(0)
     run_game(CMDS)
     random.seed(0)
