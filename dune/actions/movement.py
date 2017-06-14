@@ -8,7 +8,12 @@ from dune.state.rounds import movement, battle
 from dune.map.map import MapGraph
 
 
-def ship_units(game_state, faction, units, space, sector):
+def ship_units(game_state, faction, units, space, sector, coexist=False):
+    if "stronghold" in space.type:
+        if len(space.forces) > 1:
+            if faction not in space.forces:
+                if not coexist:
+                    raise BadCommand("Cannot ship into stronghold with 2 enemy factions")
     if sector not in space.sectors:
         raise BadCommand("You ain't going nowhere")
 
@@ -30,7 +35,12 @@ def ship_units(game_state, faction, units, space, sector):
         space.forces[faction][sector].append(u)
 
 
-def move_units(game_state, faction, units, space_a, sector_a, space_b, sector_b):
+def move_units(game_state, faction, units, space_a, sector_a, space_b, sector_b, coexist=False):
+    if "stronghold" in space_b.type:
+        if len(space_b.forces) > 1:
+            if faction not in space_b.forces:
+                if not coexist:
+                    raise BadCommand("Cannot move into stronghold with 2 enemy factions")
     if sector_b not in space_b.sectors:
         raise BadCommand("You ain't going nowhere")
 
@@ -325,19 +335,13 @@ class Ship(Action):
         if game_state.round_state.stage_state.shipment_used:
             raise IllegalAction("You have already shipped this turn")
 
-    def execute(self, game_state):
+    def _execute(self, game_state):
         new_game_state = deepcopy(game_state)
 
         space = new_game_state.map_state[self.space]
-        if "stronghold" in space.type:
-            if len(space.forces) > 1:
-                if self.faction not in space.forces:
-                    if not self.coexist:
-                        raise BadCommand("Cannot ship into stronghold with 2 enemy factions")
-
         if new_game_state.storm_position == self.sector:
             if self.faction != "fremen":
-                raise IllegalAction("Only the Fremen can ship into the storm")
+                raise BadCommand("Only the Fremen can ship into the storm")
 
         min_cost = spice_cost(new_game_state, self.faction, len(self.units), space)
 
@@ -673,7 +677,8 @@ class Move(Action):
 
         space_a = new_game_state.map_state[self.space_a]
         space_b = new_game_state.map_state[self.space_b]
-        move_units(new_game_state, self.faction, self.units, space_a, self.sector_a, space_b, self.sector_b)
+        move_units(new_game_state, self.faction, self.units, space_a, self.sector_a, space_b,
+                   self.sector_b, self.coexist and self.faction == "bene-gesserit")
 
         if self.coexist and self.faction == "bene-gesserit":
             space_b.coexist = True
@@ -692,23 +697,28 @@ class CrossShip(Action):
     @classmethod
     def parse_args(cls, faction, args):
         parts = args.split(" ")
-        if len(parts) == 5:
+        if len(parts) == 6:
+            units, space_a, sector_a, space_b, sector_b, coexist = parts
+            coexist = coexist == "coexist"
+        elif len(parts) == 5:
             units, space_a, sector_a, space_b, sector_b = parts
+            coexist = False
         else:
             raise BadCommand("wrong number of args")
 
         units = [int(u) for u in units.split(",")]
         sector_a = int(sector_a)
         sector_b = int(sector_b)
-        return CrossShip(faction, units, space_a, sector_a, space_b, sector_b)
+        return CrossShip(faction, units, space_a, sector_a, space_b, sector_b, coexist)
 
-    def __init__(self, faction, units, space_a, sector_a, space_b, sector_b):
+    def __init__(self, faction, units, space_a, sector_a, space_b, sector_b, coexist):
         self.faction = faction
         self.units = units
         self.space_a = space_a
         self.space_b = space_b
         self.sector_a = sector_a
         self.sector_b = sector_b
+        self.coexist = coexist
 
     @classmethod
     def _check(cls, game_state, faction):
@@ -729,7 +739,8 @@ class CrossShip(Action):
         if self.faction != "guild":
             if "guild" in new_game_state.faction_state:
                 new_game_state.faction_state["guild"] += cost
-        move_units(new_game_state, self.faction, self.units, space_a, self.sector_a, space_b, self.sector_b)
+        move_units(new_game_state, self.faction, self.units, space_a, self.sector_a, space_b, self.sector_b,
+                   self.coexist and self.faction == "bene-gesserit")
 
         new_game_state.round_state.stage_state.shipment_used = True
 

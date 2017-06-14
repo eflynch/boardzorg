@@ -46,6 +46,13 @@ LEADERS = {
 }
 
 
+def get_leader_faction(leader):
+    for k in LEADERS:
+        if leader in LEADERS[k]:
+            return k
+    return None
+
+
 def parse_leader(leader):
     all_leaders = [item for sublist in LEADERS.values() for item in sublist]
     leader_list = [a for a in all_leaders if a[0] == leader]

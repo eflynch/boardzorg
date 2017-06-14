@@ -106,13 +106,31 @@ CMDS = [
     ("h", "karama-pass-stop-spiritual-advisor"),
     ("h", "move 1,1,1,1 Arrakeen 9 Imperial-Basin 9"),
     ("g", "guild-pass-turn"),
+    ("b", "ship 1 Sietch-Tabr 13"),
+    ("g", "karama-pass-stop-shipment"),
+    ("b", "pay-shipment"),
     ("b", "end-movement"),
     ("g", "guild-pass-turn"),
     ("a", "end-movement"),
     ("g", "guild-pass-turn"),
     ("e", "end-movement"),
-    ("g", "cross-ship 1,1,1 Tueks-Sietch 4 Sietch-Tabr 13"),
+    ("g", "cross-ship 1,1,1 Tueks-Sietch 4 Carthag 10"),
     ("g", "move 1,1 Tueks-Sietch 4 Pasty-Mesa 6"),
+    ("b", "voice no poison weapon"),
+    ("a", "karama-pass-voice"),
+    ("f", "karama-pass-voice"),
+    ("e", "karama-pass-voice"),
+    ("h", "karama-pass-voice"),
+    ("g", "karama-pass-voice"),
+    ("a", "karama-pass-fedaykin"),
+    ("b", "karama-pass-fedaykin"),
+    ("e", "karama-pass-fedaykin"),
+    ("h", "karama-pass-fedaykin"),
+    ("g", "karama-pass-fedaykin"),
+    ("b", "commit-plan Alia 1 - -"),
+    ("f", "commit-plan Stilgar 1 - -"),
+    ("b", "pass-reveal-traitor"),
+    ("f", "pass-reveal-traitor"),
 ]
 
 CMDS2 = [
@@ -163,7 +181,7 @@ CMDS2 = [
 
 
 if __name__ == "__main__":
-    logging.basicConfig(level=logging.DEBUG)
+    logging.basicConfig(level=logging.INFO)
     random.seed(0)
     run_game(CMDS)
     random.seed(0)

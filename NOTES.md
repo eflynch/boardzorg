@@ -80,3 +80,8 @@
     * BATTLE
 
     * COLLECTION
+
+## Features Skipped For Now ##
+
+    * Leader Capture
+    * Bene-Gesserit Worthless KARAMA
