@@ -42,7 +42,7 @@ class DoControl(Action):
 
         alliances = []
         for faction in new_game_state.alliances:
-            alliance = tuple(sorted([new_game_state.alliances[faction] + [faction]]))
+            alliance = tuple(sorted(new_game_state.alliances[faction] + [faction]))
             alliances.append(alliance)
         alliances = set(alliances)
 
@@ -74,7 +74,7 @@ class DoControl(Action):
                     winner = ("guild",)
 
         if "bene-gesserit" in new_game_state.faction_state:
-            faction, turn = new_game_state.faction_state["bene_gesserit"].prediction
+            faction, turn = new_game_state.faction_state["bene-gesserit"].prediction
             if new_game_state.turn == turn:
                 if faction in a:
                     winner = ("bene-gesserit",)

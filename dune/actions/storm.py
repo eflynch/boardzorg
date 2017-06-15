@@ -38,6 +38,7 @@ def get_faction_order(game_state):
 class Storm(Action):
     name = "storm"
     ck_round = "storm"
+    su = True
 
     def _execute(self, game_state):
         new_game_state = deepcopy(game_state)

@@ -1,5 +1,18 @@
 #! /usr/bin/env python3
+import argparse
+import logging
 
 from dune.test.test_console import run_console
 
-run_console(seed=0, treachery_cards=None, factions_playing=None, output_file="output.dune", log_level=logging.INFO):
+parser = argparse.ArgumentParser(description="Dune Console")
+parser.add_argument('-s', default="0", help="Random seed")
+parser.add_argument('-o', default="output.dune", help="Output file")
+
+args = parser.parse_args()
+
+run_console(
+    seed=int(args.s),
+    treachery_cards=None,
+    factions_playing=None,
+    output_file=args.o,
+    log_level=logging.DEBUG)
