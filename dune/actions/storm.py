@@ -2,7 +2,8 @@ from copy import deepcopy
 from random import randint
 
 from dune.actions.action import Action
-from dune.constants import TOKEN_SECTORS
+
+TOKEN_SECTORS = [1, 4, 7, 10, 13, 16]
 
 
 def destroy_in_path(game_state, sectors):

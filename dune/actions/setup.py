@@ -17,7 +17,6 @@ from random import shuffle, randint
 
 from dune.actions import movement, storm
 from dune.actions.action import Action
-from dune.constants import TOKEN_SECTORS
 from dune.exceptions import IllegalAction, BadCommand
 from dune.state.leaders import LEADERS, parse_leader
 
@@ -97,7 +96,7 @@ class PlaceToken(Action):
             raise IllegalAction("{} token already placed".format(faction))
 
     def _execute(self, game_state):
-        if self.token_position not in TOKEN_SECTORS:
+        if self.token_position not in storm.TOKEN_SECTORS:
             raise BadCommand("Not a valid token position")
 
         for f in game_state.faction_state:
