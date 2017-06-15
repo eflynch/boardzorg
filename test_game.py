@@ -21,6 +21,7 @@ def translate_faction(faction):
 
 
 def run_game(cmds):
+    random.seed(0)
     session = Session()
 
     for faction, cmd in cmds:
@@ -32,9 +33,7 @@ def run_game(cmds):
         except BadCommand as e:
             logger.error("    BadComand: {}".format(e))
 
-    final_state = session.game_log[-1]
-
-    return final_state
+    return session
 
 CMDS = [
     ("b", "predict harkonnen 5"),
@@ -195,7 +194,6 @@ CMDS2 = [
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG)
-    random.seed(0)
-    json.dumps(run_game(CMDS).visible("harkonnen"))
-    random.seed(0)
+    s = run_game(CMDS)
     # run_game(CMDS2)
+

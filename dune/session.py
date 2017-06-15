@@ -13,6 +13,7 @@ class Session:
     def __init__(self, treachery_cards=None, factions_playing=None):
         self.game_log = [GameState(treachery_cards, factions_playing)]
         self.action_log = []
+        self.command_log = []
 
     def execute_supervisor(self):
         supervisor_actions = Action.get_valid_actions(self.game_log[-1], None)
@@ -31,6 +32,7 @@ class Session:
 
     def handle_cmd(self, faction, cmd):
         logger.info("CMD: {} {}".format(faction, cmd))
+        self.command_log.append((faction, cmd))
         valid_actions = Action.get_valid_actions(self.game_log[-1], faction)
         action_type = cmd.split(" ")[0]
         args = " ".join(cmd.split(" ")[1:])

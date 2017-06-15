@@ -1,0 +1,5 @@
+#! /usr/bin/env python3
+
+from dune.test.test_console import run_console
+
+run_console(seed=0, treachery_cards=None, factions_playing=None, output_file="output.dune", log_level=logging.INFO):

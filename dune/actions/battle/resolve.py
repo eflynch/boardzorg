@@ -184,7 +184,8 @@ class AutoResolve(Action):
                 space = new_game_state.map_state[battle_id[2]]
                 for fac in space.forces:
                     for sec in space.forces[fac]:
-                        for u in space.forces[fac][sec]:
+                        units_to_tank = space.forces[fac][sec][:]
+                        for u in units_to_tank:
                             ops.tank_unit(new_game_state, fac, space, sec, u)
 
                 ops.tank_leader(new_game_state, battle_id[0], stage_state.attacker_plan["leader"])
@@ -255,7 +256,8 @@ class AutoResolve(Action):
             power_left_to_tank = min(defender_max_power, stage_state.defender_plan["number"])
 
         for sec in space.forces[loser]:
-            for u in space.forces[loser][sec]:
+            units_to_tank = space.forces[loser][sec][:]
+            for u in units_to_tank:
                 ops.tank_unit(new_game_state, loser, space, sec, u)
 
         # Pay Winner Spice for dead leaders

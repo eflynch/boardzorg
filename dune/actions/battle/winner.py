@@ -2,7 +2,6 @@ from copy import deepcopy
 from logging import getLogger
 
 from dune.actions.action import Action
-from dune.state.rounds import battle
 from dune.exceptions import IllegalAction, BadCommand
 from dune.actions.battle import ops
 
