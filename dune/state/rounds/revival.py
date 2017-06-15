@@ -2,8 +2,10 @@ from dune.state.rounds import RoundState
 
 
 class RevivalRound(RoundState):
+    round = "revival"
+
     def __init__(self):
-        self.round = "revival"
+        self.stage = "main"
         self.faction_turn = None
 
     def visible(self, game_state, faction):

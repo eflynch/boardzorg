@@ -117,6 +117,7 @@ class RevealTraitor(Action):
 
     def _execute(self, game_state):
         new_game_state = deepcopy(game_state)
+        # TODO
         # Kill Leader
         # Pay spice for leader
         # Tank units (increase kh if relevent)
@@ -210,7 +211,7 @@ class AutoResolve(Action):
         dead_leaders = []
 
         if ops.clash_weapons(stage_state.defender_plan["weapon"], stage_state.attacker_plan["defense"]):
-            ops.tank_leader(stage_state.attacker_plan["leader"])
+            ops.tank_leader(new_game_state, battle_id[0], stage_state.attacker_plan["leader"])
             dead_leaders.append(stage_state.attacker_plan["leader"])
         else:
             if stage_state.attacker_plan["leader"] != "Cheap-Hero/Heroine":
@@ -219,7 +220,7 @@ class AutoResolve(Action):
                     battle_id[2], battle_id[3])
 
         if ops.clash_weapons(stage_state.defender_plan["weapon"], stage_state.defender_plan["defense"]):
-            ops.tank_leader(stage_state.defender_plan["leader"])
+            ops.tank_leader(new_game_state, battle_id[1], stage_state.defender_plan["leader"])
             dead_leaders.append(stage_state.defender_plan["leader"])
         else:
             if stage_state.defender_plan["leader"] != "Cheap-Hero/Heroine":

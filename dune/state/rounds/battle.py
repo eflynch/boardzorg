@@ -29,13 +29,15 @@ from dune.state.rounds import RoundState, StageState, SubStageState
 #   traitors : reveal-traitor / pass-reveal-traitor / skip
 #   resolve-battle : auto-resolve
 #   winner-actions : tank-units / discard / done
+
+#  TODO:
 #   karama-captured-leader : karama / pass / skip
 #   capture-leader : capture-leader / pass
 #   tank-leader : tank-leader / keep-leader
 
 
 class WinnerSubStage(SubStageState):
-    substage = "winner-actions"
+    substage = "winner"
 
     def __init__(self):
         self.power_left_to_tank = None

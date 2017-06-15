@@ -97,7 +97,7 @@ class SkipVoice(Action):
 
     def _execute(self, game_state):
         new_game_state = deepcopy(game_state)
-        new_game_state.round_state.stage_state.substage = "karama-voice"
+        new_game_state.round_state.stage_state.substage = "prescience"
         return new_game_state
 
 

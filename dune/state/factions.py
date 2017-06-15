@@ -16,13 +16,6 @@ class FactionState(State):
         self.bribe_spice = 0
         self.token_position = None
 
-    def assert_valid(self):
-        assert len(self.leaders) + len(self.tank_leaders) == 5
-        assert len(self.treachery) <= 4
-        assert len(self.traitors) <= 4
-        assert self.spice >= 0
-        assert self.bribe_spice >= 0
-
     def visible(self, game_state, faction):
         visible = super().visible(game_state, faction)
         visible["leaders"] = self.leaders
@@ -40,7 +33,7 @@ class FactionState(State):
             visible["rejected_traitors"] = self.rejected_traitors
 
         else:
-            if game_state.round_state.round == "bidding":
+            if game_state.round == "bidding":
                 visible["treachery"] = {"length": len(self.treachery)}
 
         return visible
@@ -112,13 +105,6 @@ class HarkonnenState(FactionState):
         super().__init__()
         self.reserve_units = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
         self.spice = 10
-
-    def assert_valid(self):
-        assert len(self.leaders) + len(self.tank_leaders) == 5
-        assert len(self.treachery) <= 8
-        assert len(self.traitors) <= 4
-        assert self.spice >= 0
-        assert self.bribe_spice >= 0
 
 
 class FremenState(FactionState):

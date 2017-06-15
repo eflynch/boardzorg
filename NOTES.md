@@ -85,3 +85,5 @@
 
     * Leader Capture
     * Bene-Gesserit Worthless KARAMA
+    * Harvesters / Ornithopters
+    * Special Treachery

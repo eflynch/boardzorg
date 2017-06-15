@@ -59,26 +59,14 @@ class Action(object, metaclass=ActionMeta):
     @classmethod
     def check(cls, game_state, faction):
         if hasattr(cls, "ck_round"):
-            if hasattr(game_state, "round_state"):
-                if game_state.round_state.round != cls.ck_round:
-                    raise IllegalAction("Cannot do that in this round")
-            else:
-                if game_state.round != cls.ck_round:
-                    raise IllegalAction("Cannot do that in this round")
+            if game_state.round != cls.ck_round:
+                raise IllegalAction("Cannot do that in this round")
         if hasattr(cls, "ck_stage"):
-            if hasattr(game_state.round_state, "stage_state"):
-                if game_state.round_state.stage_state.stage != cls.ck_stage:
-                    raise IllegalAction("Cannot do that in this stage")
-            else:
-                if game_state.round_state.stage != cls.ck_stage:
-                    raise IllegalAction("Cannot do that in this stage")
+            if game_state.round_state.stage != cls.ck_stage:
+                raise IllegalAction("Cannot do that in this stage")
         if hasattr(cls, "ck_substage"):
-            if hasattr(game_state.round_state.stage_state, "substage_state"):
-                if game_state.round_state.stage_state.substage_state.substage != cls.ck_substage:
-                    raise IllegalAction("Cannot do that in this substage")
-            else:
-                if game_state.round_state.stage_state.substage != cls.ck_substage:
-                    raise IllegalAction("Cannot do that in this substage")
+            if game_state.round_state.stage_state.substage != cls.ck_substage:
+                raise IllegalAction("Cannot do that in this substage")
         if hasattr(cls, "ck_faction"):
             if faction != cls.ck_faction:
                 raise IllegalAction("Only {} can {}".format(cls.ck_faction, cls.name))

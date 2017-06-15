@@ -34,8 +34,7 @@ def run_game(cmds):
 
     final_state = session.game_log[-1]
 
-    # print(json.dumps(final_state.visible("fremen"), indent=4))
-
+    return final_state
 
 CMDS = [
     ("b", "predict harkonnen 5"),
@@ -131,6 +130,20 @@ CMDS = [
     ("f", "commit-plan Stilgar 1 - -"),
     ("b", "pass-reveal-traitor"),
     ("f", "pass-reveal-traitor"),
+    ("f", "discard"),
+    ("f", "tank-units 13:1"),
+    ("a", "prescience leader"),
+    ("h", "answer-prescience Piter-DeVries"),
+    ("a", "karama-pass-entire-plan"),
+    ("h", "karama-pass-kwizatz-haderach"),
+    ("f", "karama-pass-kwizatz-haderach"),
+    ("e", "karama-pass-kwizatz-haderach"),
+    ("g", "karama-pass-kwizatz-haderach"),
+    ("b", "karama-pass-kwizatz-haderach"),
+    ("h", "commit-plan Piter-DeVries 1 Chaumas Baliset"),
+    ("a", "commit-plan Duncan-Idaho 2 Elacca-Drug -"),
+    ("a", "pass-reveal-traitor"),
+    ("h", "pass-reveal-traitor"),
 ]
 
 CMDS2 = [
@@ -183,6 +196,6 @@ CMDS2 = [
 if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG)
     random.seed(0)
-    run_game(CMDS)
+    json.dumps(run_game(CMDS).visible("harkonnen"))
     random.seed(0)
     # run_game(CMDS2)

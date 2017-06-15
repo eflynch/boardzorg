@@ -15,7 +15,7 @@ def leader_revivable(game_state, faction):
     if not game_state.faction_state[faction].tank_leaders:
         return False
     for leader in game_state.faction_state[faction].tank_leaders:
-        if all([leader_death_count[leader] <= leader_death_count[ldr] for ldr in leader_death_count]):
+        if all([leader_death_count[leader[0]] <= leader_death_count[ldr] for ldr in leader_death_count]):
             return True
     return False
 
@@ -102,7 +102,7 @@ class Revive(Action):
                 raise BadCommand("You cannot revive leaders until they all die")
 
             for ldr in leader_death_count:
-                if leader_death_count[self.leader] > leader_death_count[ldr]:
+                if leader_death_count[self.leader[0]] > leader_death_count[ldr]:
                     raise BadCommand("You cannot revive a leader again until all others have died")
 
             new_game_state.faction_state[self.faction].tank_leaders.remove(self.leader)

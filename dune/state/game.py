@@ -26,7 +26,8 @@ class GameState(State):
         self.spice_discard = []
 
         self.faction_state = {f: FactionState.from_name(f) for f in factions_playing}
-        self.round_state = SetupRound()
+        self._round_state = SetupRound()
+        self._round = None
         self.alliances = {f: [] for f in factions_playing}
         self.turn = 1
         self.storm_position = 0
@@ -40,10 +41,27 @@ class GameState(State):
         if "guild" in factions_playing:
             self.map_state["Tueks-Sietch"].forces["guild"] = {4: [1, 1, 1, 1, 1]}
 
-    def assert_valid(self):
-        for state in self.faction_state.values():
-            state.assert_valid()
-        self.round_state.assert_valid()
+        self.winner = None
+
+    @property
+    def round(self):
+        if self._round_state is not None:
+            return self._round_state.round
+        return self._round
+
+    @round.setter
+    def round(self, new_round):
+        self._round = new_round
+        self._round_state = None
+
+    @property
+    def round_state(self):
+        return self._round_state
+
+    @round_state.setter
+    def round_state(self, new_round_state):
+        self._round_state = new_round_state
+        self._round = None
 
     def visible(self, faction):
         visible = super().visible(self, faction)
@@ -60,7 +78,10 @@ class GameState(State):
             for f in self.faction_state
         }
 
-        visible["round_state"] = self.round_state.visible(self, faction)
+        if self.round_state is not None:
+            visible["round_state"] = self._round_state.visible(self, faction)
+        else:
+            visible["round_state"] = self.round
 
         visible["alliances"] = self.alliances
         visible["turn"] = self.turn

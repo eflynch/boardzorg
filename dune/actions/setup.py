@@ -20,8 +20,6 @@ from dune.actions.action import Action
 from dune.constants import TOKEN_SECTORS
 from dune.exceptions import IllegalAction, BadCommand
 from dune.state.leaders import LEADERS, parse_leader
-from dune.state.rounds.spice import SpiceRound
-from dune.state.rounds import setup
 
 
 def all_traitors_selected(game_state):
@@ -59,7 +57,7 @@ class BeneGesseritPrediction(Action):
     def _execute(self, game_state):
         new_game_state = deepcopy(game_state)
         new_game_state.faction_state["bene-gesserit"].prediction = (self.other_faction, self.turn)
-        new_game_state.round_state.stage_state = setup.TokenPlacementStage()
+        new_game_state.round_state.stage = "token-placement"
         return new_game_state
 
 
@@ -76,7 +74,7 @@ class SkipBeneGesseritPrediction(Action):
 
     def _execute(self, game_state):
         new_game_state = deepcopy(game_state)
-        new_game_state.round_state.stage_state = setup.TokenPlacementStage()
+        new_game_state.round_state.stage = "token-placement"
         return new_game_state
 
 
@@ -131,7 +129,7 @@ class DealTraitors(Action):
             new_game_state.faction_state[f].traitors.append(all_leaders.pop())
             new_game_state.faction_state[f].traitors.append(all_leaders.pop())
             new_game_state.faction_state[f].traitors.append(all_leaders.pop())
-        new_game_state.round_state.stage_state = setup.TraitorStage()
+        new_game_state.round_state.stage = "traitor"
         return new_game_state
 
 
@@ -191,7 +189,7 @@ class DealTreachery(Action):
             self._deal_card(new_game_state, f)
             if f == "harkonnen":
                 self._deal_card(new_game_state, f)
-        new_game_state.round_state.stage_state = setup.FremenPlacementStage()
+        new_game_state.round_state.stage = "fremen-placement"
         return new_game_state
 
 
@@ -240,7 +238,7 @@ class FremenPlacement(Action):
         movement.ship_units(new_game_state, self.faction, self.tabr_units, tabr, tabr.sectors[0])
         movement.ship_units(new_game_state, self.faction, self.west_units, west_wall, self.west_sector)
         movement.ship_units(new_game_state, self.faction, self.south_units, south_wall, self.south_sector)
-        new_game_state.round_state.stage_state = setup.BeneGesseritPlacementStage()
+        new_game_state.round_state.stage = "bene-gesserit-placement"
 
         return new_game_state
 
@@ -258,7 +256,7 @@ class SkipFremenPlacement(Action):
 
     def _execute(self, game_state):
         new_game_state = deepcopy(game_state)
-        new_game_state.round_state.stage_state = setup.BeneGesseritPlacementStage()
+        new_game_state.round_state.stage = "bene-gesserit-placement"
         return new_game_state
 
 
@@ -283,7 +281,7 @@ class BeneGesseritPlacement(Action):
         new_game_state = deepcopy(game_state)
         space = new_game_state.map_state[self.space]
         movement.ship_units(new_game_state, self.faction, [1], space, self.sector)
-        new_game_state.round_state.stage_state = setup.StormPlacementStage()
+        new_game_state.round_state.stage = "storm-placement"
         return new_game_state
 
 
@@ -300,7 +298,7 @@ class SkipBeneGesseritPlacement(Action):
 
     def _execute(self, game_state):
         new_game_state = deepcopy(game_state)
-        new_game_state.round_state.stage_state = setup.StormPlacementStage()
+        new_game_state.round_state.stage = "storm-placement"
         return new_game_state
 
 
@@ -315,5 +313,5 @@ class StormPlacement(Action):
         new_game_state.storm_position = randint(0, 17)
         new_game_state.storm_advance = randint(0, 6)
         storm.destroy_in_path(new_game_state, [new_game_state.storm_position])
-        new_game_state.round_state = SpiceRound()
+        new_game_state.round = "spice"
         return new_game_state

@@ -3,7 +3,7 @@ from logging import getLogger
 
 from dune.actions.action import Action
 from dune.actions import storm
-from dune.state.rounds import battle, collection
+from dune.state.rounds import battle
 from dune.exceptions import IllegalAction, BadCommand
 from dune.actions.battle import ops
 
@@ -90,13 +90,14 @@ class AutoPickBattle(Action):
             new_game_state.round_state.battles.remove(b)
 
         if not game_state.round_state.battles:
-            new_game_state.round_state = collection.CollectionRound()
+            new_game_state.round = "collection"
             return new_game_state
 
         battle_1 = game_state.round_state.battles[0]
         if battle_1[0] == game_state.round_state.faction_turn:
             new_game_state.round_state.stage_state = battle.BattleStage()
             new_game_state.round_state.stage_state.battle = battle_1
+            logger.info("Starting {}".format(battle_1))
         else:
             new_game_state.round_state.faction_turn = battle_1[0]
         return new_game_state

@@ -150,7 +150,8 @@ def pick_weapon(game_state, is_attacker, weapon):
                                 raise BadCommand("You were told to use your poison weapon")
 
     if weapon is not None and weapon not in game_state.faction_state[faction].treachery:
-        raise BadCommand("That weapon card is not available to you")
+        raise BadCommand("That weapon card is not available to you. You have {}".format(
+            game_state.faction_state[faction].treachery))
     if weapon is not None and weapon not in WEAPONS and weapon not in WORTHLESS:
         raise BadCommand("That card cannot be played as a weapon")
 
@@ -260,9 +261,9 @@ def tank_leader(game_state, faction, leader):
     if leader not in faction_state.leaders:
         raise BadCommand("Leader is not available to tank")
     if leader not in faction_state.leader_death_count:
-        faction_state.leader_death_count[leader] = 0
+        faction_state.leader_death_count[leader[0]] = 0
 
-    faction_state.leader_death_count[leader] += 1
+    faction_state.leader_death_count[leader[0]] += 1
     faction_state.leaders.remove(leader)
     faction_state.tank_leaders.append(leader)
 

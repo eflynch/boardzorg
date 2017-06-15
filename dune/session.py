@@ -25,7 +25,6 @@ class Session:
         old_state = self.game_log[-1]
         new_state = action.execute(game_state=old_state)
         logger.debug("Executing: {}".format(action))
-        new_state.assert_valid()
         self.game_log.append(new_state)
         self.action_log.append(action)
         self.execute_supervisor()

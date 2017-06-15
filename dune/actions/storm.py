@@ -3,7 +3,6 @@ from random import randint
 
 from dune.actions.action import Action
 from dune.constants import TOKEN_SECTORS
-from dune.state.rounds.spice import SpiceRound
 
 
 def destroy_in_path(game_state, sectors):
@@ -51,6 +50,6 @@ class Storm(Action):
         destroy_in_path(new_game_state,
                         range(game_state.storm_position, new_game_state.storm_position))
 
-        new_game_state.round_state = SpiceRound()
+        new_game_state.round = "spice"
 
         return new_game_state
