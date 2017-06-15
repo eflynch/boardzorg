@@ -126,5 +126,5 @@ class ConcludeWinner(Action):
     def _execute(self, game_state):
         new_game_state = deepcopy(game_state)
         new_game_state.round_state.battles.remove(new_game_state.round_state.stage_state.battle)
-        new_game_state.round_state.stage_state = battle.MainStage()
+        new_game_state.round_state.stage = "main"
         return new_game_state

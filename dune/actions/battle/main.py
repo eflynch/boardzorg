@@ -21,7 +21,7 @@ class StartBattle(Action):
 
         new_game_state.round_state.faction_turn = storm.get_faction_order(game_state)[0]
         new_game_state.round_state.battles = ops.find_battles(new_game_state)
-        new_game_state.round_state.stage_state = battle.MainStage()
+        new_game_state.round_state.stage = "main"
 
         return new_game_state
 

@@ -74,14 +74,6 @@ class BattleStage(StageState):
         self.traitor_passes = []
 
 
-class MainStage(StageState):
-    stage = "main"
-
-
-class SetupStage(StageState):
-    stage = "setup"
-
-
 class BattleRound(RoundState):
     round = "battle"
 
@@ -90,4 +82,4 @@ class BattleRound(RoundState):
         self.faction_order = None
         self.leaders_used = {}
         self.battles = None
-        self.stage_state = SetupStage()
+        self.stage = "setup"

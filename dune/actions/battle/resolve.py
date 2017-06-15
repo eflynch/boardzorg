@@ -203,7 +203,7 @@ class AutoResolve(Action):
                 ops.discard_treachery(new_game_state, stage_state.defender_plan["weapon"])
                 ops.discard_treachery(new_game_state, stage_state.defender_plan["defense"])
 
-                new_game_state.round_state.stage_state = battle.MainStage()
+                new_game_state.round_state.stage = "main"
                 return new_game_state
 
         attacker_power = 0
