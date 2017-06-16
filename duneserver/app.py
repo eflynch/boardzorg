@@ -10,9 +10,9 @@ app = Flask(__name__)
 app.register_blueprint(api, url_prefix="/api")
 
 
-@app.route("/faction/<faction>", methods=['GET'])
-def view(faction):
-    return reactstub("Shai-Hulud", [], ["app/main.js"], bootstrap=json.dumps({"faction": faction}))
+@app.route("/", methods=['GET'])
+def view():
+    return reactstub("Shai-Hulud", [], ["app/main.js"], bootstrap=json.dumps({}))
 
 
 if __name__ == "__main__":

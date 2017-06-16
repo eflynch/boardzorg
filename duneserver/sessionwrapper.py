@@ -25,7 +25,7 @@ class SessionWrapper:
         self.cursor.__exit__(*args)
 
     @staticmethod
-    def insert(session):
+    def create(session):
         conn = sql.connect(host="localhost", user="shai", db="dune", cursorclass=sql.cursors.DictCursor)
         with conn.cursor() as cursor:
             cursor.execute(

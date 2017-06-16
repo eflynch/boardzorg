@@ -9,4 +9,4 @@ class SetupRound(RoundState):
 
     def visible(self, game_state, faction):
         visible = super().visible(game_state, faction)
-        visible["stage"] = self.stage_state.stage
+        visible["stage"] = self.stage
