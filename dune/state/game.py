@@ -91,8 +91,6 @@ class GameState(State):
         if faction == "fremen":
             visible["storm_advance"] = self.storm_advance
 
-        visible["map_state"] = {
-            s: self.map_state[s].visible(self, faction) for s in self.map_state
-        }
+        visible["map_state"] = [self.map_state[s].visible(self, faction) for s in self.map_state]
 
         return visible

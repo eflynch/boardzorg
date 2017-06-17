@@ -213,6 +213,7 @@ class SpaceState(State):
 
     def visible(self, game_state, faction):
         visible = super().visible(game_state, faction)
+        visible["name"] = self.name
         visible["type"] = self.type
         visible["spice_sector"] = self.spice_sector
         visible["spice_amount"] = self.spice_amount
