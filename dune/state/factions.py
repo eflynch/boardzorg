@@ -25,6 +25,7 @@ class FactionState(State):
         visible["reserve_units"] = self.reserve_units
         visible["bribe_spice"] = self.bribe_spice
         visible["token_position"] = self.token_position
+        visible["name"] = self.name
 
         if faction == self.name:
             visible["spice"] = self.spice

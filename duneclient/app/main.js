@@ -9640,15 +9640,15 @@ var Game = function (_React$Component2) {
             var factions = fs.map(function (faction) {
                 return _react2.default.createElement(Faction, { key: faction, me: _this3.props.me, faction: faction, factionstate: _this3.props.gamestate.faction_state[faction] });
             });
+            var logoPositions = fs.map(function (faction) {
+                var factionstate = _this3.props.gamestate.faction_state[faction];
+                return [factionstate.name, factionstate.token_position];
+            });
             return _react2.default.createElement(
                 'div',
                 null,
-                _react2.default.createElement(
-                    'h1',
-                    null,
-                    'Dune'
-                ),
-                _react2.default.createElement(_board2.default, { boardstate: this.props.gamestate.map_state }),
+                _react2.default.createElement(_board2.default, { boardstate: this.props.gamestate.map_state, logoPositions: logoPositions,
+                    stormSector: this.props.gamestate.storm_position }),
                 factions
             );
         }
@@ -9691,11 +9691,6 @@ var Actions = function (_React$Component3) {
             return _react2.default.createElement(
                 'div',
                 null,
-                _react2.default.createElement(
-                    'h1',
-                    null,
-                    'Actions'
-                ),
                 _react2.default.createElement('input', { type: 'text', ref: 'text' }),
                 _react2.default.createElement(
                     'ul',
@@ -20064,8 +20059,62 @@ var Spice = function (_React$Component) {
     return Spice;
 }(_react2.default.Component);
 
-var TokenPile = function (_React$Component2) {
-    _inherits(TokenPile, _React$Component2);
+var Storm = function (_React$Component2) {
+    _inherits(Storm, _React$Component2);
+
+    function Storm() {
+        _classCallCheck(this, Storm);
+
+        return _possibleConstructorReturn(this, (Storm.__proto__ || Object.getPrototypeOf(Storm)).apply(this, arguments));
+    }
+
+    _createClass(Storm, [{
+        key: 'render',
+        value: function render() {
+            return _react2.default.createElement('img', {
+                src: "static/app/png/storm_" + this.props.sector + ".png",
+                style: {
+                    position: "absolute",
+                    top: 0,
+                    left: 0,
+                    opacity: 0.9
+                },
+                width: this.props.scale
+            });
+        }
+    }]);
+
+    return Storm;
+}(_react2.default.Component);
+
+var Logo = function (_React$Component3) {
+    _inherits(Logo, _React$Component3);
+
+    function Logo() {
+        _classCallCheck(this, Logo);
+
+        return _possibleConstructorReturn(this, (Logo.__proto__ || Object.getPrototypeOf(Logo)).apply(this, arguments));
+    }
+
+    _createClass(Logo, [{
+        key: 'render',
+        value: function render() {
+            return _react2.default.createElement('img', { src: "static/app/png/" + this.props.faction + "_logo.png",
+                style: {
+                    position: "absolute",
+                    top: this.props.scale * _boardData.logo_position[this.props.position].top,
+                    left: this.props.scale * _boardData.logo_position[this.props.position].left
+                },
+                width: this.props.scale * 0.05
+            });
+        }
+    }]);
+
+    return Logo;
+}(_react2.default.Component);
+
+var TokenPile = function (_React$Component4) {
+    _inherits(TokenPile, _React$Component4);
 
     function TokenPile() {
         _classCallCheck(this, TokenPile);
@@ -20102,14 +20151,14 @@ var TokenPile = function (_React$Component2) {
                     { style: {
                             position: "absolute",
                             top: this.props.scale * (_boardData.token_location[this.props.space][this.props.sector].top - 0.005 * this.props.number - 0.02),
-                            left: this.props.scale * (_boardData.token_location[this.props.space][this.props.sector].left - 0.030),
+                            left: this.props.scale * _boardData.token_location[this.props.space][this.props.sector].left,
                             color: "black",
-                            width: this.props.scale * 0.2,
+                            width: this.props.scale * 0.05,
                             fontWeight: 900,
-                            textShadow: "0px 0px 2px white, 0 0 25px yellow, 0 0 5px orange",
+                            textShadow: "0 0 3px white, 0 0 15px yellow, 0 0 5px red",
                             fontFamily: "sans-serif",
-                            textAlign: "right",
-                            fontSize: 6
+                            textAlign: "center",
+                            fontSize: 16
                         } },
                     this.props.number
                 )
@@ -20120,17 +20169,17 @@ var TokenPile = function (_React$Component2) {
     return TokenPile;
 }(_react2.default.Component);
 
-var Board = function (_React$Component3) {
-    _inherits(Board, _React$Component3);
+var Board = function (_React$Component5) {
+    _inherits(Board, _React$Component5);
 
     function Board(props) {
         _classCallCheck(this, Board);
 
-        var _this3 = _possibleConstructorReturn(this, (Board.__proto__ || Object.getPrototypeOf(Board)).call(this, props));
+        var _this5 = _possibleConstructorReturn(this, (Board.__proto__ || Object.getPrototypeOf(Board)).call(this, props));
 
-        _this3.state = { width: '0', height: '0' };
-        _this3.updateWindowDimensions = _this3.updateWindowDimensions.bind(_this3);
-        return _this3;
+        _this5.state = { width: '0', height: '0' };
+        _this5.updateWindowDimensions = _this5.updateWindowDimensions.bind(_this5);
+        return _this5;
     }
 
     _createClass(Board, [{
@@ -20176,6 +20225,14 @@ var Board = function (_React$Component3) {
                     }
                 }
             }
+            var logos = [];
+            for (var _i = 0; _i < this.props.logoPositions.length; _i++) {
+                var _faction = this.props.logoPositions[_i][0];
+                var position = this.props.logoPositions[_i][1];
+                if (position !== null) {
+                    logos.push(_react2.default.createElement(Logo, { key: _faction, scale: this.state.width, faction: _faction, position: position }));
+                }
+            }
             return _react2.default.createElement(
                 'div',
                 null,
@@ -20190,10 +20247,11 @@ var Board = function (_React$Component3) {
                             width: this.state.width,
                             position: "relative"
                         } },
+                    _react2.default.createElement(Storm, { scale: this.state.width, sector: this.props.stormSector }),
                     tokens,
-                    spice
-                ),
-                JSON.stringify(this.props.boardstate)
+                    spice,
+                    logos
+                )
             );
         }
     }]);
@@ -20256,7 +20314,7 @@ function renderSession(session_id, faction) {
 
 document.addEventListener("DOMContentLoaded", function () {
     // render(<App/>, document.getElementById("content"));
-    renderSession(8, "bene-gesserit");
+    renderSession(1, "bene-gesserit");
 });
 
 /***/ }),
@@ -32774,18 +32832,28 @@ var token_location = {
     "Habbanya-Sietch": {
         16: { top: 0.6, left: 0.1 } },
     "Sietch-Tabr": {
-        13: { top: 0.3, left: 0.1 } },
+        13: { top: 0.27, left: 0.1 } },
     "Carthag": {
-        10: { top: 0.3, left: 0.5 } },
+        10: { top: 0.19, left: 0.465 } },
     "Arrakeen": {
-        9: { top: 0.3, left: 0.6 } },
+        9: { top: 0.16, left: 0.62 } },
     "Tueks-Sietch": {
-        4: { top: 0.62, left: 0.79 } }
+        4: { top: 0.63, left: 0.79 } }
+};
+
+var logo_position = {
+    1: { top: 0.94, left: 0.475 },
+    4: { top: 0.709, left: 0.88 },
+    7: { top: 0.24, left: 0.88 },
+    10: { top: 0.007, left: 0.475 },
+    13: { top: 0.24, left: 0.07 },
+    16: { top: 0.709, left: 0.07 }
 };
 
 module.exports = {
     token_location: token_location,
-    spice_location: spice_location
+    spice_location: spice_location,
+    logo_position: logo_position
 };
 
 /***/ })

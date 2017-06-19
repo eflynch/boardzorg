@@ -13,12 +13,11 @@
 # Storm Placement
 
 from copy import deepcopy
-from random import shuffle, randint
 
 from dune.actions import movement, storm
 from dune.actions.action import Action
 from dune.exceptions import IllegalAction, BadCommand
-from dune.state.leaders import LEADERS, parse_leader
+from dune.state.leaders import parse_leader
 
 
 def all_traitors_selected(game_state):
@@ -120,14 +119,12 @@ class DealTraitors(Action):
             raise IllegalAction("Deal Traitors after tokens are placed")
 
     def _execute(self, game_state):
-        all_leaders = [item for sublist in LEADERS.values() for item in sublist]
-        shuffle(all_leaders)
         new_game_state = deepcopy(game_state)
         for f in new_game_state.faction_state:
-            new_game_state.faction_state[f].traitors.append(all_leaders.pop())
-            new_game_state.faction_state[f].traitors.append(all_leaders.pop())
-            new_game_state.faction_state[f].traitors.append(all_leaders.pop())
-            new_game_state.faction_state[f].traitors.append(all_leaders.pop())
+            new_game_state.faction_state[f].traitors.append(new_game_state.traitor_deck.pop(0))
+            new_game_state.faction_state[f].traitors.append(new_game_state.traitor_deck.pop(0))
+            new_game_state.faction_state[f].traitors.append(new_game_state.traitor_deck.pop(0))
+            new_game_state.faction_state[f].traitors.append(new_game_state.traitor_deck.pop(0))
         new_game_state.round_state.stage = "traitor"
         return new_game_state
 
@@ -309,8 +306,7 @@ class StormPlacement(Action):
 
     def _execute(self, game_state):
         new_game_state = deepcopy(game_state)
-        new_game_state.storm_position = randint(0, 17)
-        new_game_state.storm_advance = randint(0, 6)
+        new_game_state.storm_position = new_game_state.storm_deck.pop(0)
         storm.destroy_in_path(new_game_state, [new_game_state.storm_position])
         new_game_state.round = "spice"
         return new_game_state

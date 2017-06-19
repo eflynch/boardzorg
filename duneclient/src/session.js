@@ -20,10 +20,14 @@ class Game extends React.Component {
         var factions = fs.map((faction) => {
             return <Faction key={faction} me={this.props.me} faction={faction} factionstate={this.props.gamestate.faction_state[faction]}/>;
         });
+        var logoPositions = fs.map((faction) => {
+            let factionstate = this.props.gamestate.faction_state[faction];
+            return [factionstate.name, factionstate.token_position];
+        });
         return (
             <div>
-                <h1>Dune</h1>
-                <Board boardstate={this.props.gamestate.map_state}/>
+                <Board boardstate={this.props.gamestate.map_state} logoPositions={logoPositions}
+                stormSector={this.props.gamestate.storm_position}/>
                 {factions}
             </div>
         );
@@ -51,7 +55,6 @@ class Actions extends React.Component {
         }.bind(this));
         return (
             <div>
-                <h1>Actions</h1>
                 <input type="text" ref="text"/>
                 <ul>
                     {actions}

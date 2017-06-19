@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 
-import {spice_location, token_location} from './board-data';
+import {spice_location, token_location, logo_position} from './board-data';
 
 class Spice extends React.Component {
     render () {
@@ -24,6 +24,36 @@ class Spice extends React.Component {
                     fontFamily: "sans-serif"
                 }}>{this.props.amount}</span>
             </div>
+        )
+    }
+}
+
+class Storm extends React.Component {
+    render () {
+        return <img
+            src={"static/app/png/storm_" + this.props.sector + ".png"}
+            style={{
+                position: "absolute",
+                top: 0,
+                left: 0,
+                opacity: 0.9
+            }}
+            width={this.props.scale}
+        />;
+    }
+}
+
+class Logo extends React.Component {
+    render () {
+        return (
+            <img src={"static/app/png/" + this.props.faction + "_logo.png"}
+                style={{
+                    position: "absolute",
+                    top: this.props.scale * (logo_position[this.props.position].top),
+                    left: this.props.scale * (logo_position[this.props.position].left)
+                }}
+                width={this.props.scale * 0.05}
+            />
         )
     }
 }
@@ -53,14 +83,14 @@ class TokenPile extends React.Component {
                 <span style={{
                     position: "absolute",
                     top: this.props.scale * (token_location[this.props.space][this.props.sector].top - 0.005*this.props.number - 0.02),
-                    left: this.props.scale * (token_location[this.props.space][this.props.sector].left - 0.030),
+                    left: this.props.scale * (token_location[this.props.space][this.props.sector].left),
                     color: "black",
-                    width: this.props.scale * 0.2,
+                    width: this.props.scale * 0.05,
                     fontWeight: 900,
-                    textShadow: "0px 0px 2px white, 0 0 25px yellow, 0 0 5px orange",
+                    textShadow: "0 0 3px white, 0 0 15px yellow, 0 0 5px red",
                     fontFamily: "sans-serif",
-                    textAlign: "right",
-                    fontSize: 6
+                    textAlign: "center",
+                    fontSize: 16
                 }}>{this.props.number}</span>
             </div>
         );
@@ -113,6 +143,14 @@ class Board extends React.Component {
                 }
             }
         }
+        let logos = [];
+        for (let i=0; i < this.props.logoPositions.length; i++){
+            let faction = this.props.logoPositions[i][0];
+            let position = this.props.logoPositions[i][1];
+            if (position !== null){
+                logos.push(<Logo key={faction} scale={this.state.width} faction={faction} position={position}/>);
+            }
+        }
         return (
             <div>
                 <div style={{
@@ -124,10 +162,11 @@ class Board extends React.Component {
                     width: this.state.width,
                     position: "relative"
                 }}>
+                <Storm scale={this.state.width} sector={this.props.stormSector}/>
                 {tokens}
                 {spice}
+                {logos}
                 </div>
-                {JSON.stringify(this.props.boardstate)}
             </div>
         );
     }

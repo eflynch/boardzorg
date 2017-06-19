@@ -43,11 +43,9 @@ class Storm(Action):
     def _execute(self, game_state):
         new_game_state = deepcopy(game_state)
 
-        advance = new_game_state.storm_advance
+        advance = new_game_state.storm_deck.pop(0)
 
-        new_game_state.storm_position = (new_game_state.storm_position + advance) % 12
-
-        new_game_state.storm_advance = randint(1, 6)
+        new_game_state.storm_position = (new_game_state.storm_position + advance) % 18
 
         destroy_in_path(new_game_state,
                         range(game_state.storm_position, new_game_state.storm_position))

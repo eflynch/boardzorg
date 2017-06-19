@@ -32,5 +32,5 @@ function renderSession(session_id, faction){
 
 document.addEventListener("DOMContentLoaded", function (){
     // render(<App/>, document.getElementById("content"));
-    renderSession(8, "bene-gesserit");
+    renderSession(1, "bene-gesserit");
 });

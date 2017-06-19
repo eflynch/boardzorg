@@ -1,6 +1,5 @@
 import logging
-import pickle
-import codecs
+import json
 
 from dune.actions.action import Action
 from dune.exceptions import BadCommand
@@ -10,8 +9,9 @@ logger = logging.getLogger(__name__)
 
 
 class Session:
-    def __init__(self, treachery_cards=None, factions_playing=None):
-        self.game_log = [GameState(treachery_cards, factions_playing)]
+    def __init__(self, init_state, seed=None):
+        self.seed = seed
+        self.game_log = [init_state]
         self.action_log = []
         self.command_log = []
 
@@ -52,9 +52,37 @@ class Session:
         return Action.get_valid_actions(self.game_log[-1], faction)
 
     @staticmethod
+    def new_session(factions=None, treachery_deck=None, seed=None):
+        init_state = GameState.new_shuffle(factions, treachery_deck, seed)
+        return Session(init_state=init_state, seed=seed)
+
+    @staticmethod
     def serialize(session):
-        return codecs.encode(pickle.dumps(session), "base64").decode()
+        init_state = session.game_log[0]
+        to_json = {
+            "seed": session.seed,
+            "factions": init_state.factions,
+            "treachery_deck": init_state.treachery_deck,
+            "spice_deck": init_state.spice_deck,
+            "traitor_deck": init_state.traitor_deck,
+            "storm_deck": init_state.storm_deck,
+            "command_log": session.command_log
+        }
+        return json.dumps(to_json)
 
     @staticmethod
     def realize(serialized_session):
-        return pickle.loads(codecs.decode(serialized_session.encode(), "base64"))
+        from_json = json.loads(serialized_session)
+        init_state = GameState(
+            factions=from_json["factions"],
+            treachery_deck=from_json["treachery_deck"],
+            spice_deck=from_json["spice_deck"],
+            traitor_deck=from_json["traitor_deck"],
+            storm_deck=from_json["storm_deck"]
+        )
+        session = Session(init_state, from_json["seed"])
+
+        for f, cmd in from_json["command_log"]:
+            session.handle_cmd(f, cmd)
+
+        return session

@@ -10,7 +10,7 @@ api = Blueprint("api", __name__)
 
 @api.route("/sessions", methods=['POST'])
 def insert():
-    s = Session()
+    s = Session.new_session()
     session_id = SessionWrapper.create(s)
     return jsonify({"id": session_id})
 
