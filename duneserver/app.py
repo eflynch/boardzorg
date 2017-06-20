@@ -12,7 +12,7 @@ app.register_blueprint(api, url_prefix="/api")
 
 @app.route("/", methods=['GET'])
 def view():
-    return reactstub("Shai-Hulud", [], ["app/main.js"], bootstrap=json.dumps({}))
+    return reactstub("Shai-Hulud", ["app/css/styles.css"], ["app/main.js"], bootstrap=json.dumps({}))
 
 
 if __name__ == "__main__":

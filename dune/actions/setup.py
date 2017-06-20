@@ -153,7 +153,7 @@ class SelectTraitor(Action):
     def _execute(self, game_state):
         if self.traitor not in game_state.faction_state[self.faction].traitors:
             raise BadCommand(
-                "That traitor is not available for selection.\nValid Traitors are: {}".format(
+                "{} traitor is not available for selection.\nValid Traitors are: {}".format(self.traitor,
                     ", ".join([t[0] for t in game_state.faction_state[self.faction].traitors])))
 
         new_game_state = deepcopy(game_state)
@@ -231,9 +231,12 @@ class FremenPlacement(Action):
         tabr = new_game_state.map_state["Sietch-Tabr"]
         west_wall = new_game_state.map_state["False-Wall-West"]
         south_wall = new_game_state.map_state["False-Wall-South"]
-        movement.ship_units(new_game_state, self.faction, self.tabr_units, tabr, tabr.sectors[0])
-        movement.ship_units(new_game_state, self.faction, self.west_units, west_wall, self.west_sector)
-        movement.ship_units(new_game_state, self.faction, self.south_units, south_wall, self.south_sector)
+        if self.tabr_units:
+            movement.ship_units(new_game_state, self.faction, self.tabr_units, tabr, tabr.sectors[0])
+        if self.west_units:
+            movement.ship_units(new_game_state, self.faction, self.west_units, west_wall, self.west_sector)
+        if self.south_units:
+            movement.ship_units(new_game_state, self.faction, self.south_units, south_wall, self.south_sector)
         new_game_state.round_state.stage = "bene-gesserit-placement"
 
         return new_game_state
@@ -276,6 +279,7 @@ class BeneGesseritPlacement(Action):
     def _execute(self, game_state):
         new_game_state = deepcopy(game_state)
         space = new_game_state.map_state[self.space]
+        space.coexist = True
         movement.ship_units(new_game_state, self.faction, [1], space, self.sector)
         new_game_state.round_state.stage = "storm-placement"
         return new_game_state

@@ -32,7 +32,6 @@ class Session:
 
     def handle_cmd(self, faction, cmd):
         logger.info("CMD: {} {}".format(faction, cmd))
-        self.command_log.append((faction, cmd))
         valid_actions = Action.get_valid_actions(self.game_log[-1], faction)
         action_type = cmd.split(" ")[0]
         args = " ".join(cmd.split(" ")[1:])
@@ -44,6 +43,7 @@ class Session:
                 raise BadCommand("Not a known action")
         action = valid_actions[action_type].parse_args(faction, args)
         self.execute_action(action)
+        self.command_log.append((faction, cmd))
 
     def get_visible_state(self, faction):
         return self.game_log[-1].visible(faction)
@@ -77,7 +77,7 @@ class Session:
             factions=from_json["factions"],
             treachery_deck=from_json["treachery_deck"],
             spice_deck=from_json["spice_deck"],
-            traitor_deck=from_json["traitor_deck"],
+            traitor_deck=list(map(tuple, from_json["traitor_deck"])),
             storm_deck=from_json["storm_deck"]
         )
         session = Session(init_state, from_json["seed"])

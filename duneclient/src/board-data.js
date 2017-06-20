@@ -17,15 +17,36 @@ var spice_location = {
 
 var token_location = {
     "Habbanya-Sietch": {
-        16: {top: 0.6, left: 0.1}},
+        16: {
+            1: {top: 0.6, left: 0.1}
+        }
+    },
     "Sietch-Tabr": {
-        13: {top: 0.27, left: 0.1}},
+        13: {
+            1: {top: 0.285, left: 0.165},
+            2: {top: 0.329, left: 0.19},
+        }
+    },
     "Carthag": {
-        10: {top: 0.19, left: 0.465}},
+        10: {
+            1: {top: 0.19, left: 0.465}
+        }
+    },
     "Arrakeen": {
-        9: {top: 0.16, left: 0.62}},
+        9: {
+            1: {top: 0.16, left: 0.62}
+        }
+    },
     "Tueks-Sietch": {
-        4: {top: 0.63, left: 0.79}},
+        4: {
+            1: {top: 0.63, left: 0.79}
+        }
+    },
+    "False-Wall-South": {
+        4: {
+            1: {top: 0.63, left: 0.69}
+        }
+    },
 }
 
 var logo_position = {

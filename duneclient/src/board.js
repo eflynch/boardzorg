@@ -59,6 +59,9 @@ class Logo extends React.Component {
 }
 
 class TokenPile extends React.Component {
+    getLocation () {
+        return token_location[this.props.space][this.props.sector][this.props.order];
+    }
     getTokenPile (number, faction, space, sector) {
         let tokens = [];
         for (let i=0; i < number; i++){
@@ -66,8 +69,8 @@ class TokenPile extends React.Component {
                 <img src={"static/app/png/" + this.props.faction + "_token.png"}
                  style={{
                     position: "absolute",
-                    top: this.props.scale * (token_location[this.props.space][this.props.sector].top - 0.005*i),
-                    left: this.props.scale * token_location[this.props.space][this.props.sector].left,
+                    top: this.props.scale * (this.getLocation().top - 0.005*i),
+                    left: this.props.scale * this.getLocation().left,
                  }}
                  width={this.props.scale * 0.05}
                  key={i}
@@ -82,8 +85,8 @@ class TokenPile extends React.Component {
                 {this.getTokenPile(this.props.number, this.props.faction, this.props.space, this.props.sector)}
                 <span style={{
                     position: "absolute",
-                    top: this.props.scale * (token_location[this.props.space][this.props.sector].top - 0.005*this.props.number - 0.02),
-                    left: this.props.scale * (token_location[this.props.space][this.props.sector].left),
+                    top: this.props.scale * (this.getLocation().top - 0.005*this.props.number - 0.02),
+                    left: this.props.scale * (this.getLocation().left),
                     color: "black",
                     width: this.props.scale * 0.05,
                     fontWeight: 900,
@@ -120,6 +123,7 @@ class Board extends React.Component {
     render () {
         let spice = [];
         let tokens = [];
+        let orders = {};
         for (let i=0; i < this.props.boardstate.length; i++){
             let space = this.props.boardstate[i];
             if (space.spice){
@@ -130,12 +134,18 @@ class Board extends React.Component {
                     if (space.forces.hasOwnProperty(faction)){
                         for (var sector in space.forces[faction]){
                             if (space.forces[faction].hasOwnProperty(sector)){
+                                if (orders.hasOwnProperty(space.name)){
+                                    orders[space.name] += 1;
+                                } else {
+                                    orders[space.name] = 1;
+                                }
                                 tokens.push(
-                                    <TokenPile key={space.name}
+                                    <TokenPile key={space.name + sector + faction}
                                                number={space.forces[faction][sector].length}
                                                scale={this.state.width}
                                                space={space.name}
                                                sector={sector}
+                                               order={orders[space.name]}
                                                faction={faction}/>);
                             }
                         }
@@ -152,7 +162,7 @@ class Board extends React.Component {
             }
         }
         return (
-            <div>
+            <div className="board">
                 <div style={{
                     backgroundImage: "url(static/app/png/board.png)",
                     backgroundPosition: 'center center',

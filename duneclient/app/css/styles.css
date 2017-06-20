@@ -1,0 +1,22 @@
+body {
+
+}
+
+.board {
+    cursor: default;
+    user-select: none;
+    user-drag: none;
+    -moz-user-select: none;
+    -webkit-user-select: none;
+    -webkit-user-drag: none;
+    -ms-user-select: none;
+}
+
+.board img {
+    user-select: none;
+    user-drag: none;
+    -moz-user-select: none;
+    -webkit-user-select: none;
+    -webkit-user-drag: none;
+    -ms-user-select: none;
+}
