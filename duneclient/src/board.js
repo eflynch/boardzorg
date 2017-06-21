@@ -7,7 +7,7 @@ class Spice extends React.Component {
     render () {
         return (
             <div>
-                <img src="static/app/png/melange.png"
+                <img src={"static/app/png/melange_" + Math.ceil(this.props.amount/3) + ".png"}
                     style={{
                         position: "absolute",
                         top: this.props.scale * spice_location[this.props.space].top,
@@ -60,13 +60,16 @@ class Logo extends React.Component {
 
 class TokenPile extends React.Component {
     getLocation () {
+        if (this.props.location) return this.props.location;
         return token_location[this.props.space][this.props.sector][this.props.order];
     }
-    getTokenPile (number, faction, space, sector) {
+    getTokenPile (number, faction) {
         let tokens = [];
         for (let i=0; i < number; i++){
+            let path = "static/app/png/" + this.props.faction;
+            path += (this.props.faction === "bene-gesserit" && this.props.coexist) ? "_coexist_token.png" : "_token.png";
             tokens.push(
-                <img src={"static/app/png/" + this.props.faction + "_token.png"}
+                <img src={path}
                  style={{
                     position: "absolute",
                     top: this.props.scale * (this.getLocation().top - 0.005*i),
@@ -80,9 +83,10 @@ class TokenPile extends React.Component {
         return tokens;
     }
     render () {
+        let bonus = this.props.bonus ? " (+" + this.props.bonus + ")" : "";
         return (
             <div>
-                {this.getTokenPile(this.props.number, this.props.faction, this.props.space, this.props.sector)}
+                {this.getTokenPile(this.props.number, this.props.faction)}
                 <span style={{
                     position: "absolute",
                     top: this.props.scale * (this.getLocation().top - 0.005*this.props.number - 0.02),
@@ -94,7 +98,7 @@ class TokenPile extends React.Component {
                     fontFamily: "sans-serif",
                     textAlign: "center",
                     fontSize: 16
-                }}>{this.props.number}</span>
+                }}>{this.props.number + bonus}</span>
             </div>
         );
     }
@@ -117,7 +121,7 @@ class Board extends React.Component {
     }
 
     updateWindowDimensions() {
-      this.setState({ width: window.innerWidth, height: window.innerHeight });
+      this.setState({ width: Math.min(window.innerWidth, 800), height: window.innerHeight });
     }
 
     render () {
@@ -139,12 +143,16 @@ class Board extends React.Component {
                                 } else {
                                     orders[space.name] = 1;
                                 }
+                                let number = space.forces[faction][sector].length;
+                                let power = space.forces[faction][sector].reduce((a, b) => a + b, 0);
                                 tokens.push(
                                     <TokenPile key={space.name + sector + faction}
-                                               number={space.forces[faction][sector].length}
+                                               number={number}
+                                               bonus={number !== power ? power - number : null}
                                                scale={this.state.width}
                                                space={space.name}
                                                sector={sector}
+                                               coexist={space.coexist}
                                                order={orders[space.name]}
                                                faction={faction}/>);
                             }
@@ -170,7 +178,8 @@ class Board extends React.Component {
                     backgroundSize: 'contain',
                     height: this.state.width,
                     width: this.state.width,
-                    position: "relative"
+                    position: "relative",
+                    margin: 0
                 }}>
                 <Storm scale={this.state.width} sector={this.props.stormSector}/>
                 {tokens}
@@ -183,4 +192,7 @@ class Board extends React.Component {
 }
 
 
-module.exports = Board
+module.exports = {
+    Board: Board,
+    TokenPile: TokenPile
+}

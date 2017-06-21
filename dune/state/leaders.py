@@ -20,7 +20,7 @@ LEADERS = {
         ("Burseg", 3),
         ("Caid", 3),
         ("Captain-Aramsham", 5),
-        ("Count-Hasmir-Fenring", 6)
+        ("Count-Hasimir-Fenring", 6)
     ],
     "fremen": [
         ("Chani", 6),
@@ -37,7 +37,7 @@ LEADERS = {
         ("Staban-Tuek", 5)
     ],
     "harkonnen": [
-        ("Captain-Iakin-Nefund", 2),
+        ("Captain-Iakin-Nefud", 2),
         ("Feyd-Rautha", 6),
         ("Beast-Rabban", 4),
         ("Piter-DeVries", 3),

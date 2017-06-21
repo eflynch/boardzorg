@@ -10,7 +10,7 @@ TREACHERY_CARDS = [
     "Elacca-Drug",
     "Family-Atomics",
     "Gom-Jabbar",
-    "Harj",
+    "Hajr",
     "Jubba Cloak",
     "Karama",
     "Karama",

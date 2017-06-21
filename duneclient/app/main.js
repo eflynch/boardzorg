@@ -9584,8 +9584,6 @@ var _reactDom2 = _interopRequireDefault(_reactDom);
 
 var _board = __webpack_require__(86);
 
-var _board2 = _interopRequireDefault(_board);
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -9594,8 +9592,92 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-var Faction = function (_React$Component) {
-    _inherits(Faction, _React$Component);
+var SpiceCard = function (_React$Component) {
+    _inherits(SpiceCard, _React$Component);
+
+    function SpiceCard() {
+        _classCallCheck(this, SpiceCard);
+
+        return _possibleConstructorReturn(this, (SpiceCard.__proto__ || Object.getPrototypeOf(SpiceCard)).apply(this, arguments));
+    }
+
+    _createClass(SpiceCard, [{
+        key: 'render',
+        value: function render() {
+            return _react2.default.createElement('img', {
+                src: "static/app/png/Spice-" + this.props.name + ".png",
+                width: 150 });
+        }
+    }]);
+
+    return SpiceCard;
+}(_react2.default.Component);
+
+var TreacheryCard = function (_React$Component2) {
+    _inherits(TreacheryCard, _React$Component2);
+
+    function TreacheryCard() {
+        _classCallCheck(this, TreacheryCard);
+
+        return _possibleConstructorReturn(this, (TreacheryCard.__proto__ || Object.getPrototypeOf(TreacheryCard)).apply(this, arguments));
+    }
+
+    _createClass(TreacheryCard, [{
+        key: 'render',
+        value: function render() {
+            return _react2.default.createElement('img', {
+                src: "static/app/png/Treachery-" + this.props.name + ".png",
+                width: 150 });
+        }
+    }]);
+
+    return TreacheryCard;
+}(_react2.default.Component);
+
+var TraitorCard = function (_React$Component3) {
+    _inherits(TraitorCard, _React$Component3);
+
+    function TraitorCard() {
+        _classCallCheck(this, TraitorCard);
+
+        return _possibleConstructorReturn(this, (TraitorCard.__proto__ || Object.getPrototypeOf(TraitorCard)).apply(this, arguments));
+    }
+
+    _createClass(TraitorCard, [{
+        key: 'render',
+        value: function render() {
+            return _react2.default.createElement('img', {
+                src: "static/app/png/Traitor-" + this.props.name + ".png",
+                width: 150 });
+        }
+    }]);
+
+    return TraitorCard;
+}(_react2.default.Component);
+
+var LeaderToken = function (_React$Component4) {
+    _inherits(LeaderToken, _React$Component4);
+
+    function LeaderToken() {
+        _classCallCheck(this, LeaderToken);
+
+        return _possibleConstructorReturn(this, (LeaderToken.__proto__ || Object.getPrototypeOf(LeaderToken)).apply(this, arguments));
+    }
+
+    _createClass(LeaderToken, [{
+        key: 'render',
+        value: function render() {
+            return _react2.default.createElement('img', { className: this.props.dead ? "dead" : "alive",
+                src: "static/app/png/Leader-" + this.props.name + ".png",
+                width: 75 });
+        }
+    }]);
+
+    return LeaderToken;
+}(_react2.default.Component);
+
+var Faction = function (_React$Component5) {
+    _inherits(Faction, _React$Component5);
 
     function Faction() {
         _classCallCheck(this, Faction);
@@ -9604,17 +9686,80 @@ var Faction = function (_React$Component) {
     }
 
     _createClass(Faction, [{
-        key: 'render',
-        value: function render() {
+        key: 'getTreachery',
+        value: function getTreachery() {
+            if (!this.props.factionstate.hasOwnProperty("treachery")) {
+                return [];
+            }
+
+            if (Array.isArray(this.props.factionstate.treachery)) {
+                return this.props.factionstate.treachery.map(function (name) {
+                    return _react2.default.createElement(TreacheryCard, { key: name, name: name });
+                });
+            } else {
+                var treachery = [];
+                for (var i = 0; i < this.props.factionstate.treachery.length; i++) {
+                    treachery.push(_react2.default.createElement(TreacheryCard, { key: 'Reverse', name: 'Reverse' }));
+                }
+                return treachery;
+            }
+        }
+    }, {
+        key: 'getTraitors',
+        value: function getTraitors() {
+            if (this.props.me !== this.props.faction) {
+                return [];
+            }
+            return this.props.factionstate.traitors.map(function (traitor) {
+                return _react2.default.createElement(TraitorCard, { key: traitor[0], name: traitor[0] });
+            });
+        }
+    }, {
+        key: 'getLeaders',
+        value: function getLeaders() {
+            var _this6 = this;
+
             return _react2.default.createElement(
                 'div',
-                null,
+                { style: { width: 150, float: "left" } },
+                this.props.factionstate.leaders.map(function (leader) {
+                    var dead = false;
+                    if (_this6.props.factionstate.tank_leaders.indexOf(leader) !== -1) {
+                        dead = true;
+                    }
+                    return _react2.default.createElement(LeaderToken, { key: leader[0], name: leader[0], dead: dead });
+                })
+            );
+        }
+    }, {
+        key: 'getTokens',
+        value: function getTokens() {
+            var number = this.props.factionstate.reserve_units.length;
+            var power = this.props.factionstate.reserve_units.reduce(function (a, b) {
+                return a + b;
+            }, 0);
+            return _react2.default.createElement(
+                'div',
+                { style: { float: "left", position: "relative", width: 45, height: 225 } },
+                _react2.default.createElement(_board.TokenPile, { scale: 800, location: { top: 0.25, left: 0.002 }, faction: this.props.faction, number: number, bonus: power - number })
+            );
+        }
+    }, {
+        key: 'render',
+        value: function render() {
+
+            return _react2.default.createElement(
+                'div',
+                { style: { float: "left", border: "1px solid red" } },
                 _react2.default.createElement(
                     'h2',
                     null,
                     this.props.faction
                 ),
-                JSON.stringify(this.props.factionstate)
+                this.getTreachery(),
+                this.getTraitors(),
+                this.getLeaders(),
+                this.getTokens()
             );
         }
     }]);
@@ -9622,8 +9767,8 @@ var Faction = function (_React$Component) {
     return Faction;
 }(_react2.default.Component);
 
-var Game = function (_React$Component2) {
-    _inherits(Game, _React$Component2);
+var Game = function (_React$Component6) {
+    _inherits(Game, _React$Component6);
 
     function Game() {
         _classCallCheck(this, Game);
@@ -9634,20 +9779,20 @@ var Game = function (_React$Component2) {
     _createClass(Game, [{
         key: 'render',
         value: function render() {
-            var _this3 = this;
+            var _this8 = this;
 
             var fs = Object.keys(this.props.gamestate.faction_state);
             var factions = fs.map(function (faction) {
-                return _react2.default.createElement(Faction, { key: faction, me: _this3.props.me, faction: faction, factionstate: _this3.props.gamestate.faction_state[faction] });
+                return _react2.default.createElement(Faction, { key: faction, me: _this8.props.me, faction: faction, factionstate: _this8.props.gamestate.faction_state[faction] });
             });
             var logoPositions = fs.map(function (faction) {
-                var factionstate = _this3.props.gamestate.faction_state[faction];
+                var factionstate = _this8.props.gamestate.faction_state[faction];
                 return [factionstate.name, factionstate.token_position];
             });
             return _react2.default.createElement(
                 'div',
                 null,
-                _react2.default.createElement(_board2.default, { boardstate: this.props.gamestate.map_state, logoPositions: logoPositions,
+                _react2.default.createElement(_board.Board, { boardstate: this.props.gamestate.map_state, logoPositions: logoPositions,
                     stormSector: this.props.gamestate.storm_position }),
                 factions
             );
@@ -9657,8 +9802,8 @@ var Game = function (_React$Component2) {
     return Game;
 }(_react2.default.Component);
 
-var Actions = function (_React$Component3) {
-    _inherits(Actions, _React$Component3);
+var Actions = function (_React$Component7) {
+    _inherits(Actions, _React$Component7);
 
     function Actions() {
         _classCallCheck(this, Actions);
@@ -9690,7 +9835,7 @@ var Actions = function (_React$Component3) {
             }.bind(this));
             return _react2.default.createElement(
                 'div',
-                null,
+                { style: { float: "left" } },
                 _react2.default.createElement('input', { type: 'text', ref: 'text' }),
                 _react2.default.createElement(
                     'ul',
@@ -9704,8 +9849,8 @@ var Actions = function (_React$Component3) {
     return Actions;
 }(_react2.default.Component);
 
-var Session = function (_React$Component4) {
-    _inherits(Session, _React$Component4);
+var Session = function (_React$Component8) {
+    _inherits(Session, _React$Component8);
 
     function Session() {
         _classCallCheck(this, Session);
@@ -20105,7 +20250,7 @@ var Spice = function (_React$Component) {
             return _react2.default.createElement(
                 'div',
                 null,
-                _react2.default.createElement('img', { src: 'static/app/png/melange.png',
+                _react2.default.createElement('img', { src: "static/app/png/melange_" + Math.ceil(this.props.amount / 3) + ".png",
                     style: {
                         position: "absolute",
                         top: this.props.scale * _boardData.spice_location[this.props.space].top,
@@ -20198,14 +20343,17 @@ var TokenPile = function (_React$Component4) {
     _createClass(TokenPile, [{
         key: 'getLocation',
         value: function getLocation() {
+            if (this.props.location) return this.props.location;
             return _boardData.token_location[this.props.space][this.props.sector][this.props.order];
         }
     }, {
         key: 'getTokenPile',
-        value: function getTokenPile(number, faction, space, sector) {
+        value: function getTokenPile(number, faction) {
             var tokens = [];
             for (var i = 0; i < number; i++) {
-                tokens.push(_react2.default.createElement('img', { src: "static/app/png/" + this.props.faction + "_token.png",
+                var path = "static/app/png/" + this.props.faction;
+                path += this.props.faction === "bene-gesserit" && this.props.coexist ? "_coexist_token.png" : "_token.png";
+                tokens.push(_react2.default.createElement('img', { src: path,
                     style: {
                         position: "absolute",
                         top: this.props.scale * (this.getLocation().top - 0.005 * i),
@@ -20220,10 +20368,11 @@ var TokenPile = function (_React$Component4) {
     }, {
         key: 'render',
         value: function render() {
+            var bonus = this.props.bonus ? " (+" + this.props.bonus + ")" : "";
             return _react2.default.createElement(
                 'div',
                 null,
-                this.getTokenPile(this.props.number, this.props.faction, this.props.space, this.props.sector),
+                this.getTokenPile(this.props.number, this.props.faction),
                 _react2.default.createElement(
                     'span',
                     { style: {
@@ -20238,7 +20387,7 @@ var TokenPile = function (_React$Component4) {
                             textAlign: "center",
                             fontSize: 16
                         } },
-                    this.props.number
+                    this.props.number + bonus
                 )
             );
         }
@@ -20274,7 +20423,7 @@ var Board = function (_React$Component5) {
     }, {
         key: 'updateWindowDimensions',
         value: function updateWindowDimensions() {
-            this.setState({ width: window.innerWidth, height: window.innerHeight });
+            this.setState({ width: Math.min(window.innerWidth, 800), height: window.innerHeight });
         }
     }, {
         key: 'render',
@@ -20297,11 +20446,17 @@ var Board = function (_React$Component5) {
                                     } else {
                                         orders[space.name] = 1;
                                     }
+                                    var number = space.forces[faction][sector].length;
+                                    var power = space.forces[faction][sector].reduce(function (a, b) {
+                                        return a + b;
+                                    }, 0);
                                     tokens.push(_react2.default.createElement(TokenPile, { key: space.name + sector + faction,
-                                        number: space.forces[faction][sector].length,
+                                        number: number,
+                                        bonus: number !== power ? power - number : null,
                                         scale: this.state.width,
                                         space: space.name,
                                         sector: sector,
+                                        coexist: space.coexist,
                                         order: orders[space.name],
                                         faction: faction }));
                                 }
@@ -20330,7 +20485,8 @@ var Board = function (_React$Component5) {
                             backgroundSize: 'contain',
                             height: this.state.width,
                             width: this.state.width,
-                            position: "relative"
+                            position: "relative",
+                            margin: 0
                         } },
                     _react2.default.createElement(Storm, { scale: this.state.width, sector: this.props.stormSector }),
                     tokens,
@@ -20344,7 +20500,10 @@ var Board = function (_React$Component5) {
     return Board;
 }(_react2.default.Component);
 
-module.exports = Board;
+module.exports = {
+    Board: Board,
+    TokenPile: TokenPile
+};
 
 /***/ }),
 /* 87 */
@@ -20399,7 +20558,7 @@ function renderSession(session_id, faction) {
 
 document.addEventListener("DOMContentLoaded", function () {
     // render(<App/>, document.getElementById("content"));
-    renderSession(1, "bene-gesserit");
+    renderSession(1, "guild");
 });
 
 /***/ }),

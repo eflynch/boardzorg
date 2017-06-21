@@ -3,6 +3,8 @@ body {
 }
 
 .board {
+    border: 1px solid blue;
+    float: left;
     cursor: default;
     user-select: none;
     user-drag: none;
@@ -19,4 +21,12 @@ body {
     -webkit-user-select: none;
     -webkit-user-drag: none;
     -ms-user-select: none;
+}
+
+img.dead {
+    opacity: 0.2;
+}
+
+img.alive {
+
 }

@@ -3,13 +3,40 @@ import os
 
 from PIL import Image
 
+# BOXES = [
+#     (38, 38, 412, 562),
+#     (38, 638, 412, 1162),
+#     (488, 38, 862, 562),
+#     (488, 638, 862, 1162),
+#     (938, 38, 1312, 562),
+#     (938, 638, 1312, 1162),
+# ]
+
 BOXES = [
-    (38, 38, 412, 562),
-    (38, 638, 412, 1162),
-    (488, 38, 862, 562),
-    (488, 638, 862, 1162),
-    (938, 38, 1312, 562),
-    (938, 638, 1312, 1162),
+    (52, 52, 284, 284),
+    (315, 52, 547, 284),
+    (578, 52, 810, 284),
+    (841, 52, 1073, 284),
+
+    (52, 315, 284, 547),
+    (315, 315, 547, 547),
+    (578, 315, 810, 547),
+    (841, 315, 1073, 547),
+
+    (52, 578, 284, 810),
+    (315, 578, 547, 810),
+    (578, 578, 810, 810),
+    (841, 578, 1073, 810),
+
+    (52, 841, 284, 1073),
+    (315, 841, 547, 1073),
+    (578, 841, 810, 1073),
+    (841, 841, 1073, 1073),
+
+    (52, 1104, 284, 1336),
+    (315, 1104, 547, 1336),
+    (578, 1104, 810, 1336),
+    (841, 1104, 1073, 1336),
 ]
 
 
@@ -20,17 +47,29 @@ def crop_cards(path):
         im2 = im.crop(box)
         im2.save("{}_{}.png".format(file, i), "PNG")
 
-
-for i in range(5, 6):
-    path = "resources/cards_uncut/spice_{}.png".format(i)
-    crop_cards(path)
-
-
-for i in range(5, 6):
-    path = "resources/cards_uncut/traitors_{}.png".format(i)
-    crop_cards(path)
+#
+# for i in range(1,4):
+#     path = "resources/cards_uncut/leaders_{}.png".format(i)
+#     crop_cards(path)
 
 
-for i in range(9, 10):
-    path = "resources/cards_uncut/treachery_{}.png".format(i)
-    crop_cards(path)
+for f in os.listdir("resources/cards_uncut"):
+    if "Leader-" in f or "leaders_" in f and "Mask" not in f:
+        im = Image.open("resources/cards_uncut/" + f)
+        mask = Image.open("resources/cards_uncut/" + "Leader-Mask.png").convert('L')
+        im.putalpha(mask)
+        im.save("resources/cards_uncut/" + f)
+
+# for i in range(5, 6):
+#     path = "resources/cards_uncut/spice_{}.png".format(i)
+#     crop_cards(path)
+#
+#
+# for i in range(5, 6):
+#     path = "resources/cards_uncut/traitors_{}.png".format(i)
+#     crop_cards(path)
+#
+#
+# for i in range(9, 10):
+#     path = "resources/cards_uncut/treachery_{}.png".format(i)
+#     crop_cards(path)

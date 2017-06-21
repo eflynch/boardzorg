@@ -1,14 +1,96 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 
-import Board from './board';
+import {Board, TokenPile} from './board';
+
+
+class SpiceCard extends React.Component {
+    render () {
+        return <img
+            src={"static/app/png/Spice-" + this.props.name + ".png"}
+            width={150} />;
+    }
+}
+
+
+class TreacheryCard extends React.Component {
+    render () {
+        return <img
+            src={"static/app/png/Treachery-" + this.props.name + ".png"}
+            width={150} />;
+    }
+}
+
+class TraitorCard extends React.Component {
+    render () {
+        return <img
+            src={"static/app/png/Traitor-" + this.props.name + ".png"}
+            width={150} />;
+    }
+}
+
+class LeaderToken extends React.Component {
+    render () {
+        return <img className={this.props.dead ?  "dead" : "alive"}
+            src={"static/app/png/Leader-" + this.props.name + ".png"}
+            width={75} />;
+    }
+}
 
 class Faction extends React.Component {
+    getTreachery () {
+        if (!this.props.factionstate.hasOwnProperty("treachery")){
+            return [];
+        }
+
+        if (Array.isArray(this.props.factionstate.treachery)){
+            return this.props.factionstate.treachery.map((name) => {
+                return <TreacheryCard key={name} name={name} />;
+            });
+        } else {
+            let treachery = [];
+            for (let i=0; i < this.props.factionstate.treachery.length; i++){
+                treachery.push(<TreacheryCard key="Reverse" name="Reverse" />);
+            }
+            return treachery;
+        }
+    }
+    getTraitors () {
+        if (this.props.me !== this.props.faction){
+            return [];
+        }
+        return this.props.factionstate.traitors.map((traitor) => {
+            return <TraitorCard key={traitor[0]} name={traitor[0]} />;
+        });
+    }
+    getLeaders () {
+        return <div style={{width:150, float:"left"}}>
+            {this.props.factionstate.leaders.map((leader) => {
+                let dead = false;
+                if (this.props.factionstate.tank_leaders.indexOf(leader) !== -1){
+                    dead = true;
+                }
+            return <LeaderToken key={leader[0]} name={leader[0]} dead={dead}/>;
+            })}
+        </div>;
+    }
+    getTokens () {
+        let number = this.props.factionstate.reserve_units.length;
+        let power = this.props.factionstate.reserve_units.reduce((a, b) => a + b, 0);
+        return <div style={{float:"left", position:"relative", width: 45, height: 225}}>
+            <TokenPile scale={800} location={{top:0.25, left:0.002}} faction={this.props.faction} number={number} bonus={power-number}/>
+        </div>;
+    }
     render () {
+
+
         return (
-            <div>
+            <div style={{float: "left", border: "1px solid red"}}>
                 <h2>{this.props.faction}</h2>
-                {JSON.stringify(this.props.factionstate)}
+                {this.getTreachery()}
+                {this.getTraitors()}
+                {this.getLeaders()}
+                {this.getTokens()}
             </div>
         );
     }
@@ -54,7 +136,7 @@ class Actions extends React.Component {
             );
         }.bind(this));
         return (
-            <div>
+            <div style={{float:"left"}}>
                 <input type="text" ref="text"/>
                 <ul>
                     {actions}
