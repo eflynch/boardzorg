@@ -107,6 +107,8 @@ class KaramaBlockGuildTurnChoice(Action):
             raise IllegalAction("The guild cannot do that")
         if faction in game_state.round_state.stage_state.karama_passes:
             raise IllegalAction("You have already passed this option")
+        if "Karama" not in game_state.faction_state[faction].treachery:
+            raise IllegalAction("You need a karama card to block guild turn choice")
 
     def _execute(self, game_state):
         new_game_state = deepcopy(game_state)
@@ -115,6 +117,8 @@ class KaramaBlockGuildTurnChoice(Action):
         new_game_state.round_state.faction_turn = faction_order[0]
         new_game_state.round_state.turn_order = faction_order
         new_game_state.round_state.stage_state = movement.CoexistStage()
+        new_game_state.faction_state[self.faction].treachery.remove("Karama")
+        new_game_state.treachery_discard.insert(0, "Karama")
         return new_game_state
 
 
@@ -338,7 +342,10 @@ class Ship(Action):
     def _execute(self, game_state):
         new_game_state = deepcopy(game_state)
 
+
         space = new_game_state.map_state[self.space]
+        if self.sector not in space.sectors:
+            raise BadCommand("That sector is not in that space")
         if new_game_state.storm_position == self.sector:
             if self.faction != "fremen":
                 raise BadCommand("Only the Fremen can ship into the storm")
@@ -370,6 +377,8 @@ class KaramaStopShipment(Action):
     def _check(cls, game_state, faction):
         if game_state.round_state.stage_state.substage_state.subsubstage != "halt":
             raise IllegalAction("Wrong subsubstage yo")
+        if "Karama" not in game_state.faction_state[faction].treachery:
+            raise IllegalAction("You need a Karama card to do this")
         if game_state.round_state.faction_turn == "guild":
             raise IllegalAction("No stopping yourself guild")
 
@@ -377,6 +386,8 @@ class KaramaStopShipment(Action):
         new_game_state = deepcopy(game_state)
         new_game_state.round_state.stage_state.shipment_used = True
         new_game_state.round_state.stage_state.substage = movement.MainSubStage()
+        new_game_state.faction_state[self.faction].treachery.remove("Karama")
+        new_game_state.treachery_discard.insert(0, "Karama")
         return new_game_state
 
 
@@ -602,12 +613,12 @@ class KarmaPassStopSpiritualAdvisor(Action):
         space = new_game_state.map_state[s]
         sector = new_game_state.round_state.stage_state.substage_state.sector
         space.coexist = True
-        if self.faction not in space.forces:
-            space.forces[self.faction] = []
-        if sector not in space.forces[self.faction]:
-            space.forces[self.faction][sector] = []
-        u = new_game_state.faction_state[self.faction].reserve_units.pop(0)
-        space.forces[self.faction][sector].append(u)
+        if "bene-gesserit" not in space.forces:
+            space.forces["bene-gesserit"] = {}
+        if sector not in space.forces["bene-gesserit"]:
+            space.forces["bene-gesserit"][sector] = []
+        u = new_game_state.faction_state["bene-gesserit"].reserve_units.pop(0)
+        space.forces["bene-gesserit"][sector].append(u)
         new_game_state.round_state.stage_state.shipment_used = True
         new_game_state.round_state.stage_state.substage_state = movement.MainSubStage()
         return new_game_state
@@ -671,7 +682,8 @@ class Move(Action):
         allowed_distance = 1
         if self.faction == "fremen":
             allowed_distance = 2
-        # TODO: Handle ornithopters
+        if self.faction in new_game_state.ornithopters:
+            allowed_distance = 3
         if m.distance(self.space_a, self.sector_a, self.space_b, self.sector_b) > allowed_distance:
             raise BadCommand("You cannot move there")
 

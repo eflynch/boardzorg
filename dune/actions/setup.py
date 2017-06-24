@@ -280,6 +280,7 @@ class BeneGesseritPlacement(Action):
         new_game_state = deepcopy(game_state)
         space = new_game_state.map_state[self.space]
         space.coexist = True
+        space.was_coexist = True
         movement.ship_units(new_game_state, self.faction, [1], space, self.sector)
         new_game_state.round_state.stage = "storm-placement"
         return new_game_state

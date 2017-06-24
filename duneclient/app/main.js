@@ -9544,26 +9544,47 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-var App = function (_React$Component) {
-    _inherits(App, _React$Component);
+var SESSION_ID = 1;
 
-    function App() {
-        _classCallCheck(this, App);
+var FactionButton = function FactionButton(props) {
+    return _react2.default.createElement(
+        "li",
+        { onClick: function onClick() {
+                props.getSession(SESSION_ID, props.faction);
+            } },
+        props.faction
+    );
+};
 
-        return _possibleConstructorReturn(this, (App.__proto__ || Object.getPrototypeOf(App)).apply(this, arguments));
+var Header = function (_React$Component) {
+    _inherits(Header, _React$Component);
+
+    function Header() {
+        _classCallCheck(this, Header);
+
+        return _possibleConstructorReturn(this, (Header.__proto__ || Object.getPrototypeOf(Header)).apply(this, arguments));
     }
 
-    _createClass(App, [{
-        key: 'render',
+    _createClass(Header, [{
+        key: "render",
         value: function render() {
-            return _react2.default.createElement('div', null);
+            return _react2.default.createElement(
+                "ul",
+                null,
+                _react2.default.createElement(FactionButton, { faction: "guild", getSession: this.props.getSession }),
+                _react2.default.createElement(FactionButton, { faction: "emperor", getSession: this.props.getSession }),
+                _react2.default.createElement(FactionButton, { faction: "atreides", getSession: this.props.getSession }),
+                _react2.default.createElement(FactionButton, { faction: "harkonnen", getSession: this.props.getSession }),
+                _react2.default.createElement(FactionButton, { faction: "bene-gesserit", getSession: this.props.getSession }),
+                _react2.default.createElement(FactionButton, { faction: "fremen", getSession: this.props.getSession })
+            );
         }
     }]);
 
-    return App;
+    return Header;
 }(_react2.default.Component);
 
-module.exports = App;
+module.exports = Header;
 
 /***/ }),
 /* 83 */
@@ -9592,8 +9613,110 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-var SpiceCard = function (_React$Component) {
-    _inherits(SpiceCard, _React$Component);
+function getRandomIntInclusive(min, max) {
+    min = Math.ceil(min);
+    max = Math.floor(max);
+    return Math.floor(Math.random() * (max - min + 1)) + min; //The maximum is inclusive and the minimum is inclusive
+}
+
+var BiddingState = function (_React$Component) {
+    _inherits(BiddingState, _React$Component);
+
+    function BiddingState() {
+        _classCallCheck(this, BiddingState);
+
+        return _possibleConstructorReturn(this, (BiddingState.__proto__ || Object.getPrototypeOf(BiddingState)).apply(this, arguments));
+    }
+
+    _createClass(BiddingState, [{
+        key: 'getCards',
+        value: function getCards() {
+            var cards = [];
+            var reverses = this.props.roundstate.up_for_auction.length;
+            if (this.props.roundstate.up_for_auction.next !== undefined) {
+                cards.push(_react2.default.createElement(TreacheryCard, {
+                    key: 'next', name: this.props.roundstate.up_for_auction.next }));
+                reverses -= 1;
+            }
+            for (var i = 0; i < reverses; i++) {
+                cards.push(_react2.default.createElement(TreacheryCard, { key: i, name: 'Reverse' }));
+            }
+            return cards;
+        }
+    }, {
+        key: 'getBids',
+        value: function getBids() {
+            var _this2 = this;
+
+            return Object.keys(this.props.roundstate.stage_state.bids).map(function (faction) {
+                return _react2.default.createElement(
+                    'li',
+                    { key: faction },
+                    faction,
+                    ' : ',
+                    _this2.props.roundstate.stage_state.bids[faction]
+                );
+            });
+        }
+    }, {
+        key: 'render',
+        value: function render() {
+            if (this.props.roundstate.stage_state.stage === "auction") {
+                return _react2.default.createElement(
+                    'div',
+                    null,
+                    _react2.default.createElement(
+                        'h4',
+                        null,
+                        'Bidding Round'
+                    ),
+                    this.getCards(),
+                    this.getBids()
+                );
+            }
+            return _react2.default.createElement('div', null);
+        }
+    }]);
+
+    return BiddingState;
+}(_react2.default.Component);
+
+var RoundState = function (_React$Component2) {
+    _inherits(RoundState, _React$Component2);
+
+    function RoundState() {
+        _classCallCheck(this, RoundState);
+
+        return _possibleConstructorReturn(this, (RoundState.__proto__ || Object.getPrototypeOf(RoundState)).apply(this, arguments));
+    }
+
+    _createClass(RoundState, [{
+        key: 'render',
+        value: function render() {
+            var state = null;
+            if (this.props.roundstate.round == "bidding") {
+                state = _react2.default.createElement(BiddingState, { roundstate: this.props.roundstate });
+            }
+            if (state === null) {
+                return _react2.default.createElement(
+                    'div',
+                    null,
+                    JSON.stringify(this.props.roundstate)
+                );
+            }
+            return _react2.default.createElement(
+                'div',
+                { className: 'roundstate' },
+                state
+            );
+        }
+    }]);
+
+    return RoundState;
+}(_react2.default.Component);
+
+var SpiceCard = function (_React$Component3) {
+    _inherits(SpiceCard, _React$Component3);
 
     function SpiceCard() {
         _classCallCheck(this, SpiceCard);
@@ -9613,8 +9736,8 @@ var SpiceCard = function (_React$Component) {
     return SpiceCard;
 }(_react2.default.Component);
 
-var TreacheryCard = function (_React$Component2) {
-    _inherits(TreacheryCard, _React$Component2);
+var TreacheryCard = function (_React$Component4) {
+    _inherits(TreacheryCard, _React$Component4);
 
     function TreacheryCard() {
         _classCallCheck(this, TreacheryCard);
@@ -9625,8 +9748,12 @@ var TreacheryCard = function (_React$Component2) {
     _createClass(TreacheryCard, [{
         key: 'render',
         value: function render() {
-            return _react2.default.createElement('img', {
-                src: "static/app/png/Treachery-" + this.props.name + ".png",
+            var name = this.props.name;
+            if (this.props.name === "Cheap-Hero/Heroine") {
+                name = ["Cheap-Hero", "Cheap-Heroine"][getRandomIntInclusive(0, 1)];
+            }
+            return _react2.default.createElement('img', { style: { float: "left" },
+                src: "static/app/png/Treachery-" + name + ".png",
                 width: 150 });
         }
     }]);
@@ -9634,8 +9761,8 @@ var TreacheryCard = function (_React$Component2) {
     return TreacheryCard;
 }(_react2.default.Component);
 
-var TraitorCard = function (_React$Component3) {
-    _inherits(TraitorCard, _React$Component3);
+var TraitorCard = function (_React$Component5) {
+    _inherits(TraitorCard, _React$Component5);
 
     function TraitorCard() {
         _classCallCheck(this, TraitorCard);
@@ -9646,7 +9773,7 @@ var TraitorCard = function (_React$Component3) {
     _createClass(TraitorCard, [{
         key: 'render',
         value: function render() {
-            return _react2.default.createElement('img', {
+            return _react2.default.createElement('img', { style: { float: "left" },
                 src: "static/app/png/Traitor-" + this.props.name + ".png",
                 width: 150 });
         }
@@ -9655,8 +9782,8 @@ var TraitorCard = function (_React$Component3) {
     return TraitorCard;
 }(_react2.default.Component);
 
-var LeaderToken = function (_React$Component4) {
-    _inherits(LeaderToken, _React$Component4);
+var LeaderToken = function (_React$Component6) {
+    _inherits(LeaderToken, _React$Component6);
 
     function LeaderToken() {
         _classCallCheck(this, LeaderToken);
@@ -9676,8 +9803,8 @@ var LeaderToken = function (_React$Component4) {
     return LeaderToken;
 }(_react2.default.Component);
 
-var Faction = function (_React$Component5) {
-    _inherits(Faction, _React$Component5);
+var Faction = function (_React$Component7) {
+    _inherits(Faction, _React$Component7);
 
     function Faction() {
         _classCallCheck(this, Faction);
@@ -9693,13 +9820,13 @@ var Faction = function (_React$Component5) {
             }
 
             if (Array.isArray(this.props.factionstate.treachery)) {
-                return this.props.factionstate.treachery.map(function (name) {
-                    return _react2.default.createElement(TreacheryCard, { key: name, name: name });
+                return this.props.factionstate.treachery.map(function (name, i) {
+                    return _react2.default.createElement(TreacheryCard, { key: i, name: name });
                 });
             } else {
                 var treachery = [];
                 for (var i = 0; i < this.props.factionstate.treachery.length; i++) {
-                    treachery.push(_react2.default.createElement(TreacheryCard, { key: 'Reverse', name: 'Reverse' }));
+                    treachery.push(_react2.default.createElement(TreacheryCard, { key: "reverse-" + i, name: 'Reverse' }));
                 }
                 return treachery;
             }
@@ -9711,24 +9838,25 @@ var Faction = function (_React$Component5) {
                 return [];
             }
             return this.props.factionstate.traitors.map(function (traitor) {
-                return _react2.default.createElement(TraitorCard, { key: traitor[0], name: traitor[0] });
+                return _react2.default.createElement(TraitorCard, { key: "traitor-" + traitor[0], name: traitor[0] });
             });
         }
     }, {
         key: 'getLeaders',
         value: function getLeaders() {
-            var _this6 = this;
+            var _this9 = this;
 
             return _react2.default.createElement(
                 'div',
                 { style: { width: 150, float: "left" } },
                 this.props.factionstate.leaders.map(function (leader) {
                     var dead = false;
-                    if (_this6.props.factionstate.tank_leaders.indexOf(leader) !== -1) {
+                    if (_this9.props.factionstate.tank_leaders.indexOf(leader) !== -1) {
                         dead = true;
                     }
-                    return _react2.default.createElement(LeaderToken, { key: leader[0], name: leader[0], dead: dead });
-                })
+                    return _react2.default.createElement(LeaderToken, { key: "leader-" + leader[0], name: leader[0], dead: dead });
+                }),
+                this.getSpice()
             );
         }
     }, {
@@ -9740,14 +9868,25 @@ var Faction = function (_React$Component5) {
             }, 0);
             return _react2.default.createElement(
                 'div',
-                { style: { float: "left", position: "relative", width: 45, height: 225 } },
-                _react2.default.createElement(_board.TokenPile, { scale: 800, location: { top: 0.25, left: 0.002 }, faction: this.props.faction, number: number, bonus: power - number })
+                { style: { float: "left", width: 50, height: 210 } },
+                _react2.default.createElement(_board.TokenPile, { width: 50, height: 210, faction: this.props.faction, number: number, bonus: power - number })
             );
+        }
+    }, {
+        key: 'getSpice',
+        value: function getSpice() {
+            if (this.props.factionstate.spice !== undefined) {
+                return _react2.default.createElement(
+                    'div',
+                    { style: { float: "left", width: 75, height: 75 } },
+                    _react2.default.createElement(_board.Spice, { width: 75, amount: this.props.factionstate.spice })
+                );
+            }
+            return _react2.default.createElement('div', null);
         }
     }, {
         key: 'render',
         value: function render() {
-
             return _react2.default.createElement(
                 'div',
                 { style: { float: "left", border: "1px solid red" } },
@@ -9756,10 +9895,10 @@ var Faction = function (_React$Component5) {
                     null,
                     this.props.faction
                 ),
-                this.getTreachery(),
-                this.getTraitors(),
                 this.getLeaders(),
-                this.getTokens()
+                this.getTokens(),
+                this.getTreachery(),
+                this.getTraitors()
             );
         }
     }]);
@@ -9767,8 +9906,8 @@ var Faction = function (_React$Component5) {
     return Faction;
 }(_react2.default.Component);
 
-var Game = function (_React$Component6) {
-    _inherits(Game, _React$Component6);
+var Game = function (_React$Component8) {
+    _inherits(Game, _React$Component8);
 
     function Game() {
         _classCallCheck(this, Game);
@@ -9779,19 +9918,25 @@ var Game = function (_React$Component6) {
     _createClass(Game, [{
         key: 'render',
         value: function render() {
-            var _this8 = this;
+            var _this11 = this;
 
             var fs = Object.keys(this.props.gamestate.faction_state);
-            var factions = fs.map(function (faction) {
-                return _react2.default.createElement(Faction, { key: faction, me: _this8.props.me, faction: faction, factionstate: _this8.props.gamestate.faction_state[faction] });
+            var factions = [];
+            fs.forEach(function (faction) {
+                if (faction == _this11.props.me) {
+                    return;
+                }
+                factions.push(_react2.default.createElement(Faction, { key: faction, me: _this11.props.me, faction: faction, factionstate: _this11.props.gamestate.faction_state[faction] }));
             });
             var logoPositions = fs.map(function (faction) {
-                var factionstate = _this8.props.gamestate.faction_state[faction];
+                var factionstate = _this11.props.gamestate.faction_state[faction];
                 return [factionstate.name, factionstate.token_position];
             });
             return _react2.default.createElement(
                 'div',
                 null,
+                _react2.default.createElement(Faction, { key: "me", me: this.props.me, faction: this.props.me, factionstate: this.props.gamestate.faction_state[this.props.me] }),
+                _react2.default.createElement(RoundState, { roundstate: this.props.gamestate.round_state }),
                 _react2.default.createElement(_board.Board, { boardstate: this.props.gamestate.map_state, logoPositions: logoPositions,
                     stormSector: this.props.gamestate.storm_position }),
                 factions
@@ -9802,8 +9947,8 @@ var Game = function (_React$Component6) {
     return Game;
 }(_react2.default.Component);
 
-var Actions = function (_React$Component7) {
-    _inherits(Actions, _React$Component7);
+var Actions = function (_React$Component9) {
+    _inherits(Actions, _React$Component9);
 
     function Actions() {
         _classCallCheck(this, Actions);
@@ -9820,6 +9965,30 @@ var Actions = function (_React$Component7) {
     }, {
         key: 'render',
         value: function render() {
+            var error = _react2.default.createElement('span', null);
+            if (this.props.error !== null) {
+                if (this.props.error.BadCommand !== undefined) {
+                    error = _react2.default.createElement(
+                        'span',
+                        { className: 'error' },
+                        this.props.error.BadCommand
+                    );
+                }
+                if (this.props.error.InvalidCommand !== undefined) {
+                    error = _react2.default.createElement(
+                        'span',
+                        { className: 'error' },
+                        this.props.error.InvalidCommand
+                    );
+                }
+                if (this.props.error.UnhandledError !== undefined) {
+                    error = _react2.default.createElement(
+                        'span',
+                        { className: 'error' },
+                        this.props.error.UnhandledError
+                    );
+                }
+            }
             var actions = this.props.actions.map(function (action, i) {
                 return _react2.default.createElement(
                     'li',
@@ -9835,12 +10004,13 @@ var Actions = function (_React$Component7) {
             }.bind(this));
             return _react2.default.createElement(
                 'div',
-                { style: { float: "left" } },
-                _react2.default.createElement('input', { type: 'text', ref: 'text' }),
+                { className: 'actions' },
                 _react2.default.createElement(
                     'ul',
                     null,
-                    actions
+                    actions,
+                    error,
+                    _react2.default.createElement('input', { type: 'text', ref: 'text' })
                 )
             );
         }
@@ -9849,8 +10019,8 @@ var Actions = function (_React$Component7) {
     return Actions;
 }(_react2.default.Component);
 
-var Session = function (_React$Component8) {
-    _inherits(Session, _React$Component8);
+var Session = function (_React$Component10) {
+    _inherits(Session, _React$Component10);
 
     function Session() {
         _classCallCheck(this, Session);
@@ -9864,8 +10034,8 @@ var Session = function (_React$Component8) {
             return _react2.default.createElement(
                 'div',
                 null,
-                _react2.default.createElement(Game, { me: this.props.me, gamestate: this.props.data.state }),
-                _react2.default.createElement(Actions, { actions: this.props.data.actions, sendCommand: this.props.sendCommand })
+                _react2.default.createElement(Actions, { error: this.props.error, actions: this.props.data.actions, sendCommand: this.props.sendCommand }),
+                _react2.default.createElement(Game, { me: this.props.me, gamestate: this.props.data.state })
             );
         }
     }]);
@@ -20143,26 +20313,28 @@ return jQuery;
 
 
 var spice_location = {
-    "Hagga-Basin": { top: 0.34, left: 0.35 },
-    "Broken-Land": { top: 0.10, left: 0.31 },
-    "Old-Gap": { top: 0.08, left: 0.56 },
-    "Sihaya-Ridge": { top: 0.18, left: 0.75 },
-    "Red-Chasm": { top: 0.44, left: 0.865 },
-    "Minor-Erg": { top: 0.41, left: 0.60 },
-    "Cielago-North": { top: 0.62, left: 0.515 },
-    "South-Mesa": { top: 0.64, left: 0.83 },
-    "Cielago-South": { top: 0.88, left: 0.48 },
-    "Habbanya-Ridge-Flat": { top: 0.78, left: 0.21 },
-    "Habbanya-Erg": { top: 0.58, left: 0.08 },
-    "Great-Flat": { top: 0.445, left: 0.07 },
-    "Wind-Pass-North": { top: 0.525, left: 0.37 },
-    "Rock-Outcroppings": { top: 0.235, left: 0.13 }
+    "Hagga-Basin": { top: 0.32, left: 0.35 },
+    "Broken-Land": { top: 0.08, left: 0.31 },
+    "Old-Gap": { top: 0.06, left: 0.56 },
+    "Sihaya-Ridge": { top: 0.16, left: 0.75 },
+    "Red-Chasm": { top: 0.42, left: 0.865 },
+    "Minor-Erg": { top: 0.39, left: 0.60 },
+    "Cielago-North": { top: 0.60, left: 0.515 },
+    "South-Mesa": { top: 0.62, left: 0.83 },
+    "Cielago-South": { top: 0.86, left: 0.48 },
+    "Habbanya-Ridge-Flat": { top: 0.76, left: 0.21 },
+    "Habbanya-Erg": { top: 0.56, left: 0.08 },
+    "Great-Flat": { top: 0.435, left: 0.07 },
+    "Wind-Pass-North": { top: 0.505, left: 0.37 },
+    "Rock-Outcroppings": { top: 0.215, left: 0.13 }
 };
 
 var token_location = {
     "Habbanya-Sietch": {
         16: {
-            1: { top: 0.6, left: 0.1 }
+            1: { top: 0.65, left: 0.16 },
+            2: { top: 0.66, left: 0.20 },
+            3: { top: 0.7, left: 0.19 }
         }
     },
     "Sietch-Tabr": {
@@ -20176,9 +20348,16 @@ var token_location = {
             1: { top: 0.19, left: 0.465 }
         }
     },
+    "Imperial-Basin": {
+        9: {
+            1: { top: 0.26, left: 0.56 }
+        }
+    },
     "Arrakeen": {
         9: {
-            1: { top: 0.16, left: 0.62 }
+            1: { top: 0.15, left: 0.62 },
+            2: { top: 0.18, left: 0.63 },
+            3: { top: 0.20, left: 0.58 }
         }
     },
     "Tueks-Sietch": {
@@ -20189,6 +20368,18 @@ var token_location = {
     "False-Wall-South": {
         4: {
             1: { top: 0.63, left: 0.69 }
+        }
+    },
+    "Polar-Sink": {
+        "-1": {
+            1: { top: 0.46, left: 0.5 },
+            2: { top: 0.51, left: 0.43 },
+            3: { top: 0.53, left: 0.48 }
+        }
+    },
+    "Broken-Land": {
+        11: {
+            1: { top: 0.10, left: 0.38 }
         }
     }
 };
@@ -20235,8 +20426,35 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-var Spice = function (_React$Component) {
-    _inherits(Spice, _React$Component);
+var Positioner = function (_React$Component) {
+    _inherits(Positioner, _React$Component);
+
+    function Positioner() {
+        _classCallCheck(this, Positioner);
+
+        return _possibleConstructorReturn(this, (Positioner.__proto__ || Object.getPrototypeOf(Positioner)).apply(this, arguments));
+    }
+
+    _createClass(Positioner, [{
+        key: 'render',
+        value: function render() {
+            return _react2.default.createElement(
+                'div',
+                { style: {
+                        position: "absolute",
+                        top: this.props.scale * this.props.location.top,
+                        left: this.props.scale * this.props.location.left
+                    } },
+                this.props.children
+            );
+        }
+    }]);
+
+    return Positioner;
+}(_react2.default.Component);
+
+var Spice = function (_React$Component2) {
+    _inherits(Spice, _React$Component2);
 
     function Spice() {
         _classCallCheck(this, Spice);
@@ -20249,21 +20467,17 @@ var Spice = function (_React$Component) {
         value: function render() {
             return _react2.default.createElement(
                 'div',
-                null,
+                { style: { position: "relative" } },
                 _react2.default.createElement('img', { src: "static/app/png/melange_" + Math.ceil(this.props.amount / 3) + ".png",
-                    style: {
-                        position: "absolute",
-                        top: this.props.scale * _boardData.spice_location[this.props.space].top,
-                        left: this.props.scale * _boardData.spice_location[this.props.space].left
-                    },
-                    width: this.props.scale * 0.08
+                    width: this.props.width,
+                    style: { "position": "absolute", top: 0, left: 0 }
                 }),
                 _react2.default.createElement(
                     'span',
                     { style: {
                             position: "absolute",
-                            top: this.props.scale * (_boardData.spice_location[this.props.space].top + 0.01),
-                            left: this.props.scale * (_boardData.spice_location[this.props.space].left + 0.03),
+                            top: this.props.width * 0.50,
+                            left: this.props.width * 0.50,
                             color: "yellow",
                             fontWeight: 900,
                             fontFamily: "sans-serif"
@@ -20277,8 +20491,8 @@ var Spice = function (_React$Component) {
     return Spice;
 }(_react2.default.Component);
 
-var Storm = function (_React$Component2) {
-    _inherits(Storm, _React$Component2);
+var Storm = function (_React$Component3) {
+    _inherits(Storm, _React$Component3);
 
     function Storm() {
         _classCallCheck(this, Storm);
@@ -20305,8 +20519,8 @@ var Storm = function (_React$Component2) {
     return Storm;
 }(_react2.default.Component);
 
-var Logo = function (_React$Component3) {
-    _inherits(Logo, _React$Component3);
+var Logo = function (_React$Component4) {
+    _inherits(Logo, _React$Component4);
 
     function Logo() {
         _classCallCheck(this, Logo);
@@ -20318,12 +20532,7 @@ var Logo = function (_React$Component3) {
         key: 'render',
         value: function render() {
             return _react2.default.createElement('img', { src: "static/app/png/" + this.props.faction + "_logo.png",
-                style: {
-                    position: "absolute",
-                    top: this.props.scale * _boardData.logo_position[this.props.position].top,
-                    left: this.props.scale * _boardData.logo_position[this.props.position].left
-                },
-                width: this.props.scale * 0.05
+                width: this.props.width
             });
         }
     }]);
@@ -20331,8 +20540,8 @@ var Logo = function (_React$Component3) {
     return Logo;
 }(_react2.default.Component);
 
-var TokenPile = function (_React$Component4) {
-    _inherits(TokenPile, _React$Component4);
+var TokenPile = function (_React$Component5) {
+    _inherits(TokenPile, _React$Component5);
 
     function TokenPile() {
         _classCallCheck(this, TokenPile);
@@ -20341,27 +20550,19 @@ var TokenPile = function (_React$Component4) {
     }
 
     _createClass(TokenPile, [{
-        key: 'getLocation',
-        value: function getLocation() {
-            if (this.props.location) return this.props.location;
-            return _boardData.token_location[this.props.space][this.props.sector][this.props.order];
-        }
-    }, {
         key: 'getTokenPile',
         value: function getTokenPile(number, faction) {
+            var verticalOffset = this.props.height ? this.props.height - 76 / 142 * this.props.width : 0;
             var tokens = [];
             for (var i = 0; i < number; i++) {
                 var path = "static/app/png/" + this.props.faction;
                 path += this.props.faction === "bene-gesserit" && this.props.coexist ? "_coexist_token.png" : "_token.png";
-                tokens.push(_react2.default.createElement('img', { src: path,
+                tokens.push(_react2.default.createElement('img', { src: path, width: this.props.width, key: i,
                     style: {
                         position: "absolute",
-                        top: this.props.scale * (this.getLocation().top - 0.005 * i),
-                        left: this.props.scale * this.getLocation().left
-                    },
-                    width: this.props.scale * 0.05,
-                    key: i
-                }));
+                        top: -0.12 * this.props.width * i + verticalOffset,
+                        left: 0
+                    } }));
             }
             return tokens;
         }
@@ -20369,18 +20570,19 @@ var TokenPile = function (_React$Component4) {
         key: 'render',
         value: function render() {
             var bonus = this.props.bonus ? " (+" + this.props.bonus + ")" : "";
+            var verticalOffset = this.props.height ? this.props.height - 76 / 142 * this.props.width : 0;
             return _react2.default.createElement(
                 'div',
-                null,
+                { style: { position: "relative" } },
                 this.getTokenPile(this.props.number, this.props.faction),
                 _react2.default.createElement(
                     'span',
                     { style: {
                             position: "absolute",
-                            top: this.props.scale * (this.getLocation().top - 0.005 * this.props.number - 0.02),
-                            left: this.props.scale * this.getLocation().left,
+                            top: this.props.width * (-0.12 * this.props.number - 0.4) + verticalOffset,
+                            left: -this.props.width / 2,
                             color: "black",
-                            width: this.props.scale * 0.05,
+                            width: this.props.width * 2,
                             fontWeight: 900,
                             textShadow: "0 0 3px white, 0 0 15px yellow, 0 0 5px red",
                             fontFamily: "sans-serif",
@@ -20396,17 +20598,17 @@ var TokenPile = function (_React$Component4) {
     return TokenPile;
 }(_react2.default.Component);
 
-var Board = function (_React$Component5) {
-    _inherits(Board, _React$Component5);
+var Board = function (_React$Component6) {
+    _inherits(Board, _React$Component6);
 
     function Board(props) {
         _classCallCheck(this, Board);
 
-        var _this5 = _possibleConstructorReturn(this, (Board.__proto__ || Object.getPrototypeOf(Board)).call(this, props));
+        var _this6 = _possibleConstructorReturn(this, (Board.__proto__ || Object.getPrototypeOf(Board)).call(this, props));
 
-        _this5.state = { width: '0', height: '0' };
-        _this5.updateWindowDimensions = _this5.updateWindowDimensions.bind(_this5);
-        return _this5;
+        _this6.state = { width: '0', height: '0' };
+        _this6.updateWindowDimensions = _this6.updateWindowDimensions.bind(_this6);
+        return _this6;
     }
 
     _createClass(Board, [{
@@ -20426,53 +20628,85 @@ var Board = function (_React$Component5) {
             this.setState({ width: Math.min(window.innerWidth, 800), height: window.innerHeight });
         }
     }, {
-        key: 'render',
-        value: function render() {
-            var spice = [];
+        key: 'getTokenPiles',
+        value: function getTokenPiles() {
             var tokens = [];
             var orders = {};
             for (var i = 0; i < this.props.boardstate.length; i++) {
                 var space = this.props.boardstate[i];
-                if (space.spice) {
-                    spice.push(_react2.default.createElement(Spice, { key: space.name, scale: this.state.width, space: space.name, amount: space.spice }));
+                if (space.forces === null) {
+                    continue;
                 }
-                if (space.forces !== null) {
-                    for (var faction in space.forces) {
-                        if (space.forces.hasOwnProperty(faction)) {
-                            for (var sector in space.forces[faction]) {
-                                if (space.forces[faction].hasOwnProperty(sector)) {
-                                    if (orders.hasOwnProperty(space.name)) {
-                                        orders[space.name] += 1;
-                                    } else {
-                                        orders[space.name] = 1;
-                                    }
-                                    var number = space.forces[faction][sector].length;
-                                    var power = space.forces[faction][sector].reduce(function (a, b) {
-                                        return a + b;
-                                    }, 0);
-                                    tokens.push(_react2.default.createElement(TokenPile, { key: space.name + sector + faction,
-                                        number: number,
-                                        bonus: number !== power ? power - number : null,
-                                        scale: this.state.width,
-                                        space: space.name,
-                                        sector: sector,
-                                        coexist: space.coexist,
-                                        order: orders[space.name],
-                                        faction: faction }));
-                                }
-                            }
+                for (var faction in space.forces) {
+                    if (!space.forces.hasOwnProperty(faction)) {
+                        continue;
+                    }
+                    for (var sector in space.forces[faction]) {
+                        if (!space.forces[faction].hasOwnProperty(sector)) {
+                            continue;
                         }
+                        if (orders.hasOwnProperty(space.name)) {
+                            orders[space.name] += 1;
+                        } else {
+                            orders[space.name] = 1;
+                        }
+                        var number = space.forces[faction][sector].length;
+                        var power = space.forces[faction][sector].reduce(function (a, b) {
+                            return a + b;
+                        }, 0);
+                        var location = _boardData.token_location[space.name][sector][orders[space.name]];
+                        tokens.push(_react2.default.createElement(
+                            Positioner,
+                            { key: space.name + sector + faction, scale: this.state.width, location: location },
+                            _react2.default.createElement(TokenPile, { number: number,
+                                bonus: number !== power ? power - number : null,
+                                width: this.state.width * 0.05,
+                                coexist: space.coexist,
+                                faction: faction })
+                        ));
                     }
                 }
             }
-            var logos = [];
-            for (var _i = 0; _i < this.props.logoPositions.length; _i++) {
-                var _faction = this.props.logoPositions[_i][0];
-                var position = this.props.logoPositions[_i][1];
-                if (position !== null) {
-                    logos.push(_react2.default.createElement(Logo, { key: _faction, scale: this.state.width, faction: _faction, position: position }));
+            return tokens;
+        }
+    }, {
+        key: 'getSpice',
+        value: function getSpice() {
+            var spice = [];
+            for (var i = 0; i < this.props.boardstate.length; i++) {
+                var space = this.props.boardstate[i];
+                if (!space.spice) {
+                    continue;
                 }
+                spice.push(_react2.default.createElement(
+                    Positioner,
+                    { key: space.name + "spice", scale: this.state.width, location: _boardData.spice_location[space.name] },
+                    _react2.default.createElement(Spice, { amount: space.spice, width: this.state.width * 0.08, space: space.name })
+                ));
             }
+            return spice;
+        }
+    }, {
+        key: 'getLogos',
+        value: function getLogos() {
+            var logos = [];
+            for (var i = 0; i < this.props.logoPositions.length; i++) {
+                var faction = this.props.logoPositions[i][0];
+                var position = this.props.logoPositions[i][1];
+                if (position === null) {
+                    continue;
+                }
+                logos.push(_react2.default.createElement(
+                    Positioner,
+                    { key: faction + "logo", scale: this.state.width, location: _boardData.logo_position[position] },
+                    _react2.default.createElement(Logo, { width: this.state.width * 0.05, faction: faction })
+                ));
+            }
+            return logos;
+        }
+    }, {
+        key: 'render',
+        value: function render() {
             return _react2.default.createElement(
                 'div',
                 { className: 'board' },
@@ -20489,9 +20723,9 @@ var Board = function (_React$Component5) {
                             margin: 0
                         } },
                     _react2.default.createElement(Storm, { scale: this.state.width, sector: this.props.stormSector }),
-                    tokens,
-                    spice,
-                    logos
+                    this.getLogos(),
+                    this.getSpice(),
+                    this.getTokenPiles()
                 )
             );
         }
@@ -20502,7 +20736,8 @@ var Board = function (_React$Component5) {
 
 module.exports = {
     Board: Board,
-    TokenPile: TokenPile
+    TokenPile: TokenPile,
+    Spice: Spice
 };
 
 /***/ }),
@@ -20522,9 +20757,9 @@ var _jquery2 = _interopRequireDefault(_jquery);
 
 var _reactDom = __webpack_require__(33);
 
-var _app = __webpack_require__(82);
+var _header = __webpack_require__(82);
 
-var _app2 = _interopRequireDefault(_app);
+var _header2 = _interopRequireDefault(_header);
 
 var _session = __webpack_require__(83);
 
@@ -20532,33 +20767,50 @@ var _session2 = _interopRequireDefault(_session);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+var last_faction;
+var last_data;
+var last_session_id;
+
+function renderSession(session_id, faction, data) {
+    last_faction = faction;
+    last_data = data;
+    last_session_id = session_id;
+    (0, _reactDom.render)(_react2.default.createElement(_session2.default, { me: faction, data: data, error: null, sendCommand: function sendCommand(cmd) {
+            _sendCommand(session_id, faction, cmd);
+        } }), document.getElementById("content"));
+}
+
+function renderError(error) {
+    (0, _reactDom.render)(_react2.default.createElement(_session2.default, { me: last_faction, data: last_data, error: error, sendCommand: function sendCommand(cmd) {
+            _sendCommand(last_session_id, last_faction, cmd);
+        } }), document.getElementById("content"));
+}
+
 function _sendCommand(session_id, faction, cmd) {
     _jquery2.default.ajax({
         type: "POST",
         url: "/api/sessions/" + session_id,
         data: JSON.stringify({ faction: faction, cmd: cmd }),
         success: function success(data) {
-            console.log(data);
-            (0, _reactDom.render)(_react2.default.createElement(_session2.default, { me: faction, data: data, sendCommand: function sendCommand(cmd) {
-                    _sendCommand(session_id, faction, cmd);
-                } }), document.getElementById("content"));
+            renderSession(session_id, faction, data);
+        },
+        error: function error(data) {
+            renderError(data.responseJSON);
         },
         contentType: 'application/json; charset=utf-8',
         dataType: 'json'
     });
 }
 
-function renderSession(session_id, faction) {
+function getSession(session_id, faction) {
     _jquery2.default.getJSON("/api/sessions/" + session_id, { faction: faction }, function (data) {
-        (0, _reactDom.render)(_react2.default.createElement(_session2.default, { me: faction, data: data, sendCommand: function sendCommand(cmd) {
-                _sendCommand(session_id, faction, cmd);
-            } }), document.getElementById("content"));
+        renderSession(session_id, faction, data);
     });
 }
 
 document.addEventListener("DOMContentLoaded", function () {
-    // render(<App/>, document.getElementById("content"));
-    renderSession(1, "guild");
+    (0, _reactDom.render)(_react2.default.createElement(_header2.default, { getSession: getSession }), document.getElementById("header"));
+    getSession(1, "guild");
 });
 
 /***/ }),

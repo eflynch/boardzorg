@@ -83,3 +83,15 @@ class BattleRound(RoundState):
         self.leaders_used = {}
         self.battles = None
         self.stage = "setup"
+
+    def visible(self, game_state, faction):
+        visible = super().visible(game_state, faction)
+        visible["faction_turn"] = self.faction_turn
+        visible["faction_order"] = self.faction_order
+        visible["battles"] = self.battles
+        visible["leaders_used"] = self.leaders_used
+        if self.stage == "battle":
+            visible["stage_state"] = self.stage_state.visible(game_state, faction)
+        else:
+            visible["stage"] = self.stage
+        return visible

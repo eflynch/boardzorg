@@ -29,6 +29,8 @@ def find_battles(game_state):
     battles = []
 
     for s in game_state.map_state:
+        if s == "Polar-Sink":
+            continue
         space = game_state.map_state[s]
         forces = list(space.forces.keys())
         if "bene-gesserit" in forces and space.coexist:
@@ -259,7 +261,7 @@ def tank_leader(game_state, faction, leader):
         return
 
     if leader not in faction_state.leaders:
-        raise BadCommand("Leader is not available to tank")
+        raise BadCommand("Leader {} is not available to tank for {}".format(leader, faction))
     if leader not in faction_state.leader_death_count:
         faction_state.leader_death_count[leader[0]] = 0
 

@@ -117,13 +117,31 @@ class RevealTraitor(Action):
 
     def _execute(self, game_state):
         new_game_state = deepcopy(game_state)
-        # TODO
-        # Kill Leader
-        # Pay spice for leader
-        # Tank units (increase kh if relevent)
-        # Discard treachery
-        new_game_state.round_state.stage_state.winner = None
-        new_game_state.round_state.stage_state.substage_state = battle.WinnerSubStage()
+        stage_state = new_game_state.round_state.stage_state
+        battle_id = stage_state.battle
+        space = new_game_state.map_state[battle_id[2]]
+
+        if self.faction == battle_id[0]:
+            winner = battle_id[0]
+            loser = battle_id[1]
+            ops.discard_treachery(new_game_state, stage_state.defender_plan["weapon"])
+            ops.discard_treachery(new_game_state, stage_state.defender_plan["defense"])
+            ops.tank_leader(new_game_state, loser, stage_state.defender_plan["leader"])
+            new_game_state.faction_state[winner].spice += stage_state.defender_plan["leader"][1]
+        else:
+            winner = battle_id[1]
+            loser = battle_id[0]
+            ops.discard_treachery(new_game_state, stage_state.attacker_plan["weapon"])
+            ops.discard_treachery(new_game_state, stage_state.attacker_plan["defense"])
+            ops.tank_leader(new_game_state, loser, stage_state.attacker_plan["leader"])
+            new_game_state.faction_state[winner].spice += stage_state.attacker_plan["leader"][1]
+
+        for sec in space.forces[loser]:
+            units_to_tank = space.forces[loser][sec][:]
+            for u in units_to_tank:
+                ops.tank_unit(new_game_state, loser, space, sec, u)
+
+        new_game_state.round_state.stage = "main"
         return new_game_state
 
 
@@ -256,6 +274,7 @@ class AutoResolve(Action):
             power_left_to_tank = min(defender_max_power, stage_state.defender_plan["number"])
 
         for sec in space.forces[loser]:
+            # TODO : Check distance to sector from battle sector is 0
             units_to_tank = space.forces[loser][sec][:]
             for u in units_to_tank:
                 ops.tank_unit(new_game_state, loser, space, sec, u)

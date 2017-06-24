@@ -52,4 +52,12 @@ class Storm(Action):
 
         new_game_state.round = "spice"
 
+        new_game_state.ornithopters = []
+        carthag = new_game_state.map_state["Carthag"]
+        arrakeen = new_game_state.map_state["Arrakeen"]
+        if carthag.forces:
+            new_game_state.ornithopters.append(list(carthag.forces.keys())[0])
+        if arrakeen.forces:
+            new_game_state.ornithopters.append(list(arrakeen.forces.keys())[0])
+
         return new_game_state

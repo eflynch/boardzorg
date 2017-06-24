@@ -88,8 +88,7 @@ class AutoPickBattle(Action):
                 to_prune.append(b)
         for b in to_prune:
             new_game_state.round_state.battles.remove(b)
-
-        if not game_state.round_state.battles:
+        if not new_game_state.round_state.battles:
             new_game_state.round = "collection"
             return new_game_state
 

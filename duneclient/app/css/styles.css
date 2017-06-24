@@ -1,5 +1,70 @@
 body {
+    font-family: Monospace, sans-serif;
+}
 
+#header {
+    height: 40px;
+}
+
+#header ul {
+    margin: 0;
+    padding-left: 0;
+}
+
+#header li {
+    float: left;
+    list-style: none;
+    margin: 0;
+    margin-right: 3px;
+    padding: 5px;
+    border-radius: 5px;
+    border: 1px solid orange;
+    cursor: pointer;
+}
+
+#header li:hover {
+    background-color: black;
+    color: white;
+}
+
+.actions {
+    float: left;
+    height: 40px;
+    width: 100%;
+}
+
+.actions ul {
+    margin: 0;
+    padding-left: 0;
+}
+
+.actions input {
+    float: left;
+    font-size: 13px;
+    padding:5px;
+    border-radius: 5px;
+    outline: none;
+    width: 300px;
+}
+
+.actions li {
+    float: left;
+    list-style: none;
+    padding: 5px;
+    margin-right: 3px;
+    border-radius: 5px;
+    border: 1px solid green;
+    cursor: pointer;
+}
+
+.actions li:hover {
+    background-color: green;
+    color: white;
+}
+
+.actions .error {
+    color: red;
+    padding: 5px;
 }
 
 .board {
@@ -29,4 +94,17 @@ img.dead {
 
 img.alive {
 
+}
+
+.roundstate {
+    border: 1px solid purple;
+    width: 100%;
+    float: left;
+    cursor: default;
+    user-select: none;
+    user-drag: none;
+    -moz-user-select: none;
+    -webkit-user-select: none;
+    -webkit-user-drag: none;
+    -ms-user-select: none;
 }

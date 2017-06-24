@@ -2,7 +2,7 @@ import logging
 import json
 
 from dune.actions.action import Action
-from dune.exceptions import BadCommand
+from dune.exceptions import BadCommand, IllegalAction
 from dune.state.game import GameState
 
 logger = logging.getLogger(__name__)
@@ -83,6 +83,11 @@ class Session:
         session = Session(init_state, from_json["seed"])
 
         for f, cmd in from_json["command_log"]:
-            session.handle_cmd(f, cmd)
+            try:
+                session.handle_cmd(f, cmd)
+            except BadCommand as e:
+                print(e)
+            except IllegalAction as e:
+                print(e)
 
         return session

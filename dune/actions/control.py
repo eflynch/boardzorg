@@ -20,8 +20,6 @@ class DoControl(Action):
     def _execute(self, game_state):
         new_game_state = deepcopy(game_state)
 
-        # reset bonus cards
-
         # collect spice bribes
         for faction in new_game_state.faction_state:
             fs = new_game_state.faction_state[faction]
@@ -83,6 +81,11 @@ class DoControl(Action):
             new_game_state.winner = winner
             new_game_state.round = "end"
             return new_game_state
+
+        for s in new_game_state.map_state.values():
+            if s.coexist:
+                s.was_coexist = True
+                s.coexist = False
 
         new_game_state.round = "storm"
         return new_game_state

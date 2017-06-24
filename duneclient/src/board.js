@@ -3,22 +3,30 @@ import ReactDOM from 'react-dom';
 
 import {spice_location, token_location, logo_position} from './board-data';
 
+class Positioner extends React.Component {
+    render () {
+        return <div style={{
+            position: "absolute",
+            top: this.props.scale * this.props.location.top,
+            left: this.props.scale * this.props.location.left
+        }}>
+            {this.props.children}
+        </div>;
+    }
+}
+
 class Spice extends React.Component {
     render () {
         return (
-            <div>
+            <div style={{position:"relative"}}>
                 <img src={"static/app/png/melange_" + Math.ceil(this.props.amount/3) + ".png"}
-                    style={{
-                        position: "absolute",
-                        top: this.props.scale * spice_location[this.props.space].top,
-                        left: this.props.scale *spice_location[this.props.space].left,
-                    }}
-                    width={this.props.scale * 0.08}
+                    width={this.props.width}
+                    style={{"position": "absolute", top:0, left:0}}
                 />
                 <span style={{
                     position: "absolute",
-                    top: this.props.scale * (spice_location[this.props.space].top + 0.01),
-                    left: this.props.scale * (spice_location[this.props.space].left + 0.03),
+                    top: this.props.width*0.50,
+                    left: this.props.width*0.50,
                     color: "yellow",
                     fontWeight: 900,
                     fontFamily: "sans-serif"
@@ -47,52 +55,42 @@ class Logo extends React.Component {
     render () {
         return (
             <img src={"static/app/png/" + this.props.faction + "_logo.png"}
-                style={{
-                    position: "absolute",
-                    top: this.props.scale * (logo_position[this.props.position].top),
-                    left: this.props.scale * (logo_position[this.props.position].left)
-                }}
-                width={this.props.scale * 0.05}
+                width={this.props.width}
             />
         )
     }
 }
 
 class TokenPile extends React.Component {
-    getLocation () {
-        if (this.props.location) return this.props.location;
-        return token_location[this.props.space][this.props.sector][this.props.order];
-    }
     getTokenPile (number, faction) {
+        let verticalOffset = this.props.height ? this.props.height - (76/142*this.props.width) : 0;
         let tokens = [];
         for (let i=0; i < number; i++){
             let path = "static/app/png/" + this.props.faction;
             path += (this.props.faction === "bene-gesserit" && this.props.coexist) ? "_coexist_token.png" : "_token.png";
             tokens.push(
-                <img src={path}
-                 style={{
-                    position: "absolute",
-                    top: this.props.scale * (this.getLocation().top - 0.005*i),
-                    left: this.props.scale * this.getLocation().left,
-                 }}
-                 width={this.props.scale * 0.05}
-                 key={i}
-                 />
+                <img src={path} width={this.props.width} key={i}
+                     style={{
+                        position: "absolute",
+                        top: -0.12 * this.props.width * i + verticalOffset,
+                        left: 0
+                     }}/>
             );
         }
         return tokens;
     }
     render () {
         let bonus = this.props.bonus ? " (+" + this.props.bonus + ")" : "";
+        let verticalOffset = this.props.height ? this.props.height - (76/142*this.props.width) : 0;
         return (
-            <div>
+            <div style={{position:"relative"}}>
                 {this.getTokenPile(this.props.number, this.props.faction)}
                 <span style={{
                     position: "absolute",
-                    top: this.props.scale * (this.getLocation().top - 0.005*this.props.number - 0.02),
-                    left: this.props.scale * (this.getLocation().left),
+                    top: this.props.width * (-0.12 * this.props.number - 0.4) + verticalOffset,
+                    left: -this.props.width / 2,
                     color: "black",
-                    width: this.props.scale * 0.05,
+                    width: this.props.width * 2,
                     fontWeight: 900,
                     textShadow: "0 0 3px white, 0 0 15px yellow, 0 0 5px red",
                     fontFamily: "sans-serif",
@@ -124,51 +122,76 @@ class Board extends React.Component {
       this.setState({ width: Math.min(window.innerWidth, 800), height: window.innerHeight });
     }
 
-    render () {
-        let spice = [];
+    getTokenPiles () {
         let tokens = [];
         let orders = {};
         for (let i=0; i < this.props.boardstate.length; i++){
             let space = this.props.boardstate[i];
-            if (space.spice){
-                spice.push(<Spice key={space.name} scale={this.state.width} space={space.name} amount={space.spice}/>);
+            if (space.forces === null){
+                continue;
             }
-            if (space.forces !== null){
-                for (var faction in space.forces){
-                    if (space.forces.hasOwnProperty(faction)){
-                        for (var sector in space.forces[faction]){
-                            if (space.forces[faction].hasOwnProperty(sector)){
-                                if (orders.hasOwnProperty(space.name)){
-                                    orders[space.name] += 1;
-                                } else {
-                                    orders[space.name] = 1;
-                                }
-                                let number = space.forces[faction][sector].length;
-                                let power = space.forces[faction][sector].reduce((a, b) => a + b, 0);
-                                tokens.push(
-                                    <TokenPile key={space.name + sector + faction}
-                                               number={number}
-                                               bonus={number !== power ? power - number : null}
-                                               scale={this.state.width}
-                                               space={space.name}
-                                               sector={sector}
-                                               coexist={space.coexist}
-                                               order={orders[space.name]}
-                                               faction={faction}/>);
-                            }
-                        }
+            for (var faction in space.forces){
+                if (!space.forces.hasOwnProperty(faction)){
+                    continue;
+                }
+                for (var sector in space.forces[faction]){
+                    if (!space.forces[faction].hasOwnProperty(sector)){
+                        continue;
                     }
+                    if (orders.hasOwnProperty(space.name)){
+                        orders[space.name] += 1;
+                    } else {
+                        orders[space.name] = 1;
+                    }
+                    let number = space.forces[faction][sector].length;
+                    let power = space.forces[faction][sector].reduce((a, b) => a + b, 0);
+                    let location = token_location[space.name][sector][orders[space.name]];
+                    tokens.push(
+                        <Positioner key={space.name + sector + faction}scale={this.state.width} location={location}>
+                            <TokenPile number={number}
+                                       bonus={number !== power ? power - number : null}
+                                       width={this.state.width * 0.05}
+                                       coexist={space.coexist}
+                                       faction={faction}/>
+                        </Positioner>);
                 }
             }
         }
+        return tokens;
+    }
+
+    getSpice () {
+        let spice = [];
+        for (let i=0; i < this.props.boardstate.length; i++){
+            let space = this.props.boardstate[i];
+            if (!space.spice){
+                continue;
+            }
+            spice.push(
+                <Positioner key={space.name+"spice"} scale={this.state.width} location={spice_location[space.name]}>
+                    <Spice amount={space.spice} width={this.state.width * 0.08} space={space.name}/>
+                </Positioner>
+            );
+        }
+        return spice;
+    }
+
+    getLogos () {
         let logos = [];
         for (let i=0; i < this.props.logoPositions.length; i++){
             let faction = this.props.logoPositions[i][0];
             let position = this.props.logoPositions[i][1];
-            if (position !== null){
-                logos.push(<Logo key={faction} scale={this.state.width} faction={faction} position={position}/>);
+            if (position === null){
+                continue;
             }
+            logos.push(<Positioner key={faction+"logo"} scale={this.state.width} location={logo_position[position]}>
+                <Logo width={this.state.width * 0.05} faction={faction}/>
+            </Positioner>);
         }
+        return logos;
+    }
+
+    render () {
         return (
             <div className="board">
                 <div style={{
@@ -182,9 +205,9 @@ class Board extends React.Component {
                     margin: 0
                 }}>
                 <Storm scale={this.state.width} sector={this.props.stormSector}/>
-                {tokens}
-                {spice}
-                {logos}
+                {this.getLogos()}
+                {this.getSpice()}
+                {this.getTokenPiles()}
                 </div>
             </div>
         );
@@ -194,5 +217,6 @@ class Board extends React.Component {
 
 module.exports = {
     Board: Board,
-    TokenPile: TokenPile
+    TokenPile: TokenPile,
+    Spice: Spice
 }

@@ -30,8 +30,8 @@ TREACHERY_CARDS = [
     "Stunner",
     "Tleilaxu-Ghola",
     "Trip-to-Gamont",
-    "Truthtrance",
-    "Truthtrance",
+    "Truth-Trance",
+    "Truth-Trance",
     "Weather-Control"
 ]
 
