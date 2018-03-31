@@ -3,6 +3,10 @@ import ReactDOM from 'react-dom';
 
 import {spice_location, token_location, logo_position} from './board-data';
 
+import Spice from './components/spice';
+import TokenPile from './components/token-pile';
+
+
 class Positioner extends React.Component {
     render () {
         return <div style={{
@@ -12,27 +16,6 @@ class Positioner extends React.Component {
         }}>
             {this.props.children}
         </div>;
-    }
-}
-
-class Spice extends React.Component {
-    render () {
-        return (
-            <div style={{position:"relative"}}>
-                <img src={"static/app/png/melange_" + Math.ceil(this.props.amount/3) + ".png"}
-                    width={this.props.width}
-                    style={{"position": "absolute", top:0, left:0}}
-                />
-                <span style={{
-                    position: "absolute",
-                    top: this.props.width*0.50,
-                    left: this.props.width*0.50,
-                    color: "yellow",
-                    fontWeight: 900,
-                    fontFamily: "sans-serif"
-                }}>{this.props.amount}</span>
-            </div>
-        )
     }
 }
 
@@ -61,46 +44,6 @@ class Logo extends React.Component {
     }
 }
 
-class TokenPile extends React.Component {
-    getTokenPile (number, faction) {
-        let verticalOffset = this.props.height ? this.props.height - (76/142*this.props.width) : 0;
-        let tokens = [];
-        for (let i=0; i < number; i++){
-            let path = "static/app/png/" + this.props.faction;
-            path += (this.props.faction === "bene-gesserit" && this.props.coexist) ? "_coexist_token.png" : "_token.png";
-            tokens.push(
-                <img src={path} width={this.props.width} key={i}
-                     style={{
-                        position: "absolute",
-                        top: -0.12 * this.props.width * i + verticalOffset,
-                        left: 0
-                     }}/>
-            );
-        }
-        return tokens;
-    }
-    render () {
-        let bonus = this.props.bonus ? " (+" + this.props.bonus + ")" : "";
-        let verticalOffset = this.props.height ? this.props.height - (76/142*this.props.width) : 0;
-        return (
-            <div style={{position:"relative"}}>
-                {this.getTokenPile(this.props.number, this.props.faction)}
-                <span style={{
-                    position: "absolute",
-                    top: this.props.width * (-0.12 * this.props.number - 0.4) + verticalOffset,
-                    left: -this.props.width / 2,
-                    color: "black",
-                    width: this.props.width * 2,
-                    fontWeight: 900,
-                    textShadow: "0 0 3px white, 0 0 15px yellow, 0 0 5px red",
-                    fontFamily: "sans-serif",
-                    textAlign: "center",
-                    fontSize: 16
-                }}>{this.props.number + bonus}</span>
-            </div>
-        );
-    }
-}
 
 class Board extends React.Component {
     constructor(props) {
@@ -215,8 +158,4 @@ class Board extends React.Component {
 }
 
 
-module.exports = {
-    Board: Board,
-    TokenPile: TokenPile,
-    Spice: Spice
-}
+module.exports = Board;

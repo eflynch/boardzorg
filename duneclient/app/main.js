@@ -9603,7 +9603,21 @@ var _reactDom = __webpack_require__(33);
 
 var _reactDom2 = _interopRequireDefault(_reactDom);
 
+var _actions = __webpack_require__(195);
+
+var _actions2 = _interopRequireDefault(_actions);
+
 var _board = __webpack_require__(86);
+
+var _board2 = _interopRequireDefault(_board);
+
+var _faction = __webpack_require__(196);
+
+var _faction2 = _interopRequireDefault(_faction);
+
+var _bidding = __webpack_require__(189);
+
+var _bidding2 = _interopRequireDefault(_bidding);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -9613,414 +9627,8 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-function getRandomIntInclusive(min, max) {
-    min = Math.ceil(min);
-    max = Math.floor(max);
-    return Math.floor(Math.random() * (max - min + 1)) + min; //The maximum is inclusive and the minimum is inclusive
-}
-
-var BiddingState = function (_React$Component) {
-    _inherits(BiddingState, _React$Component);
-
-    function BiddingState() {
-        _classCallCheck(this, BiddingState);
-
-        return _possibleConstructorReturn(this, (BiddingState.__proto__ || Object.getPrototypeOf(BiddingState)).apply(this, arguments));
-    }
-
-    _createClass(BiddingState, [{
-        key: 'getCards',
-        value: function getCards() {
-            var cards = [];
-            var reverses = this.props.roundstate.up_for_auction.length;
-            if (this.props.roundstate.up_for_auction.next !== undefined) {
-                cards.push(_react2.default.createElement(TreacheryCard, {
-                    key: 'next', name: this.props.roundstate.up_for_auction.next }));
-                reverses -= 1;
-            }
-            for (var i = 0; i < reverses; i++) {
-                cards.push(_react2.default.createElement(TreacheryCard, { key: i, name: 'Reverse' }));
-            }
-            return cards;
-        }
-    }, {
-        key: 'getBids',
-        value: function getBids() {
-            var _this2 = this;
-
-            return Object.keys(this.props.roundstate.stage_state.bids).map(function (faction) {
-                return _react2.default.createElement(
-                    'li',
-                    { key: faction },
-                    faction,
-                    ' : ',
-                    _this2.props.roundstate.stage_state.bids[faction]
-                );
-            });
-        }
-    }, {
-        key: 'render',
-        value: function render() {
-            if (this.props.roundstate.stage_state.stage === "auction") {
-                return _react2.default.createElement(
-                    'div',
-                    null,
-                    _react2.default.createElement(
-                        'h4',
-                        null,
-                        'Bidding Round'
-                    ),
-                    this.getCards(),
-                    this.getBids()
-                );
-            }
-            return _react2.default.createElement('div', null);
-        }
-    }]);
-
-    return BiddingState;
-}(_react2.default.Component);
-
-var RoundState = function (_React$Component2) {
-    _inherits(RoundState, _React$Component2);
-
-    function RoundState() {
-        _classCallCheck(this, RoundState);
-
-        return _possibleConstructorReturn(this, (RoundState.__proto__ || Object.getPrototypeOf(RoundState)).apply(this, arguments));
-    }
-
-    _createClass(RoundState, [{
-        key: 'render',
-        value: function render() {
-            var state = null;
-            if (this.props.roundstate.round == "bidding") {
-                state = _react2.default.createElement(BiddingState, { roundstate: this.props.roundstate });
-            }
-            if (state === null) {
-                return _react2.default.createElement(
-                    'div',
-                    null,
-                    JSON.stringify(this.props.roundstate)
-                );
-            }
-            return _react2.default.createElement(
-                'div',
-                { className: 'roundstate' },
-                state
-            );
-        }
-    }]);
-
-    return RoundState;
-}(_react2.default.Component);
-
-var SpiceCard = function (_React$Component3) {
-    _inherits(SpiceCard, _React$Component3);
-
-    function SpiceCard() {
-        _classCallCheck(this, SpiceCard);
-
-        return _possibleConstructorReturn(this, (SpiceCard.__proto__ || Object.getPrototypeOf(SpiceCard)).apply(this, arguments));
-    }
-
-    _createClass(SpiceCard, [{
-        key: 'render',
-        value: function render() {
-            return _react2.default.createElement('img', {
-                src: "static/app/png/Spice-" + this.props.name + ".png",
-                width: 150 });
-        }
-    }]);
-
-    return SpiceCard;
-}(_react2.default.Component);
-
-var TreacheryCard = function (_React$Component4) {
-    _inherits(TreacheryCard, _React$Component4);
-
-    function TreacheryCard() {
-        _classCallCheck(this, TreacheryCard);
-
-        return _possibleConstructorReturn(this, (TreacheryCard.__proto__ || Object.getPrototypeOf(TreacheryCard)).apply(this, arguments));
-    }
-
-    _createClass(TreacheryCard, [{
-        key: 'render',
-        value: function render() {
-            var name = this.props.name;
-            if (this.props.name === "Cheap-Hero/Heroine") {
-                name = ["Cheap-Hero", "Cheap-Heroine"][getRandomIntInclusive(0, 1)];
-            }
-            return _react2.default.createElement('img', { style: { float: "left" },
-                src: "static/app/png/Treachery-" + name + ".png",
-                width: 150 });
-        }
-    }]);
-
-    return TreacheryCard;
-}(_react2.default.Component);
-
-var TraitorCard = function (_React$Component5) {
-    _inherits(TraitorCard, _React$Component5);
-
-    function TraitorCard() {
-        _classCallCheck(this, TraitorCard);
-
-        return _possibleConstructorReturn(this, (TraitorCard.__proto__ || Object.getPrototypeOf(TraitorCard)).apply(this, arguments));
-    }
-
-    _createClass(TraitorCard, [{
-        key: 'render',
-        value: function render() {
-            return _react2.default.createElement('img', { style: { float: "left" },
-                src: "static/app/png/Traitor-" + this.props.name + ".png",
-                width: 150 });
-        }
-    }]);
-
-    return TraitorCard;
-}(_react2.default.Component);
-
-var LeaderToken = function (_React$Component6) {
-    _inherits(LeaderToken, _React$Component6);
-
-    function LeaderToken() {
-        _classCallCheck(this, LeaderToken);
-
-        return _possibleConstructorReturn(this, (LeaderToken.__proto__ || Object.getPrototypeOf(LeaderToken)).apply(this, arguments));
-    }
-
-    _createClass(LeaderToken, [{
-        key: 'render',
-        value: function render() {
-            return _react2.default.createElement('img', { className: this.props.dead ? "dead" : "alive",
-                src: "static/app/png/Leader-" + this.props.name + ".png",
-                width: 75 });
-        }
-    }]);
-
-    return LeaderToken;
-}(_react2.default.Component);
-
-var Faction = function (_React$Component7) {
-    _inherits(Faction, _React$Component7);
-
-    function Faction() {
-        _classCallCheck(this, Faction);
-
-        return _possibleConstructorReturn(this, (Faction.__proto__ || Object.getPrototypeOf(Faction)).apply(this, arguments));
-    }
-
-    _createClass(Faction, [{
-        key: 'getTreachery',
-        value: function getTreachery() {
-            if (!this.props.factionstate.hasOwnProperty("treachery")) {
-                return [];
-            }
-
-            if (Array.isArray(this.props.factionstate.treachery)) {
-                return this.props.factionstate.treachery.map(function (name, i) {
-                    return _react2.default.createElement(TreacheryCard, { key: i, name: name });
-                });
-            } else {
-                var treachery = [];
-                for (var i = 0; i < this.props.factionstate.treachery.length; i++) {
-                    treachery.push(_react2.default.createElement(TreacheryCard, { key: "reverse-" + i, name: 'Reverse' }));
-                }
-                return treachery;
-            }
-        }
-    }, {
-        key: 'getTraitors',
-        value: function getTraitors() {
-            if (this.props.me !== this.props.faction) {
-                return [];
-            }
-            return this.props.factionstate.traitors.map(function (traitor) {
-                return _react2.default.createElement(TraitorCard, { key: "traitor-" + traitor[0], name: traitor[0] });
-            });
-        }
-    }, {
-        key: 'getLeaders',
-        value: function getLeaders() {
-            var _this9 = this;
-
-            return _react2.default.createElement(
-                'div',
-                { style: { width: 150, float: "left" } },
-                this.props.factionstate.leaders.map(function (leader) {
-                    var dead = false;
-                    if (_this9.props.factionstate.tank_leaders.indexOf(leader) !== -1) {
-                        dead = true;
-                    }
-                    return _react2.default.createElement(LeaderToken, { key: "leader-" + leader[0], name: leader[0], dead: dead });
-                }),
-                this.getSpice()
-            );
-        }
-    }, {
-        key: 'getTokens',
-        value: function getTokens() {
-            var number = this.props.factionstate.reserve_units.length;
-            var power = this.props.factionstate.reserve_units.reduce(function (a, b) {
-                return a + b;
-            }, 0);
-            return _react2.default.createElement(
-                'div',
-                { style: { float: "left", width: 50, height: 210 } },
-                _react2.default.createElement(_board.TokenPile, { width: 50, height: 210, faction: this.props.faction, number: number, bonus: power - number })
-            );
-        }
-    }, {
-        key: 'getSpice',
-        value: function getSpice() {
-            if (this.props.factionstate.spice !== undefined) {
-                return _react2.default.createElement(
-                    'div',
-                    { style: { float: "left", width: 75, height: 75 } },
-                    _react2.default.createElement(_board.Spice, { width: 75, amount: this.props.factionstate.spice })
-                );
-            }
-            return _react2.default.createElement('div', null);
-        }
-    }, {
-        key: 'render',
-        value: function render() {
-            return _react2.default.createElement(
-                'div',
-                { style: { float: "left", border: "1px solid red" } },
-                _react2.default.createElement(
-                    'h2',
-                    null,
-                    this.props.faction
-                ),
-                this.getLeaders(),
-                this.getTokens(),
-                this.getTreachery(),
-                this.getTraitors()
-            );
-        }
-    }]);
-
-    return Faction;
-}(_react2.default.Component);
-
-var Game = function (_React$Component8) {
-    _inherits(Game, _React$Component8);
-
-    function Game() {
-        _classCallCheck(this, Game);
-
-        return _possibleConstructorReturn(this, (Game.__proto__ || Object.getPrototypeOf(Game)).apply(this, arguments));
-    }
-
-    _createClass(Game, [{
-        key: 'render',
-        value: function render() {
-            var _this11 = this;
-
-            var fs = Object.keys(this.props.gamestate.faction_state);
-            var factions = [];
-            fs.forEach(function (faction) {
-                if (faction == _this11.props.me) {
-                    return;
-                }
-                factions.push(_react2.default.createElement(Faction, { key: faction, me: _this11.props.me, faction: faction, factionstate: _this11.props.gamestate.faction_state[faction] }));
-            });
-            var logoPositions = fs.map(function (faction) {
-                var factionstate = _this11.props.gamestate.faction_state[faction];
-                return [factionstate.name, factionstate.token_position];
-            });
-            return _react2.default.createElement(
-                'div',
-                null,
-                _react2.default.createElement(Faction, { key: "me", me: this.props.me, faction: this.props.me, factionstate: this.props.gamestate.faction_state[this.props.me] }),
-                _react2.default.createElement(RoundState, { roundstate: this.props.gamestate.round_state }),
-                _react2.default.createElement(_board.Board, { boardstate: this.props.gamestate.map_state, logoPositions: logoPositions,
-                    stormSector: this.props.gamestate.storm_position }),
-                factions
-            );
-        }
-    }]);
-
-    return Game;
-}(_react2.default.Component);
-
-var Actions = function (_React$Component9) {
-    _inherits(Actions, _React$Component9);
-
-    function Actions() {
-        _classCallCheck(this, Actions);
-
-        return _possibleConstructorReturn(this, (Actions.__proto__ || Object.getPrototypeOf(Actions)).apply(this, arguments));
-    }
-
-    _createClass(Actions, [{
-        key: 'handle_click',
-        value: function handle_click(action) {
-            var args = _reactDom2.default.findDOMNode(this.refs.text);
-            this.props.sendCommand(action + " " + args.value);
-        }
-    }, {
-        key: 'render',
-        value: function render() {
-            var error = _react2.default.createElement('span', null);
-            if (this.props.error !== null) {
-                if (this.props.error.BadCommand !== undefined) {
-                    error = _react2.default.createElement(
-                        'span',
-                        { className: 'error' },
-                        this.props.error.BadCommand
-                    );
-                }
-                if (this.props.error.InvalidCommand !== undefined) {
-                    error = _react2.default.createElement(
-                        'span',
-                        { className: 'error' },
-                        this.props.error.InvalidCommand
-                    );
-                }
-                if (this.props.error.UnhandledError !== undefined) {
-                    error = _react2.default.createElement(
-                        'span',
-                        { className: 'error' },
-                        this.props.error.UnhandledError
-                    );
-                }
-            }
-            var actions = this.props.actions.map(function (action, i) {
-                return _react2.default.createElement(
-                    'li',
-                    { key: i },
-                    _react2.default.createElement(
-                        'span',
-                        { onClick: function () {
-                                this.handle_click(action);
-                            }.bind(this), key: i },
-                        action
-                    )
-                );
-            }.bind(this));
-            return _react2.default.createElement(
-                'div',
-                { className: 'actions' },
-                _react2.default.createElement(
-                    'ul',
-                    null,
-                    actions,
-                    error,
-                    _react2.default.createElement('input', { type: 'text', ref: 'text' })
-                )
-            );
-        }
-    }]);
-
-    return Actions;
-}(_react2.default.Component);
-
-var Session = function (_React$Component10) {
-    _inherits(Session, _React$Component10);
+var Session = function (_React$Component) {
+    _inherits(Session, _React$Component);
 
     function Session() {
         _classCallCheck(this, Session);
@@ -10029,13 +9637,55 @@ var Session = function (_React$Component10) {
     }
 
     _createClass(Session, [{
+        key: 'getRoundState',
+        value: function getRoundState(round_state) {
+            var state = null;
+            if (round_state.round == "bidding") {
+                state = _react2.default.createElement(_bidding2.default, { roundstate: round_state });
+            }
+            if (state === null) {
+                return _react2.default.createElement(
+                    'div',
+                    null,
+                    JSON.stringify(round_state)
+                );
+            }
+            return _react2.default.createElement(
+                'div',
+                { className: 'roundstate' },
+                state
+            );
+        }
+    }, {
         key: 'render',
         value: function render() {
+            var _this2 = this;
+
+            var _props$data = this.props.data,
+                state = _props$data.state,
+                actions = _props$data.actions;
+
+            var fs = Object.keys(state.faction_state);
+            var factions = [];
+            fs.forEach(function (faction) {
+                if (faction == _this2.props.me) {
+                    return;
+                }
+                factions.push(_react2.default.createElement(_faction2.default, { key: faction, me: _this2.props.me, faction: faction, factionstate: state.faction_state[faction] }));
+            });
+            var logoPositions = fs.map(function (faction) {
+                var factionstate = state.faction_state[faction];
+                return [factionstate.name, factionstate.token_position];
+            });
             return _react2.default.createElement(
                 'div',
                 null,
-                _react2.default.createElement(Actions, { error: this.props.error, actions: this.props.data.actions, sendCommand: this.props.sendCommand }),
-                _react2.default.createElement(Game, { me: this.props.me, gamestate: this.props.data.state })
+                _react2.default.createElement(_actions2.default, { error: this.props.error, actions: actions, sendCommand: this.props.sendCommand }),
+                _react2.default.createElement(_faction2.default, { key: "me", me: this.props.me, faction: this.props.me, factionstate: state.faction_state[this.props.me] }),
+                this.getRoundState(state.round_state),
+                _react2.default.createElement(_board2.default, { boardstate: state.map_state, logoPositions: logoPositions,
+                    stormSector: state.storm_position }),
+                factions
             );
         }
     }]);
@@ -20418,6 +20068,14 @@ var _reactDom2 = _interopRequireDefault(_reactDom);
 
 var _boardData = __webpack_require__(85);
 
+var _spice = __webpack_require__(187);
+
+var _spice2 = _interopRequireDefault(_spice);
+
+var _tokenPile = __webpack_require__(188);
+
+var _tokenPile2 = _interopRequireDefault(_tokenPile);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -20453,46 +20111,8 @@ var Positioner = function (_React$Component) {
     return Positioner;
 }(_react2.default.Component);
 
-var Spice = function (_React$Component2) {
-    _inherits(Spice, _React$Component2);
-
-    function Spice() {
-        _classCallCheck(this, Spice);
-
-        return _possibleConstructorReturn(this, (Spice.__proto__ || Object.getPrototypeOf(Spice)).apply(this, arguments));
-    }
-
-    _createClass(Spice, [{
-        key: 'render',
-        value: function render() {
-            return _react2.default.createElement(
-                'div',
-                { style: { position: "relative" } },
-                _react2.default.createElement('img', { src: "static/app/png/melange_" + Math.ceil(this.props.amount / 3) + ".png",
-                    width: this.props.width,
-                    style: { "position": "absolute", top: 0, left: 0 }
-                }),
-                _react2.default.createElement(
-                    'span',
-                    { style: {
-                            position: "absolute",
-                            top: this.props.width * 0.50,
-                            left: this.props.width * 0.50,
-                            color: "yellow",
-                            fontWeight: 900,
-                            fontFamily: "sans-serif"
-                        } },
-                    this.props.amount
-                )
-            );
-        }
-    }]);
-
-    return Spice;
-}(_react2.default.Component);
-
-var Storm = function (_React$Component3) {
-    _inherits(Storm, _React$Component3);
+var Storm = function (_React$Component2) {
+    _inherits(Storm, _React$Component2);
 
     function Storm() {
         _classCallCheck(this, Storm);
@@ -20519,8 +20139,8 @@ var Storm = function (_React$Component3) {
     return Storm;
 }(_react2.default.Component);
 
-var Logo = function (_React$Component4) {
-    _inherits(Logo, _React$Component4);
+var Logo = function (_React$Component3) {
+    _inherits(Logo, _React$Component3);
 
     function Logo() {
         _classCallCheck(this, Logo);
@@ -20540,75 +20160,17 @@ var Logo = function (_React$Component4) {
     return Logo;
 }(_react2.default.Component);
 
-var TokenPile = function (_React$Component5) {
-    _inherits(TokenPile, _React$Component5);
-
-    function TokenPile() {
-        _classCallCheck(this, TokenPile);
-
-        return _possibleConstructorReturn(this, (TokenPile.__proto__ || Object.getPrototypeOf(TokenPile)).apply(this, arguments));
-    }
-
-    _createClass(TokenPile, [{
-        key: 'getTokenPile',
-        value: function getTokenPile(number, faction) {
-            var verticalOffset = this.props.height ? this.props.height - 76 / 142 * this.props.width : 0;
-            var tokens = [];
-            for (var i = 0; i < number; i++) {
-                var path = "static/app/png/" + this.props.faction;
-                path += this.props.faction === "bene-gesserit" && this.props.coexist ? "_coexist_token.png" : "_token.png";
-                tokens.push(_react2.default.createElement('img', { src: path, width: this.props.width, key: i,
-                    style: {
-                        position: "absolute",
-                        top: -0.12 * this.props.width * i + verticalOffset,
-                        left: 0
-                    } }));
-            }
-            return tokens;
-        }
-    }, {
-        key: 'render',
-        value: function render() {
-            var bonus = this.props.bonus ? " (+" + this.props.bonus + ")" : "";
-            var verticalOffset = this.props.height ? this.props.height - 76 / 142 * this.props.width : 0;
-            return _react2.default.createElement(
-                'div',
-                { style: { position: "relative" } },
-                this.getTokenPile(this.props.number, this.props.faction),
-                _react2.default.createElement(
-                    'span',
-                    { style: {
-                            position: "absolute",
-                            top: this.props.width * (-0.12 * this.props.number - 0.4) + verticalOffset,
-                            left: -this.props.width / 2,
-                            color: "black",
-                            width: this.props.width * 2,
-                            fontWeight: 900,
-                            textShadow: "0 0 3px white, 0 0 15px yellow, 0 0 5px red",
-                            fontFamily: "sans-serif",
-                            textAlign: "center",
-                            fontSize: 16
-                        } },
-                    this.props.number + bonus
-                )
-            );
-        }
-    }]);
-
-    return TokenPile;
-}(_react2.default.Component);
-
-var Board = function (_React$Component6) {
-    _inherits(Board, _React$Component6);
+var Board = function (_React$Component4) {
+    _inherits(Board, _React$Component4);
 
     function Board(props) {
         _classCallCheck(this, Board);
 
-        var _this6 = _possibleConstructorReturn(this, (Board.__proto__ || Object.getPrototypeOf(Board)).call(this, props));
+        var _this4 = _possibleConstructorReturn(this, (Board.__proto__ || Object.getPrototypeOf(Board)).call(this, props));
 
-        _this6.state = { width: '0', height: '0' };
-        _this6.updateWindowDimensions = _this6.updateWindowDimensions.bind(_this6);
-        return _this6;
+        _this4.state = { width: '0', height: '0' };
+        _this4.updateWindowDimensions = _this4.updateWindowDimensions.bind(_this4);
+        return _this4;
     }
 
     _createClass(Board, [{
@@ -20658,7 +20220,7 @@ var Board = function (_React$Component6) {
                         tokens.push(_react2.default.createElement(
                             Positioner,
                             { key: space.name + sector + faction, scale: this.state.width, location: location },
-                            _react2.default.createElement(TokenPile, { number: number,
+                            _react2.default.createElement(_tokenPile2.default, { number: number,
                                 bonus: number !== power ? power - number : null,
                                 width: this.state.width * 0.05,
                                 coexist: space.coexist,
@@ -20681,7 +20243,7 @@ var Board = function (_React$Component6) {
                 spice.push(_react2.default.createElement(
                     Positioner,
                     { key: space.name + "spice", scale: this.state.width, location: _boardData.spice_location[space.name] },
-                    _react2.default.createElement(Spice, { amount: space.spice, width: this.state.width * 0.08, space: space.name })
+                    _react2.default.createElement(_spice2.default, { amount: space.spice, width: this.state.width * 0.08, space: space.name })
                 ));
             }
             return spice;
@@ -20734,11 +20296,7 @@ var Board = function (_React$Component6) {
     return Board;
 }(_react2.default.Component);
 
-module.exports = {
-    Board: Board,
-    TokenPile: TokenPile,
-    Spice: Spice
-};
+module.exports = Board;
 
 /***/ }),
 /* 87 */
@@ -33299,6 +32857,638 @@ function traverseAllChildren(children, callback, traverseContext) {
 
 module.exports = traverseAllChildren;
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
+
+/***/ }),
+/* 187 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _react = __webpack_require__(25);
+
+var _react2 = _interopRequireDefault(_react);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var Spice = function (_React$Component) {
+    _inherits(Spice, _React$Component);
+
+    function Spice() {
+        _classCallCheck(this, Spice);
+
+        return _possibleConstructorReturn(this, (Spice.__proto__ || Object.getPrototypeOf(Spice)).apply(this, arguments));
+    }
+
+    _createClass(Spice, [{
+        key: "render",
+        value: function render() {
+            return _react2.default.createElement(
+                "div",
+                { style: { position: "relative" } },
+                _react2.default.createElement("img", { src: "static/app/png/melange_" + Math.ceil(this.props.amount / 3) + ".png",
+                    width: this.props.width,
+                    style: { "position": "absolute", top: 0, left: 0 }
+                }),
+                _react2.default.createElement(
+                    "span",
+                    { style: {
+                            position: "absolute",
+                            top: this.props.width * 0.50,
+                            left: this.props.width * 0.50,
+                            color: "yellow",
+                            fontWeight: 900,
+                            fontFamily: "sans-serif"
+                        } },
+                    this.props.amount
+                )
+            );
+        }
+    }]);
+
+    return Spice;
+}(_react2.default.Component);
+
+module.exports = Spice;
+
+/***/ }),
+/* 188 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _react = __webpack_require__(25);
+
+var _react2 = _interopRequireDefault(_react);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var TokenPile = function (_React$Component) {
+    _inherits(TokenPile, _React$Component);
+
+    function TokenPile() {
+        _classCallCheck(this, TokenPile);
+
+        return _possibleConstructorReturn(this, (TokenPile.__proto__ || Object.getPrototypeOf(TokenPile)).apply(this, arguments));
+    }
+
+    _createClass(TokenPile, [{
+        key: "getTokenPile",
+        value: function getTokenPile(number, faction) {
+            var verticalOffset = this.props.height ? this.props.height - 76 / 142 * this.props.width : 0;
+            var tokens = [];
+            for (var i = 0; i < number; i++) {
+                var path = "static/app/png/" + this.props.faction;
+                path += this.props.faction === "bene-gesserit" && this.props.coexist ? "_coexist_token.png" : "_token.png";
+                tokens.push(_react2.default.createElement("img", { src: path, width: this.props.width, key: i,
+                    style: {
+                        position: "absolute",
+                        top: -0.12 * this.props.width * i + verticalOffset,
+                        left: 0
+                    } }));
+            }
+            return tokens;
+        }
+    }, {
+        key: "render",
+        value: function render() {
+            var bonus = this.props.bonus ? " (+" + this.props.bonus + ")" : "";
+            var verticalOffset = this.props.height ? this.props.height - 76 / 142 * this.props.width : 0;
+            return _react2.default.createElement(
+                "div",
+                { style: { position: "relative" } },
+                this.getTokenPile(this.props.number, this.props.faction),
+                _react2.default.createElement(
+                    "span",
+                    { style: {
+                            position: "absolute",
+                            top: this.props.width * (-0.12 * this.props.number - 0.4) + verticalOffset,
+                            left: -this.props.width / 2,
+                            color: "black",
+                            width: this.props.width * 2,
+                            fontWeight: 900,
+                            textShadow: "0 0 3px white, 0 0 15px yellow, 0 0 5px red",
+                            fontFamily: "sans-serif",
+                            textAlign: "center",
+                            fontSize: 16
+                        } },
+                    this.props.number + bonus
+                )
+            );
+        }
+    }]);
+
+    return TokenPile;
+}(_react2.default.Component);
+
+module.exports = TokenPile;
+
+/***/ }),
+/* 189 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _react = __webpack_require__(25);
+
+var _react2 = _interopRequireDefault(_react);
+
+var _treacheryCard = __webpack_require__(192);
+
+var _treacheryCard2 = _interopRequireDefault(_treacheryCard);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var Bidding = function (_React$Component) {
+    _inherits(Bidding, _React$Component);
+
+    function Bidding() {
+        _classCallCheck(this, Bidding);
+
+        return _possibleConstructorReturn(this, (Bidding.__proto__ || Object.getPrototypeOf(Bidding)).apply(this, arguments));
+    }
+
+    _createClass(Bidding, [{
+        key: 'getCards',
+        value: function getCards() {
+            var cards = [];
+            var reverses = this.props.roundstate.up_for_auction.length;
+            if (this.props.roundstate.up_for_auction.next !== undefined) {
+                cards.push(_react2.default.createElement(_treacheryCard2.default, {
+                    key: 'next', name: this.props.roundstate.up_for_auction.next }));
+                reverses -= 1;
+            }
+            for (var i = 0; i < reverses; i++) {
+                cards.push(_react2.default.createElement(_treacheryCard2.default, { key: i, name: 'Reverse' }));
+            }
+            return cards;
+        }
+    }, {
+        key: 'getBids',
+        value: function getBids() {
+            var _this2 = this;
+
+            return Object.keys(this.props.roundstate.stage_state.bids).map(function (faction) {
+                return _react2.default.createElement(
+                    'li',
+                    { key: faction },
+                    faction,
+                    ' : ',
+                    _this2.props.roundstate.stage_state.bids[faction]
+                );
+            });
+        }
+    }, {
+        key: 'render',
+        value: function render() {
+            if (this.props.roundstate.stage_state.stage === "auction") {
+                return _react2.default.createElement(
+                    'div',
+                    null,
+                    _react2.default.createElement(
+                        'h4',
+                        null,
+                        'Bidding Round'
+                    ),
+                    this.getCards(),
+                    this.getBids()
+                );
+            }
+            return _react2.default.createElement('div', null);
+        }
+    }]);
+
+    return Bidding;
+}(_react2.default.Component);
+
+module.exports = Bidding;
+
+/***/ }),
+/* 190 */,
+/* 191 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _react = __webpack_require__(25);
+
+var _react2 = _interopRequireDefault(_react);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var TraitorCard = function (_React$Component) {
+    _inherits(TraitorCard, _React$Component);
+
+    function TraitorCard() {
+        _classCallCheck(this, TraitorCard);
+
+        return _possibleConstructorReturn(this, (TraitorCard.__proto__ || Object.getPrototypeOf(TraitorCard)).apply(this, arguments));
+    }
+
+    _createClass(TraitorCard, [{
+        key: "render",
+        value: function render() {
+            return _react2.default.createElement("img", { style: { float: "left" },
+                src: "static/app/png/Traitor-" + this.props.name + ".png",
+                width: 150 });
+        }
+    }]);
+
+    return TraitorCard;
+}(_react2.default.Component);
+
+module.exports = TraitorCard;
+
+/***/ }),
+/* 192 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _react = __webpack_require__(25);
+
+var _react2 = _interopRequireDefault(_react);
+
+var _utils = __webpack_require__(193);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var TreacheryCard = function (_React$Component) {
+    _inherits(TreacheryCard, _React$Component);
+
+    function TreacheryCard() {
+        _classCallCheck(this, TreacheryCard);
+
+        return _possibleConstructorReturn(this, (TreacheryCard.__proto__ || Object.getPrototypeOf(TreacheryCard)).apply(this, arguments));
+    }
+
+    _createClass(TreacheryCard, [{
+        key: 'render',
+        value: function render() {
+            var name = this.props.name;
+            if (this.props.name === "Cheap-Hero/Heroine") {
+                name = ["Cheap-Hero", "Cheap-Heroine"][(0, _utils.randInt)(0, 1)];
+            }
+            return _react2.default.createElement('img', { style: { float: "left" },
+                src: "static/app/png/Treachery-" + name + ".png",
+                width: 150 });
+        }
+    }]);
+
+    return TreacheryCard;
+}(_react2.default.Component);
+
+module.exports = TreacheryCard;
+
+/***/ }),
+/* 193 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+function getRandomIntInclusive(min, max) {
+  min = Math.ceil(min);
+  max = Math.floor(max);
+  return Math.floor(Math.random() * (max - min + 1)) + min; //The maximum is inclusive and the minimum is inclusive
+}
+
+module.exports = {
+  randInt: getRandomIntInclusive
+};
+
+/***/ }),
+/* 194 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _react = __webpack_require__(25);
+
+var _react2 = _interopRequireDefault(_react);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var LeaderToken = function (_React$Component) {
+    _inherits(LeaderToken, _React$Component);
+
+    function LeaderToken() {
+        _classCallCheck(this, LeaderToken);
+
+        return _possibleConstructorReturn(this, (LeaderToken.__proto__ || Object.getPrototypeOf(LeaderToken)).apply(this, arguments));
+    }
+
+    _createClass(LeaderToken, [{
+        key: "render",
+        value: function render() {
+            return _react2.default.createElement("img", { className: this.props.dead ? "dead" : "alive",
+                src: "static/app/png/Leader-" + this.props.name + ".png",
+                width: 75 });
+        }
+    }]);
+
+    return LeaderToken;
+}(_react2.default.Component);
+
+module.exports = LeaderToken;
+
+/***/ }),
+/* 195 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _react = __webpack_require__(25);
+
+var _react2 = _interopRequireDefault(_react);
+
+var _reactDom = __webpack_require__(33);
+
+var _reactDom2 = _interopRequireDefault(_reactDom);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var Actions = function (_React$Component) {
+    _inherits(Actions, _React$Component);
+
+    function Actions() {
+        _classCallCheck(this, Actions);
+
+        return _possibleConstructorReturn(this, (Actions.__proto__ || Object.getPrototypeOf(Actions)).apply(this, arguments));
+    }
+
+    _createClass(Actions, [{
+        key: 'handle_click',
+        value: function handle_click(action) {
+            var args = _reactDom2.default.findDOMNode(this.refs.text);
+            this.props.sendCommand(action + " " + args.value);
+        }
+    }, {
+        key: 'render',
+        value: function render() {
+            var error = _react2.default.createElement('span', null);
+            if (this.props.error !== null) {
+                if (this.props.error.BadCommand !== undefined) {
+                    error = _react2.default.createElement(
+                        'span',
+                        { className: 'error' },
+                        this.props.error.BadCommand
+                    );
+                }
+                if (this.props.error.InvalidCommand !== undefined) {
+                    error = _react2.default.createElement(
+                        'span',
+                        { className: 'error' },
+                        this.props.error.InvalidCommand
+                    );
+                }
+                if (this.props.error.UnhandledError !== undefined) {
+                    error = _react2.default.createElement(
+                        'span',
+                        { className: 'error' },
+                        this.props.error.UnhandledError
+                    );
+                }
+            }
+            var actions = this.props.actions.map(function (action, i) {
+                return _react2.default.createElement(
+                    'li',
+                    { key: i },
+                    _react2.default.createElement(
+                        'span',
+                        { onClick: function () {
+                                this.handle_click(action);
+                            }.bind(this), key: i },
+                        action
+                    )
+                );
+            }.bind(this));
+            return _react2.default.createElement(
+                'div',
+                { className: 'actions' },
+                _react2.default.createElement(
+                    'ul',
+                    null,
+                    actions,
+                    error,
+                    _react2.default.createElement('input', { type: 'text', ref: 'text' })
+                )
+            );
+        }
+    }]);
+
+    return Actions;
+}(_react2.default.Component);
+
+module.exports = Actions;
+
+/***/ }),
+/* 196 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _react = __webpack_require__(25);
+
+var _react2 = _interopRequireDefault(_react);
+
+var _tokenPile = __webpack_require__(188);
+
+var _tokenPile2 = _interopRequireDefault(_tokenPile);
+
+var _spice = __webpack_require__(187);
+
+var _spice2 = _interopRequireDefault(_spice);
+
+var _traitorCard = __webpack_require__(191);
+
+var _traitorCard2 = _interopRequireDefault(_traitorCard);
+
+var _treacheryCard = __webpack_require__(192);
+
+var _treacheryCard2 = _interopRequireDefault(_treacheryCard);
+
+var _leaderToken = __webpack_require__(194);
+
+var _leaderToken2 = _interopRequireDefault(_leaderToken);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var Faction = function (_React$Component) {
+    _inherits(Faction, _React$Component);
+
+    function Faction() {
+        _classCallCheck(this, Faction);
+
+        return _possibleConstructorReturn(this, (Faction.__proto__ || Object.getPrototypeOf(Faction)).apply(this, arguments));
+    }
+
+    _createClass(Faction, [{
+        key: 'getTreachery',
+        value: function getTreachery() {
+            if (!this.props.factionstate.hasOwnProperty("treachery")) {
+                return [];
+            }
+
+            if (Array.isArray(this.props.factionstate.treachery)) {
+                return this.props.factionstate.treachery.map(function (name, i) {
+                    return _react2.default.createElement(_treacheryCard2.default, { key: i, name: name });
+                });
+            } else {
+                var treachery = [];
+                for (var i = 0; i < this.props.factionstate.treachery.length; i++) {
+                    treachery.push(_react2.default.createElement(_treacheryCard2.default, { key: "reverse-" + i, name: 'Reverse' }));
+                }
+                return treachery;
+            }
+        }
+    }, {
+        key: 'getTraitors',
+        value: function getTraitors() {
+            if (this.props.me !== this.props.faction) {
+                return [];
+            }
+            return this.props.factionstate.traitors.map(function (traitor) {
+                return _react2.default.createElement(_traitorCard2.default, { key: "traitor-" + traitor[0], name: traitor[0] });
+            });
+        }
+    }, {
+        key: 'getLeaders',
+        value: function getLeaders() {
+            var _this2 = this;
+
+            return _react2.default.createElement(
+                'div',
+                { style: { width: 150, float: "left" } },
+                this.props.factionstate.leaders.map(function (leader) {
+                    var dead = false;
+                    if (_this2.props.factionstate.tank_leaders.indexOf(leader) !== -1) {
+                        dead = true;
+                    }
+                    return _react2.default.createElement(_leaderToken2.default, { key: "leader-" + leader[0], name: leader[0], dead: dead });
+                }),
+                this.getSpice()
+            );
+        }
+    }, {
+        key: 'getTokens',
+        value: function getTokens() {
+            var number = this.props.factionstate.reserve_units.length;
+            var power = this.props.factionstate.reserve_units.reduce(function (a, b) {
+                return a + b;
+            }, 0);
+            return _react2.default.createElement(
+                'div',
+                { style: { float: "left", width: 50, height: 210 } },
+                _react2.default.createElement(_tokenPile2.default, { width: 50, height: 210, faction: this.props.faction, number: number, bonus: power - number })
+            );
+        }
+    }, {
+        key: 'getSpice',
+        value: function getSpice() {
+            if (this.props.factionstate.spice !== undefined) {
+                return _react2.default.createElement(
+                    'div',
+                    { style: { float: "left", width: 75, height: 75 } },
+                    _react2.default.createElement(_spice2.default, { width: 75, amount: this.props.factionstate.spice })
+                );
+            }
+            return _react2.default.createElement('div', null);
+        }
+    }, {
+        key: 'render',
+        value: function render() {
+            return _react2.default.createElement(
+                'div',
+                { style: { float: "left", border: "1px solid red" } },
+                _react2.default.createElement(
+                    'h2',
+                    null,
+                    this.props.faction
+                ),
+                this.getLeaders(),
+                this.getTokens(),
+                this.getTreachery(),
+                this.getTraitors()
+            );
+        }
+    }]);
+
+    return Faction;
+}(_react2.default.Component);
+
+module.exports = Faction;
 
 /***/ })
 /******/ ]);
