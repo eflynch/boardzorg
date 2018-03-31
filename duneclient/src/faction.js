@@ -60,6 +60,14 @@ class Faction extends React.Component {
         }
         return <div/>;
     }
+    getBribeSpice () {
+        if (this.props.factionstate.bribe_spice !== undefined){
+            return <div style={{float:"left", width: 75, height: 75}}>
+                <Spice width={75} amount={this.props.factionstate.bribe_spice}/>
+            </div>;
+        }
+        return <div/>;
+    }
     render () {
         return (
             <div style={{float: "left", border: "1px solid red"}}>
@@ -68,6 +76,7 @@ class Faction extends React.Component {
                 {this.getTokens()}
                 {this.getTreachery()}
                 {this.getTraitors()}
+                {this.getBribeSpice()}
             </div>
         );
     }
