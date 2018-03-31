@@ -10,7 +10,7 @@ class Actions extends React.Component {
 
     render () {
         let error = <span/>;
-        if (this.props.error !== null){
+        if (this.props.error !== null && this.props.error !== undefined){
             if (this.props.error.BadCommand !== undefined){
                 error = <span className="error">{this.props.error.BadCommand}</span>;
             }

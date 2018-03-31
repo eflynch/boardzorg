@@ -5,22 +5,18 @@ import {render} from 'react-dom';
 import Header from './header'
 import Session from './session'
 
-var last_faction;
 var last_data;
-var last_session_id;
+var last_session_id = sessionStorage.getItem('last_session_id');
 
-function renderSession(session_id, faction, data){
-    last_faction = faction;
+
+function renderSession(session_id, faction, data, error){
+    if (session_id === null || session_id === undefined){
+        return;
+    }
     last_data = data;
-    last_session_id = session_id;
-    render(<Session me={faction} data={data} error={null} sendCommand={function(cmd){
+    sessionStorage.setItem('last_session_id', last_session_id);
+    render(<Session me={faction} data={data} error={error} sendCommand={function(cmd){
         sendCommand(session_id, faction, cmd);
-    }}/>, document.getElementById("content"));
-}
-
-function renderError(error){
-    render(<Session me={last_faction} data={last_data} error={error} sendCommand={function(cmd){
-        sendCommand(last_session_id, last_faction, cmd);
     }}/>, document.getElementById("content"));
 }
 
@@ -30,10 +26,10 @@ function sendCommand(session_id, faction, cmd){
         url: "/api/sessions/" + session_id,
         data: JSON.stringify({faction: faction, cmd: cmd}),
         success: function(data){
-            renderSession(session_id, faction, data);
+            renderSession(session_id, faction, data, null);
         },
         error: function(data){
-            renderError(data.responseJSON);
+            renderSession(session_id, faction, last_data, data.responseJSON);
         },
         contentType: 'application/json; charset=utf-8',
         dataType: 'json'
@@ -46,7 +42,25 @@ function getSession(session_id, faction){
     });
 }
 
+function newSession(){
+    $.ajax({
+        type: "POST",
+        url: "/api/sessions",
+        success: function(data){
+            console.log(data);
+            getSession(data.id, "guild");
+        },
+        error: function(data){
+            console.log("shit!");
+        },
+        contentType: 'application/json; charset=utf-8',
+        dataType: 'json'
+    });
+}
+
 document.addEventListener("DOMContentLoaded", function (){
-    render(<Header getSession={getSession}/>, document.getElementById("header"));
-    getSession(1, "guild");
+    render(<Header newSession={newSession} getSession={(faction)=>getSession(last_session_id, faction)} />, document.getElementById("header"));
+    if (last_session_id !== null && last_session_id !== undefined){
+        getSession(last_session_id, "guild");
+    }
 });

@@ -32,7 +32,7 @@ class SessionWrapper:
 """INSERT INTO sessions (serialized) VALUES ('{}')
 """.format(Session.serialize(session)))
             cursor.execute("SELECT id from sessions WHERE id=LAST_INSERT_ID()")
-            session_id = cursor.fetchone()
+            session_id = cursor.fetchone()["id"]
         conn.commit()
         conn.close()
         return session_id
