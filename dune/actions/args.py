@@ -82,6 +82,13 @@ class Leader(String):
         }
 
 
+class Units(Args):
+    def to_dict(self):
+        return {
+            "widget": "units"
+        }
+
+
 class Space(String):
     def to_dict(self):
         return {

@@ -7,41 +7,12 @@ import Spice from './components/spice';
 import TokenPile from './components/token-pile';
 
 
-class Positioner extends React.Component {
-    render () {
-        return <div style={{
-            position: "absolute",
-            top: this.props.scale * this.props.location.top,
-            left: this.props.scale * this.props.location.left
-        }}>
-            {this.props.children}
-        </div>;
-    }
-}
+const Storm = ({sector}) => {
+    return <image xlinkHref={`/static/app/png/storm_${sector}.png`} x="0" y="0" width="1" height="1" opacity={0.8}/>;
+};
 
-class Storm extends React.Component {
-    render () {
-        return <img
-            src={"/static/app/png/storm_" + this.props.sector + ".png"}
-            style={{
-                position: "absolute",
-                top: 0,
-                left: 0,
-                opacity: 0.9
-            }}
-            width={this.props.scale}
-        />;
-    }
-}
-
-class Logo extends React.Component {
-    render () {
-        return (
-            <img src={"/static/app/png/" + this.props.faction + "_logo.png"}
-                width={this.props.width}
-            />
-        )
-    }
+const Logo = ({faction, diameter, x, y}) => {
+    return <image xlinkHref={`/static/app/png/${faction}_logo.png`} x={x} y={y} width={diameter} height={diameter}/>;
 }
 
 
@@ -88,15 +59,15 @@ class Board extends React.Component {
                     }
                     let number = space.forces[faction][sector].length;
                     let power = space.forces[faction][sector].reduce((a, b) => a + b, 0);
-                    let location = token_location[space.name][sector][orders[space.name]];
+                    let {left, top} = token_location[space.name][sector][orders[space.name]];
                     tokens.push(
-                        <Positioner key={space.name + sector + faction}scale={this.state.width} location={location}>
-                            <TokenPile number={number}
-                                       bonus={number !== power ? power - number : null}
-                                       width={this.state.width * 0.05}
-                                       coexist={space.coexist}
-                                       faction={faction}/>
-                        </Positioner>);
+                        <TokenPile x={left} y={top}
+                                   number={number}
+                                   bonus={number !== power ? power - number : null}
+                                   width={0.05}
+                                   coexist={space.coexist}
+                                   faction={faction}/>
+                    );
                 }
             }
         }
@@ -110,10 +81,9 @@ class Board extends React.Component {
             if (!space.spice){
                 continue;
             }
+            const {left, top} = spice_location[space.name];
             spice.push(
-                <Positioner key={space.name+"spice"} scale={this.state.width} location={spice_location[space.name]}>
-                    <Spice amount={space.spice} width={this.state.width * 0.08} space={space.name}/>
-                </Positioner>
+                <Spice key={space.name+"spice"} x={left} y={top} amount={space.spice} width={0.08} height={0.08}/>
             );
         }
         return spice;
@@ -121,37 +91,23 @@ class Board extends React.Component {
 
     getLogos () {
         let logos = [];
-        for (let i=0; i < this.props.logoPositions.length; i++){
-            let faction = this.props.logoPositions[i][0];
-            let position = this.props.logoPositions[i][1];
-            if (position === null){
-                continue;
-            }
-            logos.push(<Positioner key={faction+"logo"} scale={this.state.width} location={logo_position[position]}>
-                <Logo width={this.state.width * 0.05} faction={faction}/>
-            </Positioner>);
-        }
-        return logos;
+        return this.props.logoPositions.map((pos) => {
+            const [faction, position] = pos;
+            const {top, left} = logo_position[position];
+            return <Logo key={faction} diameter={0.05} faction={faction} x={left} y={top}/>;
+        });
     }
 
     render () {
         return (
             <div className="board">
-                <div style={{
-                    backgroundImage: "url(/static/app/png/board.png)",
-                    backgroundPosition: 'center center',
-                    backgroundRepeat: 'no-repeat',
-                    backgroundSize: 'contain',
-                    height: this.state.width,
-                    width: this.state.width,
-                    position: "relative",
-                    margin: 0
-                }}>
-                <Storm scale={this.state.width} sector={this.props.stormSector}/>
-                {this.getLogos()}
-                {this.getSpice()}
-                {this.getTokenPiles()}
-                </div>
+                <svg width={this.state.width} height={this.state.width} viewBox={`0 0 1 1`}>
+                    <image xlinkHref="/static/app/png/board.png" x="0" y="0" width="1" height="1"/>
+                    <Storm sector={this.props.stormSector}/>
+                    {this.getLogos()}
+                    {this.getSpice()}
+                    {this.getTokenPiles()}
+                </svg>
             </div>
         );
     }

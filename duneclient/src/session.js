@@ -22,6 +22,7 @@ class Session extends React.Component {
 
     render () {
         let {state, actions, history} = this.props.data;
+        console.log(state);
         let fs = Object.keys(state.faction_state);
         let factions = [];
         fs.forEach((faction) => {
@@ -30,10 +31,11 @@ class Session extends React.Component {
             }
             factions.push(<Faction key={faction} me={this.props.me} faction={faction} factionstate={state.faction_state[faction]}/>);
         });
-        var logoPositions = fs.map((faction) => {
+        const logoPositions = fs.map((faction) => {
             let factionstate = state.faction_state[faction];
             return [factionstate.name, factionstate.token_position];
         });
+        console.log(logoPositions);
         const stageTitle = `${state.round_state.round} : ${state.round_state.stage ? state.round_state.stage : ""}`;
 
         return (

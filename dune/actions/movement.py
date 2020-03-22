@@ -178,7 +178,7 @@ class CoexistPlace(Action):
 
     @classmethod
     def get_arg_spec(cls):
-        return args.Array(args.Space)
+        return args.Array(args.Space())
 
     def __init__(self, faction, spaces):
         self.faction = faction
