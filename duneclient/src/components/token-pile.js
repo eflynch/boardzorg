@@ -7,7 +7,7 @@ const Token = ({faction, coexist, ...props}) => {
 
 const tokenAspect = 76/142;
 const tokenHeight = 0.1; 
-const textHeight = 0.35;
+const textHeight = 0.3;
 
 const TokenPile = ({width, faction, coexist, number, bonus, x, y}) => {
     const unitHeight = (tokenAspect + number * tokenHeight + textHeight);
