@@ -37,8 +37,8 @@ class Actions extends React.Component {
             <div className="actions">
                 <ul>
                     {actions}
-                    {error}
                     <input type="text" ref="text"/>
+                    {error}
                 </ul>
             </div>
         );

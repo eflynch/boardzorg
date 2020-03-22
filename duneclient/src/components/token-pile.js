@@ -6,7 +6,7 @@ class TokenPile extends React.Component {
         let verticalOffset = this.props.height ? this.props.height - (76/142*this.props.width) : 0;
         let tokens = [];
         for (let i=0; i < number; i++){
-            let path = "static/app/png/" + this.props.faction;
+            let path = "/static/app/png/" + this.props.faction;
             path += (this.props.faction === "bene-gesserit" && this.props.coexist) ? "_coexist_token.png" : "_token.png";
             tokens.push(
                 <img src={path} width={this.props.width} key={i}

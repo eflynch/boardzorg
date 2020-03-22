@@ -6,7 +6,8 @@ import Header from './header'
 import Session from './session'
 
 var last_data;
-var last_session_id = sessionStorage.getItem('last_session_id');
+var sessionID= window.bootstrap.sessionID; //sessionStorage.getItem('sessionID);
+var faction= window.bootstrap.faction;
 
 
 function renderSession(session_id, faction, data, error){
@@ -14,7 +15,6 @@ function renderSession(session_id, faction, data, error){
         return;
     }
     last_data = data;
-    sessionStorage.setItem('last_session_id', last_session_id);
     render(<Session me={faction} data={data} error={error} sendCommand={function(cmd){
         sendCommand(session_id, faction, cmd);
     }}/>, document.getElementById("content"));
@@ -47,8 +47,7 @@ function newSession(){
         type: "POST",
         url: "/api/sessions",
         success: function(data){
-            console.log(data);
-            getSession(data.id, "guild");
+            window.location = data.id;
         },
         error: function(data){
             console.log("shit!");
@@ -59,8 +58,8 @@ function newSession(){
 }
 
 document.addEventListener("DOMContentLoaded", function (){
-    render(<Header newSession={newSession} getSession={(faction)=>getSession(last_session_id, faction)} />, document.getElementById("header"));
-    if (last_session_id !== null && last_session_id !== undefined){
-        getSession(last_session_id, "guild");
+    render(<Header sessionTitle={sessionID} newSession={newSession} getSession={(faction)=>getSession(sessionID, faction)} />, document.getElementById("header"));
+    if (sessionID !== null && sessionID !== undefined){
+        getSession(sessionID, faction);
     }
 });

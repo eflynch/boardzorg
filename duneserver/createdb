@@ -1,5 +1,4 @@
 CREATE TABLE sessions (
-    id INT NOT NULL AUTO_INCREMENT,
-    serialized LONGTEXT,
-    PRIMARY KEY (id)
+    id SERIAL PRIMARY KEY,
+    serialized TEXT 
 );

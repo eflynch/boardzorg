@@ -22,7 +22,7 @@ class Positioner extends React.Component {
 class Storm extends React.Component {
     render () {
         return <img
-            src={"static/app/png/storm_" + this.props.sector + ".png"}
+            src={"/static/app/png/storm_" + this.props.sector + ".png"}
             style={{
                 position: "absolute",
                 top: 0,
@@ -37,7 +37,7 @@ class Storm extends React.Component {
 class Logo extends React.Component {
     render () {
         return (
-            <img src={"static/app/png/" + this.props.faction + "_logo.png"}
+            <img src={"/static/app/png/" + this.props.faction + "_logo.png"}
                 width={this.props.width}
             />
         )
@@ -138,7 +138,7 @@ class Board extends React.Component {
         return (
             <div className="board">
                 <div style={{
-                    backgroundImage: "url(static/app/png/board.png)",
+                    backgroundImage: "url(/static/app/png/board.png)",
                     backgroundPosition: 'center center',
                     backgroundRepeat: 'no-repeat',
                     backgroundSize: 'contain',

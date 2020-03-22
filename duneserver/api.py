@@ -31,7 +31,8 @@ def command(session_id):
 
         ret = {
             "state": session.get_visible_state(command["faction"]),
-            "actions": list(session.get_valid_actions(command["faction"]).keys())
+            "actions": list(session.get_valid_actions(command["faction"]).keys()),
+            "history": session.command_log
         }
 
         return jsonify(ret)
@@ -43,5 +44,6 @@ def state(session_id):
     with SessionWrapper(session_id) as session:
         return jsonify({
             "state": session.get_visible_state(faction),
-            "actions": list(session.get_valid_actions(faction).keys())
+            "actions": list(session.get_valid_actions(faction).keys()),
+            "history": session.command_log
         })

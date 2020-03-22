@@ -4,7 +4,7 @@ class Spice extends React.Component {
     render () {
         return (
             <div style={{position:"relative"}}>
-                <img src={"static/app/png/melange_" + Math.ceil(this.props.amount/3) + ".png"}
+                <img src={"/static/app/png/melange_" + Math.ceil(this.props.amount/3) + ".png"}
                     width={this.props.width}
                     style={{"position": "absolute", top:0, left:0}}
                 />

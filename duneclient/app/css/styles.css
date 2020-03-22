@@ -2,16 +2,32 @@ body {
     font-family: Monospace, sans-serif;
 }
 
-#header {
-    height: 40px;
+.main-header {
+    display: flex;
+    width: 100%;
+    align-items: center;
 }
 
-#header ul {
-    margin: 0;
+.main-header .site-title {
+    font-size: 40px;
+    font-family: Optima;
+    margin-left: 10px;
+    margin-right: 20px;
+}
+
+.main-header .session-title {
+    font-size: 30px;
+    margin: 20px;
+}
+
+.main-header ul {
+    margin: 5px;
     padding-left: 0;
+    display: flex;
+    flex-wrap: wrap;
 }
 
-#header li {
+.main-header li {
     float: left;
     list-style: none;
     margin: 0;
@@ -22,24 +38,29 @@ body {
     cursor: pointer;
 }
 
-#header li:hover {
+.main-header li:hover {
     background-color: black;
     color: white;
 }
 
-.actions {
-    float: left;
-    height: 40px;
-    width: 100%;
+.session {
+    display: flex;
+    flex-wrap: wrap;
 }
 
-.actions ul {
+.session .history {
+
+}
+
+.actions {
+}
+
+.session .history ul {
     margin: 0;
     padding-left: 0;
 }
 
 .actions input {
-    float: left;
     font-size: 13px;
     padding:5px;
     border-radius: 5px;
@@ -47,8 +68,7 @@ body {
     width: 300px;
 }
 
-.actions li {
-    float: left;
+.session .history li {
     list-style: none;
     padding: 5px;
     margin-right: 3px;
@@ -69,7 +89,6 @@ body {
 
 .board {
     border: 1px solid blue;
-    float: left;
     cursor: default;
     user-select: none;
     user-drag: none;
@@ -99,7 +118,6 @@ img.alive {
 .roundstate {
     border: 1px solid purple;
     width: 100%;
-    float: left;
     cursor: default;
     user-select: none;
     user-drag: none;
