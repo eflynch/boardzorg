@@ -2,6 +2,7 @@
 
 from copy import deepcopy
 
+from dune.actions import args
 from dune.actions.action import Action
 from dune.exceptions import IllegalAction, BadCommand
 from dune.state.rounds import nexus, bidding
@@ -20,6 +21,10 @@ class Gift(Action):
         other_faction, spice = parts
         spice = int(spice)
         return Bribe(faction, other_faction, spice)
+
+    @classmethod
+    def get_arg_spec(cls):
+        return args.Struct(args.Faction(), args.Spice())
 
     def __init__(self, faction, other_faction, spice):
         self.faction = faction
@@ -52,6 +57,10 @@ class Bribe(Action):
         other_faction, spice = parts
         spice = int(spice)
         return Bribe(faction, other_faction, spice)
+
+    @classmethod
+    def get_arg_spec(cls):
+        return args.Struct(args.Faction(), args.Spice())
 
     def __init__(self, faction, other_faction, spice):
         self.faction = faction

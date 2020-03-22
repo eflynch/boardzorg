@@ -14,7 +14,7 @@
 
 from copy import deepcopy
 
-from dune.actions import movement, storm
+from dune.actions import movement, storm, args
 from dune.actions.action import Action
 from dune.exceptions import IllegalAction, BadCommand
 from dune.state.leaders import parse_leader
@@ -41,11 +41,15 @@ class BeneGesseritPrediction(Action):
     def parse_args(cls, faction, args):
         parts = args.split(" ")
         if len(parts) != 2:
-            raise BadCommand("Bribe Requires Different Arguments")
+            raise BadCommand("Bene-Gesserit prediction requires a faction and a turn")
 
         other_faction, turn = parts
         turn = int(turn)
         return BeneGesseritPrediction(faction, other_faction, turn)
+
+    @classmethod
+    def get_arg_spec(cls):
+        return args.Struct(args.Faction(), args.Turn())
 
     def __init__(self, faction, other_faction, turn):
         self.faction = faction
@@ -84,6 +88,10 @@ class PlaceToken(Action):
     @classmethod
     def parse_args(cls, faction, args):
         return PlaceToken(faction, int(args))
+
+    @classmethod
+    def get_arg_spec(cls):
+        return args.Token()
 
     def __init__(self, faction, token_position):
         self.faction = faction
@@ -137,6 +145,10 @@ class SelectTraitor(Action):
     def parse_args(faction, args):
         traitor = parse_leader(args)
         return SelectTraitor(faction, traitor)
+
+    @classmethod
+    def get_arg_spec(cls):
+        return args.Leader()
 
     def __init__(self, faction, traitor):
         self.faction = faction
@@ -215,6 +227,10 @@ class FremenPlacement(Action):
 
         return FremenPlacement(faction, tabr_units, west_units, south_units, west_sector, south_sector)
 
+    @classmethod
+    def get_arg_spec(cls):
+        return args.Array(args.Struct(args.FremenPlacementSpaceSector(), args.Units()))
+
     def __init__(self, faction, tabr_units, west_units, south_units, west_sector, south_sector):
         self.faction = faction
         self.tabr_units = tabr_units
@@ -270,6 +286,10 @@ class BeneGesseritPlacement(Action):
         space, sector = args.split(" ")
         sector = int(sector)
         return BeneGesseritPlacement(faction, space, sector)
+
+    @classmethod
+    def get_arg_spec(cls):
+        return args.SpaceSector()
 
     def __init__(self, faction, space, sector):
         self.faction = faction

@@ -5,6 +5,7 @@ from dune.actions.action import Action
 from dune.exceptions import IllegalAction, BadCommand
 from dune.state.rounds.revival import RevivalRound
 from dune.state.rounds import bidding
+from dune.actions import args
 
 
 def next_bidder(game_state):
@@ -92,6 +93,10 @@ class Bid(Action):
         else:
             spice = int(args)
         return Bid(faction, spice)
+
+    @classmethod
+    def get_arg_spec(cls):
+        return args.Union(args.Constant("inf"), args.Spice())
 
     def __init__(self, faction, spice):
         self.faction = faction
@@ -313,7 +318,7 @@ class KaramaStopExtra(Action):
         return new_game_state
 
 
-class KaramPassStopExtra(Action):
+class KaramaPassStopExtra(Action):
     name = "karama-pass-stop-extra"
     ck_round = "bidding"
     ck_stage = "auction"

@@ -6,6 +6,7 @@ from dune.actions import storm
 from dune.exceptions import IllegalAction, BadCommand
 from dune.state.rounds import movement, battle
 from dune.map.map import MapGraph
+from dune.actions import args
 
 
 def ship_units(game_state, faction, units, space, sector, coexist=False):
@@ -175,6 +176,10 @@ class CoexistPlace(Action):
         spaces = args.split(" ")
         return CoexistPlace(faction, spaces)
 
+    @classmethod
+    def get_arg_spec(cls):
+        return args.Array(args.Space)
+
     def __init__(self, faction, spaces):
         self.faction = faction
         self.spaces = spaces
@@ -324,6 +329,13 @@ class Ship(Action):
 
         return Ship(faction, units, space, sector, coexist)
 
+    @classmethod
+    def get_arg_spec(cls):
+        return args.Union(
+            args.Struct(args.Units(), args.SpaceSector()),
+            args.Struct(args.Units(), args.SpaceSector(), args.Constant("coexist"))
+        )
+
     def __init__(self, faction, units, space, sector, coexist):
         self.faction = faction
         self.units = units
@@ -341,7 +353,6 @@ class Ship(Action):
 
     def _execute(self, game_state):
         new_game_state = deepcopy(game_state)
-
 
         space = new_game_state.map_state[self.space]
         if self.sector not in space.sectors:
@@ -650,6 +661,13 @@ class Move(Action):
         sector_b = int(sector_b)
         return Move(faction, units, space_a, sector_a, space_b, sector_b, coexist)
 
+    @classmethod
+    def get_arg_spec(cls):
+        return args.Union(
+            args.Struct(args.Units(), args.SpaceSector(), args.SpaceSector()),
+            args.Struct(args.Units(), args.SpaceSector(), args.SpaceSector(), args.Constant("coexist"))
+        )
+
     def __init__(self, faction, units, space_a, sector_a, space_b, sector_b, coexist):
         self.faction = faction
         self.units = units
@@ -723,6 +741,13 @@ class CrossShip(Action):
         sector_b = int(sector_b)
         return CrossShip(faction, units, space_a, sector_a, space_b, sector_b, coexist)
 
+    @classmethod
+    def get_arg_spec(cls):
+        return args.Union(
+            args.Struct(args.Units(), args.SpaceSector(), args.SpaceSector()),
+            args.Struct(args.Units(), args.SpaceSector(), args.SpaceSector(), args.Constant("coexist"))
+        )
+
     def __init__(self, faction, units, space_a, sector_a, space_b, sector_b, coexist):
         self.faction = faction
         self.units = units
@@ -776,6 +801,10 @@ class ReverseShip(Action):
         units = [int(u) for u in units.split(",")]
         sector = int(sector)
         return ReverseShip(faction, units, space, sector)
+
+    @classmethod
+    def get_arg_spec(cls):
+        return args.Struct(args.Units(), args.SpaceSector())
 
     def __init__(self, faction, units, space, sector):
         self.faction = faction
@@ -832,6 +861,10 @@ class Deploy(Action):
         units = [int(u) for u in units.split(",")]
         sector = int(sector)
         return Deploy(faction, units, space, sector)
+
+    @classmethod
+    def get_arg_spec(cls):
+        return args.Struct(args.Units(), args.SpaceSector())
 
     def __init__(self, faction, units, space, sector):
         self.faction = faction

@@ -1,6 +1,6 @@
 from copy import deepcopy
 
-from dune.actions import storm
+from dune.actions import storm, args
 from dune.actions.action import Action
 from dune.exceptions import IllegalAction, BadCommand
 from dune.state.rounds.movement import MovementRound
@@ -60,6 +60,10 @@ class Revive(Action):
         if leader is not None:
             leader = parse_leader(leader)
         return Revive(faction, units, leader)
+
+    @classmethod
+    def get_arg_spec(cls):
+        return args.Union(args.Leader(), args.Units())
 
     def __init__(self, faction, units, leader):
         self.faction = faction

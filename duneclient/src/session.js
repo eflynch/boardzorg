@@ -34,10 +34,11 @@ class Session extends React.Component {
             let factionstate = state.faction_state[faction];
             return [factionstate.name, factionstate.token_position];
         });
-        const stageTitle = `${state.turn} : ${state.round_state.round} : ${state.round_state.stage}`;
+        const stageTitle = `${state.round_state.round} : ${state.round_state.stage ? state.round_state.stage : ""}`;
+
         return (
             <div className="session">
-                <Board boardstate={state.map_state} logoPositions={logoPositions}
+                <Board turn={state.turn} boardstate={state.map_state} logoPositions={logoPositions}
                        stormSector={state.storm_position}/>
                 <History stageTitle={stageTitle} error={this.props.error} actions={actions} sendCommand={this.props.sendCommand} commandLog={history}/>
                 <Faction key={"me"} me={this.props.me} faction={this.props.me} factionstate={state.faction_state[this.props.me]}/>

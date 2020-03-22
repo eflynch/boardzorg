@@ -21,25 +21,22 @@ class Actions extends React.Component {
                 error = <span className="error">{this.props.error.UnhandledError}</span>;
             }
         }
-        var actions = this.props.actions.map(function(action, i){
+        const actionNames = Object.keys(this.props.actions);
+        var actions = actionNames.map(function(actionName, i){
             return (
-                <li key={i}>
-                    <span onClick={
+                <button key={i} onClick={
                         function(){
-                            this.handle_click(action);
+                            this.handle_click(actionName);
                         }.bind(this)} key={i}>
-                        {action}
-                    </span>
-                </li>
+                    {actionName}
+                </button>
             );
         }.bind(this));
         return (
             <div className="actions">
-                <ul>
-                    {actions}
-                    <input type="text" ref="text"/>
-                    {error}
-                </ul>
+                {actions}
+                <input type="text" ref="text"/>
+                {error}
             </div>
         );
     }

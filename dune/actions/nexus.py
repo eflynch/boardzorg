@@ -11,6 +11,7 @@ from dune.actions.action import Action
 from dune.actions.movement import move_units
 from dune.exceptions import IllegalAction, BadCommand
 from dune.state.factions import FactionState
+from dune.actions import args
 
 
 def fremen_allies_present(game_state):
@@ -48,10 +49,6 @@ class KaramaWormRide(Action):
     name = "karama-worm-ride"
     ck_round = "nexus"
 
-    @classmethod
-    def parse_args(cls, faction, args):
-        return KaramaWormRide(faction)
-
     def __init__(self, faction):
         self.faction = faction
 
@@ -78,10 +75,6 @@ class KaramaWormRide(Action):
 class KaramaPassWormRide(Action):
     name = "karam-pass-worm-ride"
     ck_round = "nexus"
-
-    @classmethod
-    def parse_args(cls, faction, args):
-        return KaramaPassWormRide(faction)
 
     def __init__(self, faction):
         self.faction = faction
@@ -119,6 +112,10 @@ class ProposeAlliance(Action):
                 raise BadCommand("That faction is not in the game")
 
         return ProposeAlliance(faction, factions)
+
+    @classmethod
+    def get_arg_spec(cls):
+        return args.Array(args.String())
 
     def __init__(self, faction, factions):
         self.faction = faction
@@ -186,6 +183,10 @@ class WormRide(Action):
         space, sector = args.split(" ")
         sector = int(sector)
         return WormRide(faction, space, sector)
+
+    @classmethod
+    def get_arg_spec(cls):
+        return args.SpaceSector()
 
     def __init__(self, faction, space, sector):
         self.faction = faction

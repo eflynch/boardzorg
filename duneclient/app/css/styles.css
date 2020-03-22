@@ -1,5 +1,5 @@
 body {
-    font-family: Monospace, sans-serif;
+    font-family: Optima, Monospace, sans-serif;
 }
 
 .main-header {
@@ -49,15 +49,7 @@ body {
 }
 
 .session .history {
-
-}
-
-.actions {
-}
-
-.session .history ul {
-    margin: 0;
-    padding-left: 0;
+    border: 2px black solid;
 }
 
 .actions input {
@@ -68,7 +60,7 @@ body {
     width: 300px;
 }
 
-.session .history li {
+.session .history button {
     list-style: none;
     padding: 5px;
     margin-right: 3px;
@@ -77,7 +69,7 @@ body {
     cursor: pointer;
 }
 
-.actions li:hover {
+.actions button:hover {
     background-color: green;
     color: white;
 }
@@ -88,7 +80,7 @@ body {
 }
 
 .board {
-    border: 1px solid blue;
+    background-color: black;
     cursor: default;
     user-select: none;
     user-drag: none;
@@ -116,7 +108,6 @@ img.alive {
 }
 
 .roundstate {
-    border: 1px solid purple;
     width: 100%;
     cursor: default;
     user-select: none;

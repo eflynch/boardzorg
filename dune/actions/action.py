@@ -1,4 +1,5 @@
 from dune.exceptions import IllegalAction
+from dune.actions.args import Args
 
 
 class ActionMeta(type):
@@ -23,6 +24,10 @@ class Action(object, metaclass=ActionMeta):
     @classmethod
     def parse_args(cls, faction, args):
         return cls(faction)
+
+    @classmethod
+    def get_arg_spec(cls):
+        return Args()
 
     @classmethod
     def check_turn(cls, game_state, faction):

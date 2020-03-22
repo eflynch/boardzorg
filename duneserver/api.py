@@ -29,9 +29,11 @@ def command(session_id):
         except Exception as e:
             return jsonify({"UnhandledError": str(e)}), 400
 
+        actions = session.get_valid_actions(command["faction"])
+
         ret = {
             "state": session.get_visible_state(command["faction"]),
-            "actions": list(session.get_valid_actions(command["faction"]).keys()),
+            "actions": {a: actions[a].get_arg_spec().to_dict() for a in actions},
             "history": session.command_log
         }
 
@@ -42,8 +44,9 @@ def command(session_id):
 def state(session_id):
     faction = request.args.get("faction")
     with SessionWrapper(session_id) as session:
+        actions = session.get_valid_actions(faction)
         return jsonify({
             "state": session.get_visible_state(faction),
-            "actions": list(session.get_valid_actions(faction).keys()),
+            "actions": {a: actions[a].get_arg_spec().to_dict() for a in actions},
             "history": session.command_log
         })
