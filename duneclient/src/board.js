@@ -33,7 +33,7 @@ class Board extends React.Component {
     }
 
     updateWindowDimensions() {
-      this.setState({size: Math.min(window.innerWidth - 100, 700)});
+      this.setState({size: Math.min(window.innerWidth - 100, 800)});
     }
 
     getTokenPiles () {
@@ -102,6 +102,7 @@ class Board extends React.Component {
         return (
             <div className="board">
                 <svg width={this.state.size} height={this.state.size} viewBox={`0 0 1 1`}>
+                    <text x={0.04} y={0.04} style={{fill: "white", font: "normal 0.02px Optima"}}>Turn: {this.props.turn} / 10 ({this.props.stageTitle})</text>
                     <image xlinkHref="/static/app/png/board.png" x="0" y="0" width="1" height="1"/>
                     <Storm sector={this.props.stormSector}/>
                     {this.getLogos()}

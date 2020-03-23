@@ -22,7 +22,7 @@ def run_console(seed=0, treachery_cards=None, factions_playing=None, output_file
     logging.basicConfig(level=log_level)
     random.seed(seed)
 
-    session = Session(treachery_cards=treachery_cards, factions_playing=factions_playing)
+    session = Session.new_session(treachery_deck=treachery_cards, factions=factions_playing)
 
     while True:
         parts = input("dune > ").split("! ")

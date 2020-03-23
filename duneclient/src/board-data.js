@@ -51,6 +51,11 @@ var token_location = {
             1: {top: 0.63, left: 0.79}
         }
     },
+    "Pasty-Mesa": {
+        6: {
+            1: {top: 0.43, left: 0.79}
+        }
+    },
     "False-Wall-South": {
         4: {
             1: {top: 0.63, left: 0.69}

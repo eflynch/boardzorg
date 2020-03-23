@@ -35,6 +35,7 @@ body {
 }
 
 .session .history {
+    padding: 10px;
     border: 2px black solid;
     max-width: 400px;
     text-align: center;
@@ -51,7 +52,6 @@ body {
     max-height: 500px;
     overflow-y: scroll;
     border: 1px solid red;
-    border-radius: 5px;
     padding: 10px;
 }
 
@@ -72,13 +72,13 @@ body {
     text-align: left;
     margin-bottom: 20px;
     display: flex;
+    justify-content: space-around;
     flex-wrap: wrap;
 }
 
 .actions input {
     font-size: 13px;
     padding:5px;
-    border-radius: 5px;
     outline: none;
     width: 300px;
 }
@@ -86,8 +86,6 @@ body {
 .actions li {
     padding: 5px;
     margin-right: 3px;
-    border-radius: 5px;
-    border: 1px solid green;
     cursor: pointer;
     list-style: none;
 }
@@ -147,7 +145,10 @@ img.alive {
 }
 
 .roundstate {
-    width: 100%;
+    padding: 20px;
+    background-color: black;
+    color: white;
+    min-height: 50px;
     cursor: default;
     user-select: none;
     user-drag: none;
@@ -155,4 +156,47 @@ img.alive {
     -webkit-user-select: none;
     -webkit-user-drag: none;
     -ms-user-select: none;
+}
+
+
+.factions {
+    display: flex;
+    flex-direction: column;
+    flex-wrap: wrap;
+}
+
+.faction:not(:last-child) {
+    border-bottom: 1px black solid;
+}
+
+.faction h2 {
+    margin: 0;
+    writing-mode: vertical-rl;
+    transform: rotate(-180deg);
+    margin-right: 10px;
+    border-left: 1px black solid;
+    font-size: 18px;
+    align-self: center;
+}
+
+.faction {
+    padding-top: 5px;
+    padding-bottom: 5px;
+    padding-right: 5px;
+    display: flex;
+    align-items: flex-end;
+}
+
+.faction svg {
+    flex-shrink: 0;
+}
+
+
+.faction img {
+    padding-left: 2px;
+    padding-right: 2px;
+}
+
+.faction.me {
+    background-color: #feffbe;
 }

@@ -5,7 +5,11 @@ const Choice = ({args, setArgs}) => {
     return (
         <div>
             {args.map((arg, i) => {
-                return <Widget key={i} type={arg.widget} args={arg.args} setArgs={setArgs}/>
+                return (
+                    <div>
+                        <Widget key={i} type={arg.widget} args={arg.args} setArgs={setArgs}/>
+                    </div>
+                );
             })}
         </div>
     );
@@ -84,7 +88,7 @@ const ActionArgs = ({sendCommand, actionName, argSpec}) => {
             <Widget setArgs={setArgs} type={argSpec.widget} args={argSpec.args} />
             <button onClick={()=>{
                 console.log(args);
-                // sendCommand(`${actionName} ${args}`);
+                sendCommand(`${actionName} ${args}`);
             }}>Submit Command</button>
         </div>
     );

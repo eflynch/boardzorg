@@ -15,7 +15,7 @@ class Session extends React.Component {
             state = <Bidding roundstate={round_state}/>;
         }
         if (state === null){
-            return <div>{JSON.stringify(round_state)}</div>;
+            return <div className="roundstate">{JSON.stringify(round_state)}</div>;
         }
         return <div className="roundstate">{state}</div>;
     }
@@ -40,12 +40,16 @@ class Session extends React.Component {
 
         return (
             <div className="session">
-                <Board turn={state.turn} boardstate={state.map_state} logoPositions={logoPositions}
-                       stormSector={state.storm_position}/>
-                <History stageTitle={stageTitle} error={this.props.error} actions={actions} sendCommand={this.props.sendCommand} commandLog={history}/>
-                <Faction key={"me"} me={this.props.me} faction={this.props.me} factionstate={state.faction_state[this.props.me]}/>
-                {this.getRoundState(state.round_state)}
-                {factions}
+                <div>
+                    <Board stageTitle={stageTitle} turn={state.turn} boardstate={state.map_state} logoPositions={logoPositions}
+                           stormSector={state.storm_position}/>
+                    {this.getRoundState(state.round_state)}
+                </div>
+                <History error={this.props.error} actions={actions} sendCommand={this.props.sendCommand} commandLog={history}/>
+                <div className="factions">
+                    <Faction key={"me"} me={this.props.me} faction={this.props.me} factionstate={state.faction_state[this.props.me]}/>
+                    {factions}
+                </div>
             </div>
         );
     }

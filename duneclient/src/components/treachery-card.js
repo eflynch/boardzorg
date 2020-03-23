@@ -8,7 +8,7 @@ class TreacheryCard extends React.Component {
         if (this.props.name === "Cheap-Hero/Heroine"){
             name = ["Cheap-Hero", "Cheap-Heroine"][randInt(0,1)];
         }
-        return <img style={{float:"left"}}
+        return <img
             src={"/static/app/png/Treachery-" + name + ".png"}
             width={150} />;
     }
