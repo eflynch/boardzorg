@@ -19,7 +19,7 @@ const Logo = ({faction, diameter, x, y}) => {
 class Board extends React.Component {
     constructor(props) {
       super(props);
-      this.state = { width: '0', height: '0' };
+      this.state = { size: '0' };
       this.updateWindowDimensions = this.updateWindowDimensions.bind(this);
     }
 
@@ -33,7 +33,7 @@ class Board extends React.Component {
     }
 
     updateWindowDimensions() {
-      this.setState({ width: Math.min(window.innerWidth, 800), height: window.innerHeight });
+      this.setState({size: Math.min(window.innerWidth - 100, 700)});
     }
 
     getTokenPiles () {
@@ -61,7 +61,7 @@ class Board extends React.Component {
                     let power = space.forces[faction][sector].reduce((a, b) => a + b, 0);
                     let {left, top} = token_location[space.name][sector][orders[space.name]];
                     tokens.push(
-                        <TokenPile x={left} y={top}
+                        <TokenPile key={i + faction + sector} x={left} y={top}
                                    number={number}
                                    bonus={number !== power ? power - number : null}
                                    width={0.05}
@@ -101,7 +101,7 @@ class Board extends React.Component {
     render () {
         return (
             <div className="board">
-                <svg width={this.state.width} height={this.state.width} viewBox={`0 0 1 1`}>
+                <svg width={this.state.size} height={this.state.size} viewBox={`0 0 1 1`}>
                     <image xlinkHref="/static/app/png/board.png" x="0" y="0" width="1" height="1"/>
                     <Storm sector={this.props.stormSector}/>
                     {this.getLogos()}

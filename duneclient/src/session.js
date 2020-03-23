@@ -36,7 +36,7 @@ class Session extends React.Component {
             return [factionstate.name, factionstate.token_position];
         });
         console.log(logoPositions);
-        const stageTitle = `${state.round_state.round} : ${state.round_state.stage ? state.round_state.stage : ""}`;
+        const stageTitle = `${state.round_state.round}${state.round_state.stage ? " : " + state.round_state.stage : ""}`;
 
         return (
             <div className="session">

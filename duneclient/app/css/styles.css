@@ -9,38 +9,24 @@ body {
 }
 
 .main-header .site-title {
-    font-size: 40px;
+    font-size: 30px;
     font-family: Optima;
     margin-left: 10px;
     margin-right: 20px;
 }
 
 .main-header .session-title {
-    font-size: 30px;
-    margin: 20px;
+    font-size: 16px;
 }
 
-.main-header ul {
-    margin: 5px;
-    padding-left: 0;
-    display: flex;
-    flex-wrap: wrap;
-}
-
-.main-header li {
-    float: left;
-    list-style: none;
-    margin: 0;
-    margin-right: 3px;
-    padding: 5px;
-    border-radius: 5px;
-    border: 1px solid orange;
+.main-header .header-button {
+    margin: 10px;
+    color: red;
     cursor: pointer;
 }
 
-.main-header li:hover {
-    background-color: black;
-    color: white;
+.main-header .header-button:hover {
+    color: black;
 }
 
 .session {
@@ -50,6 +36,41 @@ body {
 
 .session .history {
     border: 2px black solid;
+    max-width: 400px;
+    text-align: center;
+}
+
+.session .history .stage-title {
+    text-align: left;
+    margin: 10px;
+}
+
+.session .history .log {
+    margin-top: 5px;
+    text-align: left;
+    max-height: 500px;
+    overflow-y: scroll;
+    border: 1px solid red;
+    border-radius: 5px;
+    padding: 10px;
+}
+
+.session .history .log ul {
+    margin: 0px;
+    padding: 0px;
+    font-size: 12px;
+}
+
+.session .history .log li {
+    list-style: none;
+}
+
+.actions {
+    margin-top: 5px;
+    margin-left: 10px;
+    margin-right: 10px;
+    text-align: left;
+    margin-bottom: 20px;
 }
 
 .actions input {
@@ -60,8 +81,7 @@ body {
     width: 300px;
 }
 
-.session .history button {
-    list-style: none;
+.actions button {
     padding: 5px;
     margin-right: 3px;
     border-radius: 5px;
