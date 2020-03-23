@@ -6,14 +6,13 @@ class Args:
 
 
 class Union(Args):
-    def __init__(self, argA, argB):
-        self.argA = argA
-        self.argB = argB
+    def __init__(self, *args):
+        self.args = args
 
     def to_dict(self):
         return {
             "widget": "choice",
-            "args": [self.argA.to_dict(), self.argB.to_dict()]
+            "args": [a.to_dict() for a in self.args]
         }
 
 

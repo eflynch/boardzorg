@@ -71,6 +71,8 @@ body {
     margin-right: 10px;
     text-align: left;
     margin-bottom: 20px;
+    display: flex;
+    flex-wrap: wrap;
 }
 
 .actions input {
@@ -81,15 +83,32 @@ body {
     width: 300px;
 }
 
-.actions button {
+.actions li {
     padding: 5px;
     margin-right: 3px;
     border-radius: 5px;
     border: 1px solid green;
     cursor: pointer;
+    list-style: none;
 }
 
-.actions button:hover {
+.actions-wrapper button {
+    font-size: 16px;
+    padding: 5px;
+    margin-right: 3px;
+    border-radius: 5px;
+    border: 2px solid green;
+    cursor: pointer;
+    list-style: none;
+    outline: none;
+}
+
+.actions-wrapper button:active {
+    background-color: green;
+    color: white;
+}
+
+.actions li.selected {
     background-color: green;
     color: white;
 }

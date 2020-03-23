@@ -2,7 +2,7 @@ import React from 'react';
 
 import Actions from './actions';
 
-export default History = ({stageTitle, error, actions, sendCommand, commandLog}) => {
+export default History = ({stageTitle, error, actions, sendCommand, commandLog, faction}) => {
     return (
         <div className="history">
             <div className="stage-title"><b>Stage</b>: {stageTitle}</div>

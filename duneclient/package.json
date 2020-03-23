@@ -18,9 +18,10 @@
     "babel-preset-react": "^6.24.1",
     "babel-preset-stage-2": "^6.24.1",
     "css-loader": "3.4.2",
+    "immutability-helper": "3.0.1",
     "jquery": "3.4.1",
-    "react": "15.6.2",
-    "react-dom": "15.6.2",
+    "react": "16.13.1",
+    "react-dom": "16.13.1",
     "style-loader": "^0.20.3",
     "webpack": "2.7.0",
     "webpack-notifier": "1.8.0"
