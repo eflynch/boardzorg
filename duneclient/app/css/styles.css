@@ -199,4 +199,5 @@ img.alive {
 
 .faction.me {
     background-color: #feffbe;
+    flex-wrap: wrap;
 }

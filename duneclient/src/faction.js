@@ -78,7 +78,7 @@ class Faction extends React.Component {
                 {this.getLeaders()}
                 {this.getTokens()}
                 {this.getSpice()}
-                <div style={{display:"flex"}}>
+                <div style={{display:"flex", flexWrap: "wrap"}}>
                     {this.getTreachery()}
                     {this.getTraitors()}
                 </div>

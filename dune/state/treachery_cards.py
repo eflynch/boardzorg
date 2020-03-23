@@ -26,7 +26,7 @@ TREACHERY_CARDS = [
     "Snooper",
     "Snooper",
     "Snooper",
-    "Slip Tip",
+    "Slip-Tip",
     "Stunner",
     "Tleilaxu-Ghola",
     "Trip-to-Gamont",
@@ -51,7 +51,7 @@ WEAPONS = [
     "Gom-Jabbar",
     "Lasgun",
     "Maula-Pistol",
-    "Slip Tip",
+    "Slip-Tip",
     "Stunner",
 ]
 
@@ -64,7 +64,7 @@ PROJECTILE_WEAPONS = [
     "Maula-Pistol",
     "Crysknife",
     "Stunner",
-    "Slip Tip"
+    "Slip-Tip"
 ]
 
 POISON_WEAPONS = [
