@@ -78,6 +78,10 @@ const Widget = ({type, args, setArgs}) => {
         return <Input setArgs={setArgs} />;
     }
 
+    if (type === "token-select") {
+        return <Input setArgs={setArgs} />;
+    }
+
     console.log(type);
 };
 
@@ -103,16 +107,16 @@ class Actions extends React.Component {
     render () {
         let {selectedAction} = this.state;
         let {error, actions, sendCommand} = this.props;
-        let errorSpan = <span/>;
+        let errordiv = <div/>;
         if (error !== null && error !== undefined){
             if (error.BadCommand !== undefined){
-                errorSpan = <span className="error">{error.BadCommand}</span>;
+                errordiv = <div className="error">{error.BadCommand}</div>;
             }
-            if (error.InvalidCommand !== undefined){
-                errorSpan = <span className="error">{error.InvalidCommand}</span>;
+            if (error.IllegalAction !== undefined){
+                errordiv = <div className="error">{error.IllegalAction}</div>;
             }
             if (error.UnhandledError !== undefined){
-                errorSpan = <span className="error">{error.UnhandledError}</span>;
+                errordiv = <div className="error">{error.UnhandledError}</div>;
             }
         }
         const actionNames = Object.keys(actions);
@@ -133,7 +137,7 @@ class Actions extends React.Component {
                     {actionButtons}
                 </div>
                 {actionArgs}
-                {errorSpan}
+                {errordiv}
             </div>
         );
     }

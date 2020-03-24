@@ -16,11 +16,11 @@ class Gift(Action):
     def parse_args(cls, faction, args):
         parts = args.split(" ")
         if len(parts) != 2:
-            raise BadCommand("Bribe Requires Different Arguments")
+            raise BadCommand("Gift Requires Different Arguments")
 
         other_faction, spice = parts
         spice = int(spice)
-        return Bribe(faction, other_faction, spice)
+        return Gift(faction, other_faction, spice)
 
     @classmethod
     def get_arg_spec(cls):

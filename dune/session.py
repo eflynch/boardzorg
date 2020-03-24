@@ -31,7 +31,6 @@ class Session:
         self.execute_supervisor()
 
     def handle_cmd(self, faction, cmd):
-        logger.info("CMD: {} {}".format(faction, cmd))
         valid_actions = Action.get_valid_actions(self.game_log[-1], faction)
         action_type = cmd.split(" ")[0]
         args = " ".join(cmd.split(" ")[1:])
@@ -42,6 +41,7 @@ class Session:
             else:
                 raise BadCommand("Not a known action")
         action = valid_actions[action_type].parse_args(faction, args)
+        print(action)
         self.execute_action(action)
         self.command_log.append((faction, cmd))
 

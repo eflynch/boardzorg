@@ -1,4 +1,4 @@
-var spice_location = {
+export const SpiceLocations = {
     "Hagga-Basin": {top: 0.32, left: 0.35},
     "Broken-Land": {top: 0.08, left: 0.31},
     "Old-Gap": {top: 0.06, left: 0.56},
@@ -15,7 +15,7 @@ var spice_location = {
     "Rock-Outcroppings": {top: 0.215, left: 0.13}
 }
 
-var token_location = {
+export const TokenLocations = {
     "Habbanya-Sietch": {
         16: {
             1: {top: 0.65, left: 0.16},
@@ -75,17 +75,11 @@ var token_location = {
     }
 }
 
-var logo_position = {
+export const LogoLocations = {
     1: {top: 0.94, left: 0.475},
     4: {top: 0.709, left: 0.88},
     7: {top: 0.24, left: 0.88},
     10: {top: 0.007, left: 0.475},
     13: {top: 0.24, left: 0.07},
     16: {top: 0.709, left: 0.07}
-}
-
-module.exports = {
-    token_location: token_location,
-    spice_location: spice_location,
-    logo_position: logo_position,
 }

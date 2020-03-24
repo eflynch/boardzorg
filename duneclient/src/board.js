@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 
-import {spice_location, token_location, logo_position} from './board-data';
+import {SpiceLocations, TokenLocations, LogoLocations} from './board-data';
 
 import Spice from './components/spice';
 import TokenPile from './components/token-pile';
@@ -59,7 +59,7 @@ class Board extends React.Component {
                     }
                     let number = space.forces[faction][sector].length;
                     let power = space.forces[faction][sector].reduce((a, b) => a + b, 0);
-                    let {left, top} = token_location[space.name][sector][orders[space.name]];
+                    let {left, top} = TokenLocations[space.name][sector][orders[space.name]];
                     tokens.push(
                         <TokenPile key={i + faction + sector} x={left} y={top}
                                    number={number}
@@ -81,7 +81,7 @@ class Board extends React.Component {
             if (!space.spice){
                 continue;
             }
-            const {left, top} = spice_location[space.name];
+            const {left, top} = SpiceLocations[space.name];
             spice.push(
                 <Spice key={space.name+"spice"} x={left} y={top} amount={space.spice} width={0.08} height={0.08}/>
             );
@@ -90,10 +90,12 @@ class Board extends React.Component {
     }
 
     getLogos () {
-        let logos = [];
         return this.props.logoPositions.map((pos) => {
             const [faction, position] = pos;
-            const {top, left} = logo_position[position];
+            if (position === null) {
+                return <g key={faction}/>;
+            }
+            const {top, left} = LogoLocations[position];
             return <Logo key={faction} diameter={0.05} faction={faction} x={left} y={top}/>;
         });
     }
@@ -102,7 +104,8 @@ class Board extends React.Component {
         return (
             <div className="board">
                 <svg width={this.state.size} height={this.state.size} viewBox={`0 0 1 1`}>
-                    <text x={0.04} y={0.04} style={{fill: "white", font: "normal 0.02px Optima"}}>Turn: {this.props.turn} / 10 ({this.props.stageTitle})</text>
+                    <text x={0.04} y={0.04} style={{fill: "white", font: "normal 0.02px Optima"}}>Turn {this.props.turn} / 10</text>
+                    <text x={0.04} y={0.06} style={{fill: "white", font: "normal 0.02px Optima"}}>{this.props.round}</text>
                     <image xlinkHref="/static/app/png/board.png" x="0" y="0" width="1" height="1"/>
                     <Storm sector={this.props.stormSector}/>
                     {this.getLogos()}

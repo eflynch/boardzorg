@@ -111,9 +111,9 @@ body {
     color: white;
 }
 
-.actions .error {
+.actions-wrapper .error {
     color: red;
-    padding: 5px;
+    margin: 5px;
 }
 
 .board {
