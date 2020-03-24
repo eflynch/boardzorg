@@ -1,5 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
+import update from 'immutability-helper';
 
 import {SpiceLocations, TokenLocations, LogoLocations} from './board-data';
 
@@ -13,6 +14,10 @@ const Storm = ({sector}) => {
 
 const Logo = ({faction, diameter, x, y}) => {
     return <image xlinkHref={`/static/app/png/${faction}_logo.png`} x={x} y={y} width={diameter} height={diameter}/>;
+}
+
+const BlankLogo = ({diameter, x, y, ...props}) => {
+    return <circle className="blank-logo" r={diameter/2} cx={x+diameter/2} cy={y+diameter/2} {...props}/>;
 }
 
 
@@ -90,14 +95,34 @@ class Board extends React.Component {
     }
 
     getLogos () {
-        return this.props.logoPositions.map((pos) => {
-            const [faction, position] = pos;
-            if (position === null) {
-                return <g key={faction}/>;
-            }
-            const {top, left} = LogoLocations[position];
-            return <Logo key={faction} diameter={0.05} faction={faction} x={left} y={top}/>;
+        const {me, interaction, setInteraction} = this.props;
+        const allLogoPositions = Object.keys(LogoLocations).map((i)=>parseInt(i));
+        const emptyPositions = allLogoPositions.filter((position)=>{
+            const matches = this.props.logoPositions.filter(([faction, pos]) => {
+                return (pos !== null) && (pos === position);
+            });
+            return matches.length === 0;
         });
+        let logos = this.props.logoPositions
+            .filter(([faction, position])=> {return position !== null;})
+            .map(([faction, position]) => {
+                const {top, left} = LogoLocations[position];
+                return <Logo key={faction} diameter={0.05} faction={faction} x={left} y={top}/>;
+            });
+
+        if (interaction.mode === "token-select") {
+            logos = logos.concat(emptyPositions.map((position)=>{
+                const {top, left} = LogoLocations[position];
+                if (interaction.selected === null) {
+                    return <BlankLogo key={position} diameter={0.05} x={left} y={top} onClick={(e)=>{
+                        setInteraction(update(interaction, {selected: {$set: position}}));
+                    }}/>;
+                } else if (interaction.selected === position) {
+                    return <Logo key={"me"} diameter={0.05} faction={me} x={left} y={top}/>;
+                }
+            }));
+        }
+        return logos;
     }
 
     render () {

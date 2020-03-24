@@ -54,8 +54,8 @@ class Faction extends React.Component {
     getSpice () {
         if (this.props.factionstate.spice !== undefined){
             return (
-                <div style={{display: "flex", flexDirection: "column"}}>
-                    Spice: <Spice width={75} amount={this.props.factionstate.spice}/>
+                <div style={{display: "flex", flexDirection: "column", alignItems:"center"}}>
+                    Spice<Spice width={75} amount={this.props.factionstate.spice}/>
                 </div>
             );
         }
@@ -64,8 +64,8 @@ class Faction extends React.Component {
     getBribeSpice () {
         if (this.props.factionstate.bribe_spice !== undefined){
             return (
-                <div style={{display: "flex", flexDirection: "column"}}>
-                    Bribe: <Spice width={75} amount={this.props.factionstate.bribe_spice}/>
+                <div style={{display: "flex", flexDirection: "column", alignItems:"center"}}>
+                    Bribe<Spice width={75} amount={this.props.factionstate.bribe_spice}/>
                 </div>
             );
         }

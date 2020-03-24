@@ -9,6 +9,16 @@ import Bidding from './rounds/bidding';
 
 
 class Session extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state = {interaction: {
+            mode: null
+        }};
+    }
+
+    setInteraction = (interaction) => {
+        this.setState({interaction: interaction});
+    }
     getRoundState(round_state) {
         let state = null;
         if (round_state && round_state.round == "bidding"){
@@ -37,11 +47,11 @@ class Session extends React.Component {
         return (
             <div className="session">
                 <div>
-                    <Board round={state.round_state.round} turn={state.turn} boardstate={state.map_state} logoPositions={logoPositions}
+                    <Board me={this.props.me} interaction={this.state.interaction} setInteraction={this.setInteraction} round={state.round_state.round} turn={state.turn} boardstate={state.map_state} logoPositions={logoPositions}
                            stormSector={state.storm_position}/>
                     {this.getRoundState(state.round_state)}
                 </div>
-                <History error={this.props.error} actions={actions} sendCommand={this.props.sendCommand} commandLog={history}/>
+                <History interaction={this.state.interaction} setInteraction={this.setInteraction} error={this.props.error} actions={actions} sendCommand={this.props.sendCommand} commandLog={history}/>
                 <div className="factions">
                     <Faction key={"me"} me={this.props.me} faction={this.props.me} factionstate={state.faction_state[this.props.me]}/>
                     {factions}

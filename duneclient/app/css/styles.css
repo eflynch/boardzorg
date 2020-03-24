@@ -201,3 +201,24 @@ img.alive {
     background-color: #feffbe;
     flex-wrap: wrap;
 }
+
+.token-select.on {
+    background-color: green;
+    color: white;
+    cursor: default;
+}
+
+.token-select {
+    border: 1px black solid;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.blank-logo {
+    fill: rgba(255, 255, 255, 0.6);
+    cursor: pointer;
+}
+
+.blank-logo:hover {
+    fill: rgba(0, 255, 0, 0.7);
+}
