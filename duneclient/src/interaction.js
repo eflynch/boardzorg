@@ -1,8 +1,9 @@
 
 
 export function isInteractionInProcess(interaction, type) {
-    if (type === "token-select") {
-        if (interaction.mode === "token-select") {
+    const selectModes = ["token-select", "space-sector-select", "sector-select", "space-select"];
+    if (selectModes.indexOf(type) !== -1) {
+        if (selectModes.indexOf(interaction.mode) !== -1) {
             return interaction.selected === null;
         }
         return true;

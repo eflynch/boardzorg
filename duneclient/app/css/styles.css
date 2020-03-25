@@ -202,16 +202,18 @@ img.alive {
     flex-wrap: wrap;
 }
 
-.token-select.on {
+.select-on-map.on {
     background-color: green;
     color: white;
     cursor: default;
 }
 
-.token-select {
+.select-on-map {
     border: 1px black solid;
     border-radius: 5px;
     cursor: pointer;
+    padding-left: 5px;
+    padding-right: 5px;
 }
 
 .unit-select .label{
@@ -244,6 +246,26 @@ img.alive {
 .spaceSector:hover {
     fill: rgba(255, 255, 255, 0.4);
 }
+
+.sector {
+    fill: rgba(255, 255, 255, 0);
+}
+
+.space.selected {
+    fill: rgba(0, 255, 0, 0.7);
+}
+
+.spaceSector.selected {
+    fill: rgba(0, 255, 0, 0.7);
+}
+.sector.selected {
+    fill: rgba(0, 255, 0, 0.7);
+}
+
+.sector:hover {
+    fill: rgba(255, 255, 255, 0.4);
+}
+
 
 .storm {
     fill: rgba(255, 0, 0, 0.5);

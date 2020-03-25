@@ -81,6 +81,11 @@ export const TokenLocations = {
         11: {
             1: {top: 0.10, left: 0.38}
         }
+    },
+    "Cielago-North": {
+        2: {
+            1: {top: 0.66, left: 0.54}
+        }
     }
 }
 

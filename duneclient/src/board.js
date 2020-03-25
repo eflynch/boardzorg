@@ -134,10 +134,11 @@ class Board extends React.Component {
         return logos;
     }
 
-    _getMapParts(paths, className, onClick) {
+    _getMapParts(paths, className, onClick, selected) {
         let transform=`translate(0.000000,1.000000) scale(${0.100000/848},${-0.100000/848})`;
         let spaces = Object.keys(paths).map((territory) => {
-            return <g className={className}
+            const isSelected = (selected !== undefined && selected !== null) && (territory == selected.replace(" ", "-"));
+            return <g className={className + (isSelected ? " selected": "")}
                 onClick={()=>{
                     onClick(territory);
                 }}
@@ -150,21 +151,36 @@ class Board extends React.Component {
     }
 
     getSpaces () {
+        const {interaction, setInteraction} = this.props;
+        if (interaction.mode !== "space-select") {
+            return <g/>;
+        }
         return this._getMapParts(spacePaths, "space", (space)=>{
-
-        });
+            setInteraction(update(interaction, {selected: {$set: space}}));
+        }, interaction.selected);
     }
 
     getSpaceSectors () {
-       return  this._getMapParts(spaceSectorPaths, "spaceSector", (spaceSector)=>{
-
-       });
+        const {interaction, setInteraction} = this.props;
+        if (interaction.mode !== "space-sector-select") {
+            return <g/>;
+        }
+        return  this._getMapParts(spaceSectorPaths, "spaceSector", (spaceSector)=>{
+            let split = spaceSector.split("-")
+            const sector = split.pop()
+            const space = split.join("-")
+            setInteraction(update(interaction, {selected: {$set: [space, sector].join(" ")}}));
+        }, interaction.selected);
     }
 
     getSectors () {
-        return this._getMapParts(sectorPaths, "space", (space)=>{
-
-        });
+        const {interaction, setInteraction} = this.props;
+        if (interaction.mode !== "sector-select") {
+            return <g/>;
+        }
+        return this._getMapParts(sectorPaths, "sector", (sector)=>{
+            setInteraction(update(interaction, {selected: {$set: sector}}));
+        }, interaction.selected);
     }
 
     render () {
@@ -186,7 +202,7 @@ class Board extends React.Component {
                     <text x={0.04} y={0.06} style={{fill: "white", font: "normal 0.02px Optima"}}>{this.props.round}</text>
                     <image xlinkHref="/static/app/png/board.png" x="0" y="0" width="1" height="1"/>
                     <Storm sector={this.props.stormSector}/>
-                    {this.getSectors()}
+                    {this.getSpaceSectors()}
                     {this.getLogos()}
                     {this.getSpice()}
                     {this.getTokenPiles()}
