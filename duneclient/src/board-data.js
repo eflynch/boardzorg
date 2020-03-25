@@ -59,6 +59,14 @@ export const TokenLocations = {
     "False-Wall-South": {
         4: {
             1: {top: 0.63, left: 0.69}
+        },
+        3: {
+            1: {top: 0.73, left: 0.69}
+        }
+    },
+    "False-Wall-West": {
+        16: {
+            1: {top: 0.60, left: 0.29}
         }
     },
     "Polar-Sink": {

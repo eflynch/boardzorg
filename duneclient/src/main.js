@@ -47,7 +47,7 @@ function newSession(){
         type: "POST",
         url: "/api/sessions",
         success: function(data){
-            window.location = data.id;
+            window.location = "/" + data.id + "/guild";
         },
         error: function(data){
             console.log("shit!");

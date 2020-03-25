@@ -8,6 +8,9 @@ const defaultArgsForAction = (actionName) => {
     if (actionName === "bribe") {
         return "emperor 2";
     }
+    if (actionName === "fremen-placement") {
+        return "::::";
+    }
     return "";
 };
 
@@ -22,6 +25,7 @@ const ActionArgs = ({args, setArgs, sendCommand, actionName, argSpec, interactio
                 type={argSpec.widget}
                 config={argSpec.args} />
             <br/>
+            <br/>
             <button disabled={isInteractionInProcess(interaction, argSpec.widget)} onClick={()=>{
                 const fixedArgs = args.split(" ").map((arg) => {
                     if (arg.startsWith("$")) {
@@ -34,6 +38,28 @@ const ActionArgs = ({args, setArgs, sendCommand, actionName, argSpec, interactio
         </div>
     );
 } 
+
+
+/*
+Actions manages a list of space separated args " " which can be submitted as a command.
+
+It creates widgets for each arg based on the selected action type.
+
+interaction and setInteraction are used for situations where these widgets
+need to interact with global state.
+
+Both these widgets as well as other interactive objects like the board are expected
+to handle interaction and setInteraction based on a reasonable protocol.
+
+Since the state of the selected args is rooted here and is not global,
+if the result of the interaction will be needed at command submit time, we can use
+the arg $interaction.[some prop] to retrieve it at submit time.
+
+Additionally, we compute whether an interaction is on-going from the current
+interaction state and disable the submit button if it is
+to ensure that all $interaction props will be present at submit time.
+
+*/
 
 const Actions = (props) => {
     const [args, setArgs] = useState("");

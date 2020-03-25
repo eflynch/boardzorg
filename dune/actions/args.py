@@ -109,7 +109,7 @@ class SpaceSector(Args):
         }
 
 
-class FremenPlacementSpaceSector(SpaceSector):
+class FremenPlacementSelector(Args):
     def to_dict(self):
         return {
             "widget": "fremen-placement-select"

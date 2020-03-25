@@ -208,28 +208,19 @@ class FremenPlacement(Action):
     ck_stage = "fremen-placement"
 
     def parse_args(faction, args):
-        ops = args.split(" ")
-        tabr_units = []
-        west_units = []
-        south_units = []
-        west_sector = None
-        south_sector = None
-        for op in ops:
-            parts = op.split(":")
-            if parts[0] == "tabr":
-                tabr_units = [int(i) for i in parts[1].split(",")]
-            elif parts[0] == "west":
-                west_units = [int(i) for i in parts[2].split(",")]
-                west_sector = int(parts[1])
-            elif parts[0] == "south":
-                south_units = [int(i) for i in parts[2].split(",")]
-                south_sector = int(parts[1])
+        ops = args.split(":")
+        print(ops)
+        tabr_units = list(map(int, ops[0].split(",")))
+        west_units = list(map(int, ops[1].split(",")))
+        south_units = list(map(int, ops[2].split(",")))
+        west_sector = int(ops[3])
+        south_sector = int(ops[4])
 
         return FremenPlacement(faction, tabr_units, west_units, south_units, west_sector, south_sector)
 
     @classmethod
     def get_arg_spec(cls):
-        return args.Array(args.Struct(args.FremenPlacementSpaceSector(), args.Units()))
+        return args.FremenPlacementSelector()
 
     def __init__(self, faction, tabr_units, west_units, south_units, west_sector, south_sector):
         self.faction = faction

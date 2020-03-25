@@ -21,7 +21,10 @@ def command(session_id):
     print(command)
     with SessionWrapper(session_id) as session:
         try:
-            session.handle_cmd(command["faction"], command["cmd"])
+            if command["cmd"] == "undo":
+                session.undo()
+            else:
+                session.handle_cmd(command["faction"], command["cmd"])
         except IllegalAction as e:
             return jsonify({"IllegalAction": str(e)}), 400
         except BadCommand as e:

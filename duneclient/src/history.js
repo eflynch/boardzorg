@@ -14,6 +14,7 @@ export default History = ({error, actions, sendCommand, commandLog, faction, int
                     {commandLog.map((command, i) => <li key={i}>{command[0]}: {command[1]}</li>)}
                 </ul>
             </div>
+            <button onClick={()=>{sendCommand("undo");}}>undo</button>
         </div>
     );
 };

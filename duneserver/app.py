@@ -12,7 +12,7 @@ app.register_blueprint(api, url_prefix="/api")
 
 @app.route("/<session_id>/<faction>", methods=['GET'])
 def view(session_id, faction):
-    return reactstub("Shai-Hulud", ["app/css/styles.css"], ["app/main.js"], bootstrap=json.dumps({"sessionID": session_id, "faction": faction}))
+    return reactstub("Shai-Hulud", ["app/css/styles.css", "app/css/slider.css"], ["app/main.js"], bootstrap=json.dumps({"sessionID": session_id, "faction": faction}))
 
 
 if __name__ == "__main__":

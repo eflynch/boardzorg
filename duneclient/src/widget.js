@@ -1,5 +1,6 @@
 import React, {useState} from 'react';
 import Select from 'react-select';
+import Slider, { Range } from 'rc-slider';
 import update from 'immutability-helper';
 
 
@@ -20,16 +21,31 @@ const Choice = ({args, setArgs, config}) => {
 };
 
 const Struct = ({args, setArgs, config}) => {
-    const [subArgs, setSubArgs] = useState(args.split(" "));
+    const subArgs = args.split(" ");
     return (
         <div>
             {config.map((subWidget, i) => {
                 return <Widget key={i} type={subWidget.widget} config={subWidget.args} setArgs={(args)=> {
                     const newSubArgs = update(subArgs, {[i]: {$set: args}});
-                    setSubArgs(newSubArgs);
                     setArgs(newSubArgs.join(" "));
                 }} args={subArgs[i]} />
             })}
+        </div>
+    );
+};
+
+const ArrayWidget = ({args, setArgs, config}) => {
+    const subArgs = args.split(":");
+    let widgets = subArgs.map((arg, i) => {
+        return <Widget key={i} type={config.widget} config={config.args} args={arg} setArgs={(args)=> {
+            setArgs(update(subArgs, {[i]: {$set: args}}).join(":"));
+        }} args={subArgs[i]} />;
+    });
+
+    return (
+        <div>
+            {widgets}
+            <button onClick={(e)=>{setArgs(args + ":")}} >+</button>
         </div>
     );
 };
@@ -84,6 +100,61 @@ const FactionSelect = ({args, setArgs, config}) => {
     />;
 };
 
+const FremenPlacementSelect = ({args, setArgs, config}) => {
+    const [tabr, west, south, westSector, southSector] = args.split(":");
+    return (
+        <div>
+            Sietch Tabr
+            <Units args={tabr} setArgs={(args)=>{
+                setArgs([args, west, south, westSector, southSector].join(":"));
+            }} fedaykin={true} />
+            False Wall West
+            <Units args={west} setArgs={(args)=>{
+                setArgs([tabr, args, south, westSector, southSector].join(":"));
+            }} fedaykin={true} />
+            False Wall South
+            <Units args={south} setArgs={(args)=>{
+                setArgs([tabr, west, args, westSector, southSector].join(":"));
+            }} fedaykin={true} />
+        </div>
+    );
+};
+
+const Units = ({args, setArgs, fedaykin, sardaukar}) => {
+    const units = args.split(",").map((i)=>parseInt(i));
+    const numOnes = units.filter((i)=>i===1).length;
+    const numTwos = units.filter((i)=>i===2).length;
+
+    let bonus = <div/>;
+    if (fedaykin || sardaukar) {
+        bonus = (
+            <div style={{display: "flex"}}>
+                <div className="label">{fedaykin ? "Fedaykin: " : "Sardaukar: "}{numTwos}</div>
+                <Slider min={0} max={5} step={1} dots={true} value={numTwos}
+                    onChange={(value)=>{
+                        const ones = Array(numOnes).fill("1").join(",");
+                        const twos = Array(value).fill("2").join(",");
+                        setArgs([ones, twos].join(","));
+                    }} />
+            </div>
+        );
+    }
+    return (
+        <div className="unit-select">
+            <div style={{display: "flex"}}>
+                <div className="label">Units: {numOnes}</div>
+                <Slider min={0} max={20} step={1} dots={true} value={numOnes}
+                    onChange={(value)=>{
+                        const ones = Array(value).fill("1").join(",");
+                        const twos = Array(numTwos).fill("2").join(",");
+                        setArgs([ones, twos].join(","));
+                    }} />
+            </div>
+            {bonus} 
+        </div>
+    );
+};
+
 
 const Widget = ({type, args, setArgs, config, interaction, setInteraction}) => {
     if (type === "choice") {
@@ -102,31 +173,29 @@ const Widget = ({type, args, setArgs, config, interaction, setInteraction}) => {
         return <FactionSelect args={args} setArgs={setArgs} config={config} />;
     }
 
-    if (type === "integer") {
-        return <Input args={args} setArgs={setArgs} config={config}/>;
-    }
-
     if (type === "constant") {
         return args;
     }
 
     if (type === "units") {
-        return <Input args={args} setArgs={setArgs} config={config}/>;
-    }
-
-    if (type === "space-sector-select") {
-        return <Input args={args} setArgs={setArgs} config={config}/>;
+        return <Units args={args} setArgs={setArgs} fedakyin={config.fedaykin} sardaukar={config.sardaukar}/>;
     }
 
     if (type === "token-select") {
         return <TokenSelect interaction={interaction} setInteraction={setInteraction} setArgs={setArgs} />;
     }
 
-    if (type === "leader-input") {
-        return <Input args={args} setArgs={setArgs} config={config} />;
+    if (type === "array") {
+        return <ArrayWidget args={args} setArgs={setArgs} config={config} />;
     }
 
+    if (type === "fremen-placement-select") {
+        return <FremenPlacementSelect args={args} setArgs={setArgs} config={config} />;
+    }
+
+
     console.log(type);
+    return <Input args={args} setArgs={setArgs} config={config} />;
 };
 
 module.exports = Widget;
