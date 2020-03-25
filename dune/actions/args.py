@@ -2,7 +2,7 @@
 
 class Args:
     def to_dict(self):
-        return {"widget": "input"}
+        return {"widget": "null"}
 
 
 class Union(Args):

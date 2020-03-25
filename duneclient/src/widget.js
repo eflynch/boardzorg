@@ -11,7 +11,7 @@ const Choice = ({args, setArgs, config}) => {
         <div>
             {config.map((subWidget, i) => {
                 return (
-                    <div>
+                    <div key={i}>
                         <Widget key={i} type={subWidget.widget} config={subWidget.args} args={args} setArgs={setArgs}/>
                     </div>
                 );
@@ -56,6 +56,10 @@ const Input = ({args, setArgs, config}) => {
         setArgs(value);
     })}/>;
 };
+
+const Constant = ({value, setArgs}) => {
+    return <button onClick={()=>{setArgs(value);}}>{value}</button>;
+}
 
 
 const SelectOnMap = ({args, setArgs, interaction, setInteraction, mode}) => {
@@ -185,6 +189,10 @@ const Integer = ({args, setArgs, type, min, max}) => {
 
 
 const Widget = ({type, args, setArgs, config, interaction, setInteraction}) => {
+    if (type === "null") {
+        return "";
+    }
+
     if (type === "choice") {
         return <Choice args={args} setArgs={setArgs} config={config}/>; 
     }
@@ -202,7 +210,7 @@ const Widget = ({type, args, setArgs, config, interaction, setInteraction}) => {
     }
 
     if (type === "constant") {
-        return args;
+        return <Constant value={config} setArgs={setArgs} />;
     }
 
     if (type === "units") {
