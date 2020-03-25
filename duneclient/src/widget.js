@@ -104,18 +104,26 @@ const FremenPlacementSelect = ({args, setArgs, config}) => {
     const [tabr, west, south, westSector, southSector] = args.split(":");
     return (
         <div>
-            Sietch Tabr
+            <h3>Sietch Tabr</h3>
             <Units args={tabr} setArgs={(args)=>{
                 setArgs([args, west, south, westSector, southSector].join(":"));
             }} fedaykin={true} />
-            False Wall West
+            <h3>False Wall West</h3>
             <Units args={west} setArgs={(args)=>{
                 setArgs([tabr, args, south, westSector, southSector].join(":"));
             }} fedaykin={true} />
-            False Wall South
+            Sector:
+            <Integer min={15} max={17} args={westSector} setArgs={(args)=>{
+                setArgs([tabr, west, south, args, southSector].join(":"));
+            }}/>
+            <h3>False Wall South</h3>
             <Units args={south} setArgs={(args)=>{
                 setArgs([tabr, west, args, westSector, southSector].join(":"));
             }} fedaykin={true} />
+            Sector:
+            <Integer min={3} max={4} args={southSector} setArgs={(args)=>{
+                setArgs([tabr, west, south, westSector, args].join(":"));
+            }}/>
         </div>
     );
 };
@@ -130,11 +138,15 @@ const Units = ({args, setArgs, fedaykin, sardaukar}) => {
         bonus = (
             <div style={{display: "flex"}}>
                 <div className="label">{fedaykin ? "Fedaykin: " : "Sardaukar: "}{numTwos}</div>
-                <Slider min={0} max={5} step={1} dots={true} value={numTwos}
+                <Slider min={0} max={fedaykin ? 3 : 5} step={1} dots={true} value={numTwos}
                     onChange={(value)=>{
                         const ones = Array(numOnes).fill("1").join(",");
                         const twos = Array(value).fill("2").join(",");
-                        setArgs([ones, twos].join(","));
+                        if (ones && twos){
+                            setArgs([ones, twos].join(","));
+                        } else {
+                            setArgs(ones + twos);
+                        }
                     }} />
             </div>
         );
@@ -147,10 +159,26 @@ const Units = ({args, setArgs, fedaykin, sardaukar}) => {
                     onChange={(value)=>{
                         const ones = Array(value).fill("1").join(",");
                         const twos = Array(numTwos).fill("2").join(",");
-                        setArgs([ones, twos].join(","));
+                        if (ones && twos){
+                            setArgs([ones, twos].join(","));
+                        } else {
+                            setArgs(ones + twos);
+                        }
                     }} />
             </div>
             {bonus} 
+        </div>
+    );
+};
+
+const Integer = ({args, setArgs, type, min, max}) => {
+    return (
+        <div>
+            {args} {type ? type : ""}
+            <Slider min={min} max={max} step={1} value={parseInt(args)}
+                onChange={(value)=>{
+                    setArgs(value.toString());
+            }} />
         </div>
     );
 };
@@ -191,6 +219,10 @@ const Widget = ({type, args, setArgs, config, interaction, setInteraction}) => {
 
     if (type === "fremen-placement-select") {
         return <FremenPlacementSelect args={args} setArgs={setArgs} config={config} />;
+    }
+
+    if (type === "integer") {
+        return <Integer args={args} setArgs={setArgs} type={config.type} min={config.min} max={config.max} />;
     }
 
 

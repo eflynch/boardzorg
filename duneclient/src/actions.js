@@ -9,7 +9,7 @@ const defaultArgsForAction = (actionName) => {
         return "emperor 2";
     }
     if (actionName === "fremen-placement") {
-        return "::::";
+        return ":::16:3";
     }
     return "";
 };

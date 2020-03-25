@@ -209,10 +209,16 @@ class FremenPlacement(Action):
 
     def parse_args(faction, args):
         ops = args.split(":")
-        print(ops)
-        tabr_units = list(map(int, ops[0].split(",")))
-        west_units = list(map(int, ops[1].split(",")))
-        south_units = list(map(int, ops[2].split(",")))
+
+        def _parse_units(op):
+            if op:
+                return list(map(int, op.split(",")))
+            else:
+                return []
+
+        tabr_units = _parse_units(ops[0])
+        west_units = _parse_units(ops[1])
+        south_units = _parse_units(ops[2])
         west_sector = int(ops[3])
         south_sector = int(ops[4])
 

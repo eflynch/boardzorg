@@ -6,10 +6,19 @@ import {SpiceLocations, TokenLocations, LogoLocations} from './board-data';
 
 import Spice from './components/spice';
 import TokenPile from './components/token-pile';
+import {spacePaths, spaceSectorPaths, sectorPaths} from './paths';
 
 
 const Storm = ({sector}) => {
-    return <image xlinkHref={`/static/app/png/storm_${sector}.png`} x="0" y="0" width="1" height="1" opacity={0.8}/>;
+    let transform=`translate(0.000000,1.000000) scale(${0.100000/848},${-0.100000/848})`;
+    return <g className="storm"
+        onClick={()=>{
+            onClick(territory);
+        }}
+        transform={transform}>
+            {sectorPaths[sector].map((p, i)=><path key={i} d={p}/>)}
+        }}
+    </g>
 };
 
 const Logo = ({faction, diameter, x, y}) => {
@@ -125,7 +134,51 @@ class Board extends React.Component {
         return logos;
     }
 
+    _getMapParts(paths, className, onClick) {
+        let transform=`translate(0.000000,1.000000) scale(${0.100000/848},${-0.100000/848})`;
+        let spaces = Object.keys(paths).map((territory) => {
+            return <g className={className}
+                onClick={()=>{
+                    onClick(territory);
+                }}
+                key={territory +"path"} transform={transform}>
+                {paths[territory].map((p, i)=><path key={i} d={p}/>)}
+            }}
+            </g>
+        });
+        return spaces;
+    }
+
+    getSpaces () {
+        return this._getMapParts(spacePaths, "space", (space)=>{
+
+        });
+    }
+
+    getSpaceSectors () {
+       return  this._getMapParts(spaceSectorPaths, "spaceSector", (spaceSector)=>{
+
+       });
+    }
+
+    getSectors () {
+        return this._getMapParts(sectorPaths, "space", (space)=>{
+
+        });
+    }
+
     render () {
+
+        let AllSpaces = Object.keys(spaceSectorPaths);
+        let transform=`translate(0.000000,1.000000) scale(${0.100000/848},${-0.100000/848})`;
+        let spaces = AllSpaces.map((territory) => {
+                return <g className="space"
+                    onClick={()=>{}}
+                    key={territory +"path"} transform={transform}>
+                    {spaceSectorPaths[territory].map((p, i)=><path key={i} d={p}/>)}
+                }}
+                </g>
+            });
         return (
             <div className="board">
                 <svg width={this.state.size} height={this.state.size} viewBox={`0 0 1 1`}>
@@ -133,6 +186,7 @@ class Board extends React.Component {
                     <text x={0.04} y={0.06} style={{fill: "white", font: "normal 0.02px Optima"}}>{this.props.round}</text>
                     <image xlinkHref="/static/app/png/board.png" x="0" y="0" width="1" height="1"/>
                     <Storm sector={this.props.stormSector}/>
+                    {this.getSectors()}
                     {this.getLogos()}
                     {this.getSpice()}
                     {this.getTokenPiles()}

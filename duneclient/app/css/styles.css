@@ -228,3 +228,23 @@ img.alive {
 .blank-logo:hover {
     fill: rgba(0, 255, 0, 0.7);
 }
+
+.space {
+    fill: rgba(255, 255, 255, 0);
+}
+
+.space:hover {
+    fill: rgba(255, 255, 255, 0.4);
+}
+
+.spaceSector {
+    fill: rgba(255, 255, 255, 0);
+}
+
+.spaceSector:hover {
+    fill: rgba(255, 255, 255, 0.4);
+}
+
+.storm {
+    fill: rgba(255, 0, 0, 0.5);
+}

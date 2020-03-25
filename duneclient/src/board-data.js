@@ -31,7 +31,8 @@ export const TokenLocations = {
     },
     "Carthag": {
         10: {
-            1: {top: 0.19, left: 0.465}
+            1: {top: 0.24, left: 0.455},
+            2: {top: 0.19, left: 0.475},
         }
     },
     "Imperial-Basin": {
