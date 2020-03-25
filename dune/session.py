@@ -55,6 +55,16 @@ class Session:
     def get_valid_actions(self, faction):
         return Action.get_valid_actions(self.game_log[-1], faction)
 
+    def get_visible_command_log(self, faction):
+        def _filtfilt(command):
+            (cmd_faction, cmd) = command
+            redacted = ["predict", "select-traitor"]
+            if cmd.split(" ")[0] in redacted:
+                if cmd_faction != faction:
+                    return False
+            return True 
+        return list(filter(_filtfilt, self.command_log))
+
     @staticmethod
     def new_session(factions=None, treachery_deck=None, seed=None):
         init_state = GameState.new_shuffle(factions, treachery_deck, seed)

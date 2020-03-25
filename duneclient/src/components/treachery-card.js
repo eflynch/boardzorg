@@ -9,7 +9,7 @@ class TreacheryCard extends React.Component {
             name = ["Cheap-Hero", "Cheap-Heroine"][randInt(0,1)];
         }
         return <img
-            src={"/static/app/png/Treachery-" + name + ".png"}
+            src={"/static/app/png/Treachery-" + name.replace(" ", "-") + ".png"}
             width={150} />;
     }
 }

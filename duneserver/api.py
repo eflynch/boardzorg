@@ -37,7 +37,7 @@ def command(session_id):
         ret = {
             "state": session.get_visible_state(command["faction"]),
             "actions": {a: actions[a].get_arg_spec().to_dict() for a in actions},
-            "history": session.command_log
+            "history": session.get_visible_command_log(command["faction"]) 
         }
 
         return jsonify(ret)
@@ -51,5 +51,5 @@ def state(session_id):
         return jsonify({
             "state": session.get_visible_state(faction),
             "actions": {a: actions[a].get_arg_spec().to_dict() for a in actions},
-            "history": session.command_log
+            "history": session.get_visible_command_log(faction) 
         })

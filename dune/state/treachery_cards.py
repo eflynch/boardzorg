@@ -11,7 +11,7 @@ TREACHERY_CARDS = [
     "Family-Atomics",
     "Gom-Jabbar",
     "Hajr",
-    "Jubba Cloak",
+    "Jubba-Cloak",
     "Karama",
     "Karama",
     "Kulon",
@@ -37,7 +37,7 @@ TREACHERY_CARDS = [
 
 WORTHLESS = [
     "Baliset",
-    "Jubba Cloak",
+    "Jubba-Cloak",
     "Kulon",
     "La-la-la!",
     "Trip-to-Gamont"
