@@ -6,13 +6,13 @@ import update from 'immutability-helper';
 
 const AllFactions = ["emperor", "fremen", "guild", "bene-gesserit", "harkonnen", "atreides"];
 
-const Choice = ({args, setArgs, config}) => {
+const Choice = ({args, setArgs, config, ...props}) => {
     return (
         <div>
             {config.map((subWidget, i) => {
                 return (
                     <div key={i}>
-                        <Widget key={i} type={subWidget.widget} config={subWidget.args} args={args} setArgs={setArgs}/>
+                        <Widget {...props} key={i} type={subWidget.widget} config={subWidget.args} args={args} setArgs={setArgs}/>
                     </div>
                 );
             })}
@@ -20,12 +20,12 @@ const Choice = ({args, setArgs, config}) => {
     );
 };
 
-const Struct = ({args, setArgs, config}) => {
+const Struct = ({args, setArgs, config, ...props}) => {
     const subArgs = args.split(" ");
     return (
         <div>
             {config.map((subWidget, i) => {
-                return <Widget key={i} type={subWidget.widget} config={subWidget.args} setArgs={(args)=> {
+                return <Widget {...props} key={i} type={subWidget.widget} config={subWidget.args} setArgs={(args)=> {
                     const newSubArgs = update(subArgs, {[i]: {$set: args}});
                     setArgs(newSubArgs.join(" "));
                 }} args={subArgs[i]} />
@@ -194,11 +194,11 @@ const Widget = ({type, args, setArgs, config, interaction, setInteraction}) => {
     }
 
     if (type === "choice") {
-        return <Choice args={args} setArgs={setArgs} config={config}/>; 
+        return <Choice args={args} setArgs={setArgs} config={config} interaction={interaction} setInteraction={setInteraction}/>; 
     }
 
     if (type === "struct") {
-        return <Struct args={args} setArgs={setArgs} config={config}/>; 
+        return <Struct args={args} setArgs={setArgs} config={config} interaction={interaction} setInteraction={setInteraction}/>; 
     }
 
     if (type === "input") {

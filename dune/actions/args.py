@@ -84,7 +84,8 @@ class Leader(String):
 class Units(Args):
     def to_dict(self):
         return {
-            "widget": "units"
+            "widget": "units",
+            "args": {}
         }
 
 

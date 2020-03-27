@@ -60,6 +60,8 @@ function newSession(){
 document.addEventListener("DOMContentLoaded", function (){
     render(<Header sessionTitle={sessionID} newSession={newSession} getSession={(faction)=>getSession(sessionID, faction)} />, document.getElementById("header"));
     if (sessionID !== null && sessionID !== undefined){
-        getSession(sessionID, faction);
+        setInterval(()=>{
+            getSession(sessionID, faction);
+        }, 500);
     }
 });
