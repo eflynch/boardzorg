@@ -6,7 +6,6 @@ class Header extends React.Component {
             <div className="main-header">
                 <span className="site-title">SHAI-HULUD</span>
                 <span className="session-title">{this.props.sessionTitle}</span>
-                <span className="header-button" onClick={()=>{this.props.newSession()}}>New Session</span>
             </div>
         );
     }

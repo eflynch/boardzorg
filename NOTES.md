@@ -1,18 +1,20 @@
-# Notes to myself #
+# Kanban
 
-  * Maybe should get rid of command parsing in Actions and implement a more strict argument pattern
-  * Maybe should change how Action registration works
-  * Maybe should add a "StageState" to the "RoundState" with an optional ck_stage check
-  * Maybe should change raise InvalidAction to return False
-  * Maybe should change raise BadCommand to raise InvalidAction
-  * Maybe should change the representation of units
-  * Maybe should switch to functional interface for state so that representation can change? (I think the overhead is  as bad either way though)
+## Ready For Dev
+
+    * Add Discard Piles to visible board state
+    * Add Top of Spice Deck to visible board state for Atreides
+    * Allow Fremen to see next storm movement
+    * Re-do Bene-Gesserit coexist in a reasonable way
+    * Leader Capture
+    * Support Ornithopters/Harvesters
+    * Support Special Treachery Cards
+
+## In Progress
 
 
-## Active TODO ##
 
-  * Refactoring imports
-
+# Notes
 
 ## Karama Powers ##
 
@@ -83,7 +85,6 @@
 
 ## Features Skipped For Now ##
 
-    * Leader Capture
     * Bene-Gesserit Worthless KARAMA
     * Harvesters / Ornithopters
     * Special Treachery

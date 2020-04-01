@@ -4,50 +4,83 @@ import {render} from 'react-dom';
 
 import Header from './header'
 import Session from './session'
+import Assignment from './assignment'
+import SessionCreator from './session-creator'
 
 var last_data;
-var sessionID= window.bootstrap.sessionID; //sessionStorage.getItem('sessionID);
-var faction= window.bootstrap.faction;
+var last_assignment_data;
 
 
-function renderSession(session_id, faction, data, error){
-    if (session_id === null || session_id === undefined){
+function renderSession(sessionID, roleID, data, error){
+    if (sessionID === null || sessionID === undefined){
         return;
     }
     last_data = data;
-    render(<Session me={faction} data={data} error={error} sendCommand={function(cmd){
-        sendCommand(session_id, faction, cmd);
+    let {state, actions, history, role} = data;
+    render(<Session me={role} state={state} actions={actions} history={history} error={error} sendCommand={function(cmd){
+        sendCommand(sessionID, roleID, cmd);
     }}/>, document.getElementById("content"));
 }
 
-function sendCommand(session_id, faction, cmd){
+function renderAssignment(sessionID, data, error) {
+    last_assignment_data = data;
+    render(<Assignment assignedRoles={data.assigned_roles} assignRole={(role)=>{
+        assignRole(sessionID, role);}} />, document.getElementById("content"));
+}
+
+function getAssignedRoles(sessionID) {
+    $.getJSON(`/api/sessions/${sessionID}/roles`, function(data){
+        renderAssignment(sessionID, data);
+    })
+}
+
+function assignRole(sessionID, role) {
     $.ajax({
         type: "POST",
-        url: "/api/sessions/" + session_id,
-        data: JSON.stringify({faction: faction, cmd: cmd}),
+        url: `/api/sessions/${sessionID}/roles`,
+        data: JSON.stringify({role: role}),
         success: function(data){
-            renderSession(session_id, faction, data, null);
+            const roleID = data.role_id;
+            window.location = `/${sessionID}/${roleID}`
         },
         error: function(data){
-            renderSession(session_id, faction, last_data, data.responseJSON);
+            renderAssignment(sessionID, last_assignment_data, data.responseJSON);
+        },
+        contentType: 'application/json; charset=utf-8',
+        dataType: 'json'
+    }); 
+}
+
+function sendCommand(sessionID, roleID, cmd){
+    $.ajax({
+        type: "POST",
+        url: "/api/sessions/" + sessionID,
+        data: JSON.stringify({role_id: roleID, cmd: cmd}),
+        success: function(data){
+            renderSession(sessionID, roleID, data, null);
+        },
+        error: function(data){
+            renderSession(sessionID, roleID, last_data, data.responseJSON);
         },
         contentType: 'application/json; charset=utf-8',
         dataType: 'json'
     });
 }
 
-function getSession(session_id, faction){
-    $.getJSON("/api/sessions/" + session_id, {faction: faction}, function(data){
-        renderSession(session_id, faction, data);
+function getSession(sessionID, roleID){
+    $.getJSON("/api/sessions/" + sessionID, {role_id: roleID}, function(data){
+        console.log(data);
+        renderSession(sessionID, roleID, data);
     });
 }
 
-function newSession(){
+function newSession(name){
     $.ajax({
         type: "POST",
         url: "/api/sessions",
+        data: JSON.stringify({session_id: name}),
         success: function(data){
-            window.location = "/" + data.id + "/guild";
+            window.location = "/" + data.id;
         },
         error: function(data){
             console.log("shit!");
@@ -57,11 +90,22 @@ function newSession(){
     });
 }
 
+function renderNewSessions() {
+    render(<SessionCreator newSession={newSession} />, document.getElementById("content"));
+}
+
 document.addEventListener("DOMContentLoaded", function (){
-    render(<Header sessionTitle={sessionID} newSession={newSession} getSession={(faction)=>getSession(sessionID, faction)} />, document.getElementById("header"));
-    if (sessionID !== null && sessionID !== undefined){
-        setInterval(()=>{
-            getSession(sessionID, faction);
-        }, 500);
+    const sessionID= window.bootstrap.sessionID;
+    const roleID= window.bootstrap.roleID;
+    render(<Header sessionTitle={sessionID} />, document.getElementById("header"));
+    if (sessionID === null || sessionID === undefined) {
+        renderNewSessions();
+    } else if (roleID === null || roleID === undefined) {
+        getAssignedRoles(sessionID);
+    } else{
+        getSession(sessionID, roleID);
+        // setInterval(()=>{
+        //     getSession(sessionID, roleID);
+        // }, 1000);
     }
 });

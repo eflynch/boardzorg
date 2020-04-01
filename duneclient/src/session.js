@@ -20,7 +20,7 @@ class Session extends React.Component {
         this.setState({interaction: interaction});
     }
     getRoundState = (round_state) => {
-        let {state, actions, history} = this.props.data;
+        const {state, actions, history} = this.props;
         let stateDiv = null;
         if (round_state && round_state.round == "bidding"){
             stateDiv = <Bidding stormSector={state.storm_position} roundstate={round_state} logoPositions={this.getLogoPositions()}/>;
@@ -32,23 +32,20 @@ class Session extends React.Component {
     }
 
     getLogoPositions = () => {
-        let {state, actions, history} = this.props.data;
-        let fs = Object.keys(state.faction_state);
+        const {state, actions, history} = this.props;
+        const fs = Object.keys(state.faction_state);
         return fs.map((faction) => {
-            let factionstate = state.faction_state[faction];
+            const factionstate = state.faction_state[faction];
             return [factionstate.name, factionstate.token_position];
         });
     }
 
     render () {
-        let {state, actions, history} = this.props.data;
-        let fs = Object.keys(state.faction_state);
-        let factions = [];
-        fs.forEach((faction) => {
-            if (faction == this.props.me){
-                return;
-            }
-            factions.push(<Faction key={faction} me={this.props.me} faction={faction} factionstate={state.faction_state[faction]}/>);
+        const {state, actions, history, me} = this.props;
+        const fs = Object.keys(state.faction_state).sort((x,y)=>{ return x == me ? -1 : y == me ? 1 : 0; });;
+
+        const factions = fs.map((faction)=> {
+            return <Faction key={faction} me={this.props.me} faction={faction} factionstate={state.faction_state[faction]}/>;
         });
 
         return (
@@ -60,7 +57,6 @@ class Session extends React.Component {
                 </div>
                 <History interaction={this.state.interaction} setInteraction={this.setInteraction} error={this.props.error} actions={actions} sendCommand={this.props.sendCommand} commandLog={history}/>
                 <div className="factions">
-                    <Faction key={"me"} me={this.props.me} faction={this.props.me} factionstate={state.faction_state[this.props.me]}/>
                     {factions}
                 </div>
             </div>

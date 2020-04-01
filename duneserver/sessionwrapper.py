@@ -1,5 +1,11 @@
 from dune.session import Session
+import rolewrapper
+
 import psycopg2 as psql
+
+
+class SessionConflict(Exception):
+    pass
 
 
 class SessionWrapper:
@@ -11,28 +17,35 @@ class SessionWrapper:
     def __enter__(self):
         self.conn.__enter__()
         self.cursor.__enter__()
-        self.cursor.execute("SELECT serialized FROM sessions where id={} FOR UPDATE".format(self.session_id))
-        ret = self.cursor.fetchone()[0]
-        self.session = Session.realize(ret)
-        return self.session
+        self.cursor.execute(
+            "SELECT serialized, roles FROM sessions where name='{}' FOR UPDATE".format(
+                self.session_id))
+        ret = self.cursor.fetchone()
+        self.session = Session.realize(ret[0])
+        self.roles = ret[1]
+        return self.session, self.roles
 
     def __exit__(self, *args):
         self.cursor.execute(
-"""UPDATE sessions SET serialized='{}' WHERE id={}
-""".format(Session.serialize(self.session), self.session_id))
+            "UPDATE sessions SET serialized='{}', roles='{}' WHERE name='{}'".format(
+                Session.serialize(self.session), rolewrapper.serialize(self.roles),
+                self.session_id))
         self.conn.commit()
         self.conn.__exit__(*args)
         self.cursor.__exit__(*args)
 
     @staticmethod
-    def create(session):
+    def create(name):
         conn = psql.connect("dbname=shai-hulud")
         with conn.cursor() as cursor:
+            cursor.execute("SELECT (id) from sessions where name='{}'".format(name))
+            if (cursor.fetchone() is not None):
+                raise SessionConflict("Session with this name already exists")
+
             cursor.execute(
-"""INSERT INTO sessions (serialized) VALUES ('{}') RETURNING id
-""".format(Session.serialize(session)))
-            session_id = cursor.fetchone()[0]
-            cursor.execute("SELECT id from sessions WHERE id={}".format(session_id))
+                "INSERT INTO sessions (name, serialized, roles) VALUES ('{}', '{}', '{}')".format(
+                    name, Session.serialize(Session.new_session()),
+                    rolewrapper.serialize(rolewrapper.new())))
         conn.commit()
         conn.close()
-        return session_id
+        return name

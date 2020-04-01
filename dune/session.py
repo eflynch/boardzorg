@@ -2,10 +2,24 @@ import logging
 import json
 
 from dune.actions.action import Action
+from dune.actions.args import Args
 from dune.exceptions import BadCommand, IllegalAction
 from dune.state.game import GameState
 
 logger = logging.getLogger(__name__)
+
+HOST_ACTIONS = ["undo"]
+
+
+class HostAction:
+    @classmethod
+    def get_arg_spec(cls):
+        return Args()
+
+
+def handle_host_actions(session, cmd):
+    if cmd == "undo":
+        session.undo()
 
 
 class Session:
@@ -35,7 +49,15 @@ class Session:
         self.action_log.pop()
         self.command_log.pop()
 
-    def handle_cmd(self, faction, cmd):
+    def handle_cmd(self, role, cmd):
+        if role in ('host',):
+            if cmd in HOST_ACTIONS:
+                handle_host_actions(self, cmd)
+                return
+            else:
+                raise BadCommand("{} not a host action".format(cmd))
+
+        faction = role
         valid_actions = Action.get_valid_actions(self.game_log[-1], faction)
         action_type = cmd.split(" ")[0]
         args = " ".join(cmd.split(" ")[1:])
@@ -49,10 +71,13 @@ class Session:
         self.execute_action(action)
         self.command_log.append((faction, cmd))
 
-    def get_visible_state(self, faction):
-        return self.game_log[-1].visible(faction)
+    def get_visible_state(self, role):
+        return self.game_log[-1].visible(role)
 
-    def get_valid_actions(self, faction):
+    def get_valid_actions(self, role):
+        if role in ('host',):
+            return {a: HostAction() for a in HOST_ACTIONS}
+        faction = role
         return Action.get_valid_actions(self.game_log[-1], faction)
 
     def get_visible_command_log(self, faction):
@@ -62,7 +87,7 @@ class Session:
             if cmd.split(" ")[0] in redacted:
                 if cmd_faction != faction:
                     return False
-            return True 
+            return True
         return list(filter(_filtfilt, self.command_log))
 
     @staticmethod
@@ -86,7 +111,10 @@ class Session:
 
     @staticmethod
     def realize(serialized_session):
-        from_json = json.loads(serialized_session)
+        if type(serialized_session) is dict:
+            from_json = serialized_session
+        else:
+            from_json = json.loads(serialized_session)
         init_state = GameState(
             factions=from_json["factions"],
             treachery_deck=from_json["treachery_deck"],
