@@ -94,6 +94,7 @@ function getSession(sessionID, roleID){
             getSession(sessionID, roleID);
         }, 1000);
     }).fail(function(error){
+        console.log(error.responseText);
         document.getElementById("content").innerHTML = `${sessionID} does not exist :(`;
     });
 }
