@@ -69,7 +69,7 @@ function sendCommand(sessionID, roleID, cmd){
 
 function getSession(sessionID, roleID){
     $.getJSON("/api/sessions/" + sessionID, {role_id: roleID}, function(data){
-        console.log(data);
+        document.title = `Shai-Hulud: ${data.role}`;
         renderSession(sessionID, roleID, data);
     });
 }
@@ -83,7 +83,6 @@ function newSession(name){
             window.location = "/" + data.id;
         },
         error: function(data){
-            console.log("shit!");
         },
         contentType: 'application/json; charset=utf-8',
         dataType: 'json'
