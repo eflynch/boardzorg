@@ -18,7 +18,7 @@ var config = {
                 include: APP_DIR,
                 loader: 'babel-loader',
                 query: {
-                    presets: ['es2015', 'react', 'stage-2']
+                    presets: ['env', 'react', 'stage-2']
                 }
             },
             {

@@ -9,6 +9,11 @@ from api import api
 app = Flask(__name__)
 app.register_blueprint(api, url_prefix="/api")
 
+with open('/etc/config.json') as config_file:
+    config = json.load(config_file)
+
+app.config['SECRET_KEY'] = config.get('SECRET_KEY')
+
 
 @app.route("/", methods=['GET'])
 def index():
