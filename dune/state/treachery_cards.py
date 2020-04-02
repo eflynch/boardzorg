@@ -7,7 +7,7 @@ TREACHERY_CARDS = [
     "Cheap-Hero/Heroine",
     "Cheap-Hero/Heroine",
     "Cheap-Hero/Heroine",
-    "Elacca-Drug",
+    "Ellaca-Drug",
     "Family-Atomics",
     "Gom-Jabbar",
     "Hajr",

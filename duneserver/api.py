@@ -87,10 +87,11 @@ def command(session_id):
 @api.route("/sessions/<session_id>/roles", methods=['GET'])
 def get_assigned_roles(session_id):
     with SessionWrapper(session_id) as (session, roles):
-        assigned_roles = [r for r in roles.values() if r not in ('host',)]
+        assigned_roles = list(roles.values())
         return jsonify({
             "assigned_roles": assigned_roles
         })
+
 
 @api.route("/sessions/<session_id>", methods=['GET'])
 def state(session_id):

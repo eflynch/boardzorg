@@ -11,7 +11,7 @@ class SessionCreator extends React.Component {
                 <input value={this.state.input} onChange={(e)=>{
                     this.setState({input: e.target.value});
                 }}/>
-                <button onClick={()=>{this.props.newSession(this.state.input)}}>New Session</button>
+                <button onClick={()=>{this.props.newSession(this.state.input)}}>Create Session</button>
             </div>
         );
     }

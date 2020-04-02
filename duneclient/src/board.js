@@ -9,9 +9,12 @@ import TokenPile from './components/token-pile';
 import {spacePaths, spaceSectorPaths, sectorPaths} from './paths';
 
 
-const Storm = ({sector}) => {
+const Storm = ({sector, color}) => {
     let transform=`translate(0.000000,1.000000) scale(${0.100000/848},${-0.100000/848})`;
     return <g className="storm"
+        style={{
+            fill: color
+        }}
         onClick={()=>{
             onClick(territory);
         }}
@@ -51,10 +54,11 @@ class Board extends React.Component {
     }
 
     getTokenPiles () {
+        let {map_state} = this.props.state;
         let tokens = [];
         let orders = {};
-        for (let i=0; i < this.props.boardstate.length; i++){
-            let space = this.props.boardstate[i];
+        for (let i=0; i < map_state.length; i++){
+            let space = map_state[i];
             if (space.forces === null){
                 continue;
             }
@@ -89,9 +93,10 @@ class Board extends React.Component {
     }
 
     getSpice () {
+        let {map_state} = this.props.state;
         let spice = [];
-        for (let i=0; i < this.props.boardstate.length; i++){
-            let space = this.props.boardstate[i];
+        for (let i=0; i < map_state.length; i++){
+            let space = map_state[i];
             if (!space.spice){
                 continue;
             }
@@ -184,7 +189,7 @@ class Board extends React.Component {
     }
 
     render () {
-
+        let {round_state, turn, map_state} = this.props.state;
         let AllSpaces = Object.keys(spaceSectorPaths);
         let transform=`translate(0.000000,1.000000) scale(${0.100000/848},${-0.100000/848})`;
         let spaces = AllSpaces.map((territory) => {
@@ -195,13 +200,27 @@ class Board extends React.Component {
                 }}
                 </g>
             });
+
+        let text = round_state.round;
+        if (round_state.stage !== undefined) {
+            text += ": " + round_state.stage;
+        }
+        if (round_state.stage_state !== undefined) {
+            text += ": " + round_state.stage_state.stage;
+        }
+
+        let futureStorm = <g/>;
+        if (this.props.futureStorm !== undefined) {
+            futureStorm = <Storm sector={this.props.futureStorm} color="rgba(0, 0, 255, 0.2)"/>;
+        }
         return (
             <div className="board">
                 <svg width={this.state.size} height={this.state.size} viewBox={`0 0 1 1`}>
-                    <text x={0.04} y={0.04} style={{fill: "white", font: "normal 0.02px Optima"}}>Turn {this.props.turn} / 10</text>
-                    <text x={0.04} y={0.06} style={{fill: "white", font: "normal 0.02px Optima"}}>{this.props.round}</text>
+                    <text x={0.04} y={0.04} style={{fill: "white", font: "normal 0.02px Optima"}}>Turn {turn} / 10</text>
+                    <text x={0.04} y={0.06} style={{fill: "white", font: "normal 0.02px Optima"}}>{text}</text>
                     <image xlinkHref="/static/app/png/board.png" x="0" y="0" width="1" height="1"/>
-                    <Storm sector={this.props.stormSector}/>
+                    <Storm sector={this.props.stormSector} color="rgba(255, 0, 0, 0.5)"/>
+                    {futureStorm}
                     {this.getSpaceSectors()}
                     {this.getLogos()}
                     {this.getSpice()}

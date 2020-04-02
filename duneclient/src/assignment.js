@@ -11,7 +11,7 @@ class Assignment extends React.Component {
         });
         return (
             <div className="main-assignment">
-                {assignedRoles}
+                <span>Select role to receive secret URL</span>
                 {buttons}
             </div>
         );

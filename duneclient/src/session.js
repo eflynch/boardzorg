@@ -48,11 +48,15 @@ class Session extends React.Component {
             return <Faction key={faction} me={this.props.me} faction={faction} factionstate={state.faction_state[faction]}/>;
         });
 
+        let futureStorm = undefined;
+        if (state.storm_deck.next !== undefined) {
+            futureStorm = (state.storm_deck.next + state.storm_position) % 18;
+        }
         return (
             <div className="session">
                 <div>
-                    <Board me={this.props.me} interaction={this.state.interaction} setInteraction={this.setInteraction} round={state.round_state.round} turn={state.turn} boardstate={state.map_state} logoPositions={this.getLogoPositions()}
-                           stormSector={state.storm_position}/>
+                    <Board me={this.props.me} interaction={this.state.interaction} setInteraction={this.setInteraction} logoPositions={this.getLogoPositions()}
+                           stormSector={state.storm_position} futureStorm={futureStorm} state={state} />
                     {this.getRoundState(state.round_state)}
                 </div>
                 <History interaction={this.state.interaction} setInteraction={this.setInteraction} error={this.props.error} actions={actions} sendCommand={this.props.sendCommand} commandLog={history}/>

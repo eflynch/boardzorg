@@ -2,6 +2,10 @@ body {
     font-family: Optima, Monospace, sans-serif;
 }
 
+a {
+    text-decoration: none;
+}
+
 .main-header {
     display: flex;
     width: 100%;
@@ -13,6 +17,7 @@ body {
     font-family: Optima;
     margin-left: 10px;
     margin-right: 20px;
+    color: #b14f14;
 }
 
 .main-header .session-title {
@@ -29,6 +34,42 @@ body {
     color: black;
 }
 
+.sessioncreator {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    padding: 20%;
+}
+
+.sessioncreator input {
+    text-align: center;
+    font-size: 25px;
+    font-family: Optima;
+}
+
+.sessioncreator button {
+
+    font-family: Optima;
+    font-size: 25px;
+}
+
+.main-assignment {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    padding: 20%;
+}
+
+.main-assignment button {
+    font-family: Optima;
+    font-size: 20px;
+    margin: 10px;
+}
+
+.main-assignment span {
+    font-family: Optima;
+    font-size: 20px;
+}
 .session {
     display: flex;
     flex-wrap: wrap;
@@ -268,5 +309,4 @@ img.alive {
 
 
 .storm {
-    fill: rgba(255, 0, 0, 0.5);
 }

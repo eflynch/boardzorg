@@ -21,6 +21,8 @@ class SessionWrapper:
             "SELECT serialized, roles FROM sessions where name='{}' FOR UPDATE".format(
                 self.session_id))
         ret = self.cursor.fetchone()
+        if not ret:
+            raise SessionConflict("No session found with name {}".format(self.session_id))
         self.session = Session.realize(ret[0])
         self.roles = ret[1]
         return self.session, self.roles
@@ -39,7 +41,7 @@ class SessionWrapper:
         conn = psql.connect("dbname=shai-hulud")
         with conn.cursor() as cursor:
             cursor.execute("SELECT (id) from sessions where name='{}'".format(name))
-            if (cursor.fetchone() is not None):
+            if cursor.rowcount != 0:
                 raise SessionConflict("Session with this name already exists")
 
             cursor.execute(

@@ -4,8 +4,8 @@ class Header extends React.Component {
     render () {
         return (
             <div className="main-header">
-                <span className="site-title">SHAI-HULUD</span>
-                <span className="session-title">{this.props.sessionTitle}</span>
+                <a className="site-title" href="/">SHAI-HULUD</a>
+                <span className="session-title">{this.props.sessionTitle} : {this.props.role}</span>
             </div>
         );
     }

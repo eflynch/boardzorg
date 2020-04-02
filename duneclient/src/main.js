@@ -11,28 +11,21 @@ var last_data;
 var last_assignment_data;
 
 
-function renderSession(sessionID, roleID, data, error){
-    if (sessionID === null || sessionID === undefined){
-        return;
-    }
-    last_data = data;
-    let {state, actions, history, role} = data;
-    render(<Session me={role} state={state} actions={actions} history={history} error={error} sendCommand={function(cmd){
-        sendCommand(sessionID, roleID, cmd);
-    }}/>, document.getElementById("content"));
+function newSession(name){
+    $.ajax({
+        type: "POST",
+        url: "/api/sessions",
+        data: JSON.stringify({session_id: name}),
+        success: function(data){
+            window.location = "/" + data.id;
+        },
+        error: function(data){
+        },
+        contentType: 'application/json; charset=utf-8',
+        dataType: 'json'
+    });
 }
 
-function renderAssignment(sessionID, data, error) {
-    last_assignment_data = data;
-    render(<Assignment assignedRoles={data.assigned_roles} assignRole={(role)=>{
-        assignRole(sessionID, role);}} />, document.getElementById("content"));
-}
-
-function getAssignedRoles(sessionID) {
-    $.getJSON(`/api/sessions/${sessionID}/roles`, function(data){
-        renderAssignment(sessionID, data);
-    })
-}
 
 function assignRole(sessionID, role) {
     $.ajax({
@@ -50,6 +43,32 @@ function assignRole(sessionID, role) {
         dataType: 'json'
     }); 
 }
+
+
+function renderSession(sessionID, roleID, data, error){
+    if (sessionID === null || sessionID === undefined){
+        return;
+    }
+    last_data = data;
+    let {state, actions, history, role} = data;
+    render(<Header sessionTitle={sessionID} role={role} />, document.getElementById("header"));
+    render(<Session me={role} state={state} actions={actions} history={history} error={error} sendCommand={function(cmd){
+        sendCommand(sessionID, roleID, cmd);
+    }}/>, document.getElementById("content"));
+}
+
+
+function renderAssignment(sessionID, data, error) {
+    last_assignment_data = data;
+    render(<Assignment assignedRoles={data.assigned_roles} assignRole={(role)=>{
+        assignRole(sessionID, role);}} />, document.getElementById("content"));
+}
+
+
+function renderNewSessions() {
+    render(<SessionCreator newSession={newSession} />, document.getElementById("content"));
+}
+
 
 function sendCommand(sessionID, roleID, cmd){
     $.ajax({
@@ -71,43 +90,37 @@ function getSession(sessionID, roleID){
     $.getJSON("/api/sessions/" + sessionID, {role_id: roleID}, function(data){
         document.title = `Shai-Hulud: ${data.role}`;
         renderSession(sessionID, roleID, data);
+        setTimeout(()=>{
+            getSession(sessionID, roleID);
+        }, 1000);
+    }).fail(function(error){
+        document.getElementById("content").innerHTML = `${sessionID} does not exist :(`;
     });
 }
 
-function newSession(name){
-    $.ajax({
-        type: "POST",
-        url: "/api/sessions",
-        data: JSON.stringify({session_id: name}),
-        success: function(data){
-            window.location = "/" + data.id;
-        },
-        error: function(data){
-        },
-        contentType: 'application/json; charset=utf-8',
-        dataType: 'json'
-    });
+
+function getAssignedRoles(sessionID) {
+    $.getJSON(`/api/sessions/${sessionID}/roles`, function(data){
+        renderAssignment(sessionID, data);
+        setTimeout(()=>{
+            getAssignedRoles(sessionID);
+        }, 1000);
+    }).fail(function(error){
+        document.getElementById("content").innerHTML = `${sessionID} does not exist :(`;
+    })
 }
 
-function renderNewSessions() {
-    render(<SessionCreator newSession={newSession} />, document.getElementById("content"));
-}
+
 
 document.addEventListener("DOMContentLoaded", function (){
     const sessionID= window.bootstrap.sessionID;
     const roleID= window.bootstrap.roleID;
-    render(<Header sessionTitle={sessionID} />, document.getElementById("header"));
+    render(<Header sessionTitle={sessionID} role={""} />, document.getElementById("header"));
     if (sessionID === null || sessionID === undefined) {
         renderNewSessions();
     } else if (roleID === null || roleID === undefined) {
         getAssignedRoles(sessionID);
-        setInterval(()=>{
-            getAssignedRoles(sessionID);
-        }, 1000);
     } else{
         getSession(sessionID, roleID);
-        setInterval(()=>{
-            getSession(sessionID, roleID);
-        }, 1000);
     }
 });

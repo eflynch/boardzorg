@@ -25,7 +25,7 @@ def new():
 
 def assign(roles, role):
     if role in roles.values():
-        raise Exception("Role already defined")
+        raise RoleException("Role already defined")
 
     key = _random_generator()
     roles[key] = role
