@@ -1,3 +1,4 @@
+import os
 import json
 
 from flask import Flask
@@ -9,10 +10,13 @@ from api import api
 app = Flask(__name__)
 app.register_blueprint(api, url_prefix="/api")
 
-with open('/etc/config.json') as config_file:
-    config = json.load(config_file)
+if os.path.exists('/etc/config.json'):
+    with open('/etc/config.json') as config_file:
+        config = json.load(config_file)
 
-app.config['SECRET_KEY'] = config.get('SECRET_KEY')
+    app.config['SECRET_KEY'] = config.get('SECRET_KEY')
+else:
+    print("Warning, running without a secret")
 
 
 @app.route("/", methods=['GET'])

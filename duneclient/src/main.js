@@ -102,10 +102,13 @@ document.addEventListener("DOMContentLoaded", function (){
         renderNewSessions();
     } else if (roleID === null || roleID === undefined) {
         getAssignedRoles(sessionID);
+        setInterval(()=>{
+            getAssignedRoles(sessionID);
+        }, 1000);
     } else{
         getSession(sessionID, roleID);
-        // setInterval(()=>{
-        //     getSession(sessionID, roleID);
-        // }, 1000);
+        setInterval(()=>{
+            getSession(sessionID, roleID);
+        }, 1000);
     }
 });
