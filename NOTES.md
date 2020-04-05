@@ -2,13 +2,13 @@
 
 ## Ready For Dev
 
-    * Add Discard Piles to visible board state
-    * Add Top of Spice Deck to visible board state for Atreides
-    * Allow Fremen to see next storm movement
-    * Re-do Bene-Gesserit coexist in a reasonable way
-    * Leader Capture
-    * Support Ornithopters/Harvesters
-    * Support Special Treachery Cards
+* Switch to using websockets instead of polling
+* Show the discard piles on the board
+* Re-do BG coexist in a reasonable way
+* Support Leader Capture mechanic
+* Support Special Treachery Cards
+* Support ANY TIME Karama powers
+* Show movement round turn order
 
 ## In Progress
 
@@ -82,9 +82,3 @@
     * BATTLE
 
     * COLLECTION
-
-## Features Skipped For Now ##
-
-    * Bene-Gesserit Worthless KARAMA
-    * Harvesters / Ornithopters
-    * Special Treachery
