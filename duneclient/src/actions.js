@@ -1,10 +1,9 @@
 import React, {useState} from 'react';
 import update from 'immutability-helper';
 
-import {isInteractionInProcess} from './interaction';
 import Widget from './widget';
 
-const defaultArgsForAction = (actionName) => {
+const defaultArgsForAction = (actionName, argSpec) => {
     if (actionName === "bribe") {
         return "emperor 2";
     }
@@ -14,6 +13,20 @@ const defaultArgsForAction = (actionName) => {
     if (actionName === "movement-select") {
         return "   ";
     }
+
+    const selectWidgets = ["token-select", "space-sector-select", "space-sector-select-start", "space-sector-select-end", "sector-select", "space-select", "traitor-select"];
+    if (selectWidgets.indexOf(argSpec.widget) !== -1) {
+        return `$interaction.${argSpec.widget}`;
+    }
+
+    if (argSpec.widget === "struct") {
+        let subArgs = [];
+        for (const subWidget of argSpec.args) {
+            subArgs = subArgs.concat(defaultArgsForAction(actionName, subWidget));
+        }
+        return subArgs.join(" ");
+    }
+
     return "";
 };
 
@@ -29,7 +42,7 @@ const ActionArgs = ({args, setArgs, sendCommand, actionName, argSpec, interactio
                 config={argSpec.args} />
             <br/>
             <br/>
-            <button disabled={isInteractionInProcess(interaction, argSpec.widget)} onClick={()=>{
+            <button disabled={interaction.mode != null} onClick={()=>{
                 const fixedArgs = args.split(" ").map((arg) => {
                     if (arg.startsWith("$")) {
                         return interaction[arg.slice(13)];
@@ -43,6 +56,22 @@ const ActionArgs = ({args, setArgs, sendCommand, actionName, argSpec, interactio
     );
 } 
 
+
+const getFlowForWidget = (type, config) => {
+    const selectModes = ["token-select", "space-sector-select", "space-sector-select-start", "space-sector-select-end", "sector-select", "space-select", "traitor-select"];
+    if (selectModes.indexOf(type) !== -1) {
+        return [type];
+    }
+
+    if (type === "struct") {
+        let ret = [];
+        for (const subWidget of config) {
+            ret = ret.concat(getFlowForWidget(subWidget.widget, subWidget.args));
+        }
+        return ret;
+    }
+    return [];
+};
 
 /*
 Actions manages a list of space separated args " " which can be submitted as a command.
@@ -69,7 +98,7 @@ const Actions = (props) => {
     const [args, setArgs] = useState("");
     const [selectedAction, setSelectedAction] = useState(null);
 
-    let {error, actions, sendCommand, setInteraction, interaction} = props;
+    let {error, actions, sendCommand, setInteraction, setInteractionFlow, interaction} = props;
     let errordiv = <div/>;
     if (error !== null && error !== undefined){
         if (error.BadCommand !== undefined){
@@ -87,8 +116,8 @@ const Actions = (props) => {
         return (
             <li className={selectedAction === actionName ? "selected" : ""} key={i} onClick={()=>{
                 setSelectedAction(actionName);
-                setArgs(defaultArgsForAction(actionName));
-                setInteraction({mode: null});
+                setArgs(defaultArgsForAction(actionName, actions[actionName]));
+                setInteractionFlow(getFlowForWidget(actions[actionName].widget, actions[actionName].config));
             }} key={i}>
                 {actionName}
             </li>

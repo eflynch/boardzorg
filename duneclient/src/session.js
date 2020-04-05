@@ -8,6 +8,7 @@ import History from './history';
 import Bidding from './rounds/bidding';
 import Movement from './rounds/movement';
 import Deck from './components/deck';
+import update from 'immutability-helper';
 
 const GetFactionOrder = (logoPositions, stormSector) => {
     const factionOrder = []
@@ -66,10 +67,37 @@ const Decks = ({state}) => {
     );
 };
 
+const maybeFlowInteraction = (interaction, flow) => {
+    if (!interaction.mode) {
+        for (const mode of flow) {
+            if (interaction[mode] == null) {
+                return update(interaction, {
+                    mode: {$set: mode}
+                });
+            }
+        }
+    }
+    return interaction;
+};
 
 export default function Session({state, actions, history, me, error, sendCommand}) {
-    const [interaction, setInteraction] = useState({mode: null});
+    const [interaction, setInteractionRaw] = useState({mode: null});
     const [errorState, setErrorState] = useState(error);
+    const [interactionFlow, setInteractionFlowRaw] = useState([]);
+
+    const setInteraction = (interaction) => {
+        setInteractionRaw(maybeFlowInteraction(interaction, interactionFlow));
+    };
+
+    const setInteractionFlow = (flow) => {
+        setInteractionRaw(
+            maybeFlowInteraction(
+                update(
+                    interaction,
+                    {mode: {$set: null}}),
+                flow));
+        setInteractionFlowRaw(flow);
+    };
 
     useEffect(()=>{
         if (error !== undefined) {
@@ -105,7 +133,7 @@ export default function Session({state, actions, history, me, error, sendCommand
                 </div>
                 <RoundState roundState={state.round_state} logoPositions={logoPositions} stormPosition={state.storm_position} />
             </div>
-            <History interaction={interaction} setInteraction={setInteraction} error={errorState} actions={actions} sendCommand={sendCommand} commandLog={history}/>
+            <History interaction={interaction} setInteraction={setInteraction} error={errorState} actions={actions} sendCommand={sendCommand} commandLog={history} setInteractionFlow={setInteractionFlow}/>
             <div className="factions">
                 {factions}
             </div>
