@@ -10,9 +10,9 @@
 
 ## In Progress
 
-* Show the discard piles on the board
 
 ## Done
+* Show the discard piles on the board
 * Switch to using websockets instead of polling
 * Re-do BG coexist in a reasonable way
   * There shouldn't be any union arg specs with "coexist" constants, rather a ¿coexist? check command should happen before the movement resolves
