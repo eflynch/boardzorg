@@ -7,9 +7,9 @@ import History from './history';
 
 import Bidding from './rounds/bidding';
 import Movement from './rounds/movement';
+import Deck from './components/deck';
 
-
-const getFactionOrder = (logoPositions, stormSector) => {
+const GetFactionOrder = (logoPositions, stormSector) => {
     const factionOrder = []
     for (let i=0; i<18; i++){
         const sector = (stormSector + i + 1) % 18
@@ -20,6 +20,50 @@ const getFactionOrder = (logoPositions, stormSector) => {
         });
     }
     return factionOrder;
+};
+
+const GetLogoPositions = (faction_state) => {
+    const fs = Object.keys(faction_state);
+    return fs.map((faction) => {
+        const factionstate = faction_state[faction];
+        return [factionstate.name, factionstate.token_position];
+    });
+}
+
+
+const RoundState = ({roundState, stormPosition, logoPositions}) => {
+    let stateDiv = null;
+    let factionOrder = GetFactionOrder(logoPositions, stormPosition);
+    if (roundState && roundState.round == "bidding"){
+        stateDiv = <Bidding factionOrder={factionOrder} roundstate={roundState} />;
+    }
+    if (roundState && roundState.round == "movement"){
+        stateDiv = <Movement roundstate={roundState} />;
+    }
+    if (stateDiv === null){
+        return <div className="roundstate">{JSON.stringify(roundState)}</div>;
+    }
+    return <div className="roundstate">{stateDiv}</div>;
+};
+
+
+const Decks = ({state}) => {
+    console.log(state);
+    return (
+        <div style={{
+            display:"flex",
+            flexDirection:"column",
+            flexWrap: "wrap",
+            flexGrow: 1,
+            alignSelf: "stretch",
+            backgroundColor: "black",
+            alignItems: "center",
+            justifyContent: "space-around"
+        }}>
+            <Deck type="Treachery" facedown={state.treachery_deck} faceup={state.treachery_discard} />
+            <Deck type="Spice" facedown={state.spice_deck} faceup={state.spice_discard} />
+        </div>
+    );
 };
 
 
@@ -34,30 +78,6 @@ class Session extends React.Component {
     setInteraction = (interaction) => {
         this.setState({interaction: interaction});
     }
-    getRoundState = (round_state) => {
-        const {state, actions, history} = this.props;
-        let stateDiv = null;
-        let factionOrder = getFactionOrder(this.getLogoPositions(), state.storm_position);
-        if (round_state && round_state.round == "bidding"){
-            stateDiv = <Bidding factionOrder={factionOrder} roundstate={round_state} />;
-        }
-        if (round_state && round_state.round == "movement"){
-            stateDiv = <Movement roundstate={round_state} />;
-        }
-        if (stateDiv === null){
-            return <div className="roundstate">{JSON.stringify(round_state)}</div>;
-        }
-        return <div className="roundstate">{stateDiv}</div>;
-    }
-
-    getLogoPositions = () => {
-        const {state, actions, history} = this.props;
-        const fs = Object.keys(state.faction_state);
-        return fs.map((faction) => {
-            const factionstate = state.faction_state[faction];
-            return [factionstate.name, factionstate.token_position];
-        });
-    }
 
     render () {
         const {state, actions, history, me} = this.props;
@@ -71,12 +91,16 @@ class Session extends React.Component {
         if (state.storm_deck.next !== undefined) {
             futureStorm = (state.storm_deck.next + state.storm_position) % 18;
         }
+        const logoPositions = GetLogoPositions(state.faction_state);
         return (
             <div className="session">
                 <div>
-                    <Board me={this.props.me} interaction={this.state.interaction} setInteraction={this.setInteraction} logoPositions={this.getLogoPositions()}
-                           stormSector={state.storm_position} futureStorm={futureStorm} state={state} />
-                    {this.getRoundState(state.round_state)}
+                    <div style={{display:"flex", alignItems:"flex-start"}}>
+                        <Board me={this.props.me} interaction={this.state.interaction} setInteraction={this.setInteraction} logoPositions={logoPositions}
+                               stormSector={state.storm_position} futureStorm={futureStorm} state={state} />
+                        <Decks state={state} />
+                    </div>
+                    <RoundState roundState={state.round_state} logoPositions={logoPositions} stormPosition={state.storm_position} />
                 </div>
                 <History interaction={this.state.interaction} setInteraction={this.setInteraction} error={this.props.error} actions={actions} sendCommand={this.props.sendCommand} commandLog={history}/>
                 <div className="factions">

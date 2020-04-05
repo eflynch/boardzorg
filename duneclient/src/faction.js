@@ -2,8 +2,7 @@ import React from 'react';
 
 import TokenPile from './components/token-pile';
 import Spice from './components/spice';
-import TraitorCard from './components/traitor-card';
-import TreacheryCard from './components/treachery-card';
+import Card from './components/card';
 import LeaderToken from './components/leader-token';
 
 
@@ -15,12 +14,12 @@ class Faction extends React.Component {
 
         if (Array.isArray(this.props.factionstate.treachery)){
             return this.props.factionstate.treachery.map((name, i) => {
-                return <TreacheryCard key={i} name={name} />;
+                return <Card type="Treachery" key={i} name={name} />;
             });
         } else {
             let treachery = [];
             for (let i=0; i < this.props.factionstate.treachery.length; i++){
-                treachery.push(<TreacheryCard key={"reverse-"+i} name="Reverse" />);
+                treachery.push(<Card type="Treachery" key={"reverse-"+i} name="Reverse" />);
             }
             return treachery;
         }
@@ -43,7 +42,7 @@ class Faction extends React.Component {
             return [];
         }
         return this.props.factionstate.traitors.map((traitor) => {
-            return <TraitorCard key={"traitor-"+traitor[0]} name={traitor[0]} />;
+            return <Card type="Traitor" key={"traitor-"+traitor[0]} name={traitor[0]} />;
         });
     }
     getTokens () {

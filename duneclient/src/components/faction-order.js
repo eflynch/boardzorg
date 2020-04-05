@@ -8,7 +8,7 @@ const PASS_LABELS = ["pass", "done", "moved"];
 
 export default function FactionOrder({factions}) {
     return (
-        <svg width="600px" height="100px" viewBox="2.5 0 1 1">
+        <svg width="480px" height="80px" viewBox="2.5 0 1 1">
             {factions.map((factionInfo, i)=> {
                 const passed = PASS_LABELS.indexOf(factionInfo.label) !== -1;
                 const opacity = passed ? 0.2 : 1.0;

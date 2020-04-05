@@ -1,6 +1,6 @@
 import React from 'react';
 
-import TreacheryCard from '../components/treachery-card';
+import Card from '../components/card';
 import FactionOrder from '../components/faction-order';
 
 
@@ -10,12 +10,12 @@ class Bidding extends React.Component {
         let cards = [];
         let reverses = this.props.roundstate.up_for_auction.length;
         if (this.props.roundstate.up_for_auction.next !== undefined){
-            cards.push(<TreacheryCard
+            cards.push(<Card type="Treachery"
                 key="next" name={this.props.roundstate.up_for_auction.next}/>);
             reverses -=1;
         }
         for (let i=0; i<reverses;i++){
-            cards.push(<TreacheryCard key={i} name="Reverse"/>);
+            cards.push(<Card type="Treachery" key={i} name="Reverse"/>);
         }
         return cards;
     }
