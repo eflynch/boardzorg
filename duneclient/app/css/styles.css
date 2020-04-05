@@ -315,5 +315,10 @@ img.alive {
     filter: brightness(2);
 }
 
+.card.peak {
+    opacity: 0.7;
+    filter: hue-rotate(100deg);
+}
+
 .storm {
 }
