@@ -1,6 +1,7 @@
 import React from 'react';
 import $ from 'jquery';
 import {render} from 'react-dom';
+import io from 'socket.io-client';
 
 import Header from './header'
 import Session from './session'
@@ -100,15 +101,22 @@ function getSession(sessionID, roleID){
 }
 
 
+
+
 function getAssignedRoles(sessionID) {
-    $.getJSON(`/api/sessions/${sessionID}/roles`, function(data){
-        renderAssignment(sessionID, data);
-        setTimeout(()=>{
-            getAssignedRoles(sessionID);
-        }, 1000);
-    }).fail(function(error){
+    const socket = io("/roles");
+    socket.on('connect', () =>{
+        socket.emit('join', {
+            "session_id": sessionID,
+        });
+    });
+    socket.on('roles', (roles) => {
+        renderAssignment(sessionID, roles);
+    });
+    socket.on('error', () => {
         document.getElementById("content").innerHTML = `${sessionID} does not exist :(`;
-    })
+    });
+    document.getElementById("content").innerHTML = "Loading...";
 }
 
 

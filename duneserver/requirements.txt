@@ -1,3 +1,5 @@
 coloredlogs
 Flask
 psycopg2-binary
+flask-socketio
+eventlet
