@@ -46,7 +46,7 @@ def connect_namespace(socketio, namespace_info):
                 callback=_on_change,
                 session_id=session_id)
             subscribe(session_id, subs[room_id].callback)
-        with SessionWrapper(session_id) as (session, roles):
+        with SessionWrapper(session_id, read_only=True) as (session, roles):
             emit(namespace_info.name, namespace_info.serialize(session, roles, data))
             join_room(room_id)
 
@@ -64,7 +64,7 @@ def connect_namespace(socketio, namespace_info):
 
 def connect_socketio(socketio):
     def _check_state_data(data):
-        with SessionWrapper(data["session_id"]) as (_session, roles):
+        with SessionWrapper(data["session_id"], read_only=True) as (_session, roles):
             rolewrapper.look_up(roles, data["role_id"])
 
     def _serialize_state_data(session, roles, data):

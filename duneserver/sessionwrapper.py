@@ -47,16 +47,21 @@ def unsubscribe(session_id, callback):
 
 
 class SessionWrapper:
-    def __init__(self, session_id):
+    def __init__(self, session_id, read_only=False):
         self.session_id = session_id
         self.conn = _connect()
         self.cursor = self.conn.cursor()
+        self.read_only = read_only
 
     def __enter__(self):
         self.conn.__enter__()
         self.cursor.__enter__()
+        if self.read_only:
+            query = "SELECT serialized, roles FROM sessions where name=%(name)s"
+        else:
+            query = "SELECT serialized, roles FROM sessions where name=%(name)s FOR UPDATE"
         self.cursor.execute(
-            "SELECT serialized, roles FROM sessions where name=%(name)s FOR UPDATE",
+            query,
             {'name': self.session_id})
         ret = self.cursor.fetchone()
         if not ret:
@@ -66,17 +71,18 @@ class SessionWrapper:
         return self.session, self.roles
 
     def __exit__(self, *args):
-        if self.session_id in session_change_subscriptions:
-            for callback in session_change_subscriptions[self.session_id]:
-                callback(self.session, self.roles)
-        self.cursor.execute(
-            "UPDATE sessions SET serialized=%(serialized)s, roles=%(roles)s WHERE name=%(name)s",
-            {
-                'serialized': Session.serialize(self.session),
-                'roles': rolewrapper.serialize(self.roles),
-                'name': self.session_id
-            })
-        self.conn.commit()
+        if not self.read_only:
+            if self.session_id in session_change_subscriptions:
+                for callback in session_change_subscriptions[self.session_id]:
+                    callback(self.session, self.roles)
+            self.cursor.execute(
+                "UPDATE sessions SET serialized=%(serialized)s, roles=%(roles)s WHERE name=%(name)s",
+                {
+                    'serialized': Session.serialize(self.session),
+                    'roles': rolewrapper.serialize(self.roles),
+                    'name': self.session_id
+                })
+            self.conn.commit()
         self.conn.__exit__(*args)
         self.cursor.__exit__(*args)
 
