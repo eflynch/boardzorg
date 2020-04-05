@@ -37,6 +37,7 @@ const ActionArgs = ({args, setArgs, sendCommand, actionName, argSpec, interactio
                     return arg;
                 }).join(" ");
                 sendCommand(`${actionName} ${fixedArgs}`);
+                setInteraction({mode: null});
             }}>Submit Command</button>
         </div>
     );

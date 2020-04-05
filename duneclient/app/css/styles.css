@@ -268,7 +268,7 @@ img.alive {
     cursor: pointer;
 }
 
-.blank-logo:hover {
+.blank-logo.active:hover {
     fill: rgba(0, 255, 0, 0.7);
 }
 
@@ -276,7 +276,7 @@ img.alive {
     fill: rgba(255, 255, 255, 0);
 }
 
-.space:hover {
+.space.active:hover {
     fill: rgba(255, 255, 255, 0.4);
 }
 
@@ -284,7 +284,7 @@ img.alive {
     fill: rgba(255, 255, 255, 0);
 }
 
-.spaceSector:hover {
+.spaceSector.active:hover {
     fill: rgba(255, 255, 255, 0.4);
 }
 
@@ -303,7 +303,7 @@ img.alive {
     fill: rgba(0, 255, 0, 0.7);
 }
 
-.sector:hover {
+.sector.active:hover {
     fill: rgba(255, 255, 255, 0.4);
 }
 
