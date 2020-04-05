@@ -87,7 +87,7 @@ export default function Session({state, actions, history, me, error, sendCommand
     const fs = Object.keys(state.faction_state).sort((x,y)=>{ return x == me ? -1 : y == me ? 1 : 0; });;
 
     const factions = fs.map((faction)=> {
-        return <Faction key={faction} me={me} faction={faction} factionstate={state.faction_state[faction]}/>;
+        return <Faction key={faction} me={me} faction={faction} factionstate={state.faction_state[faction]} interaction={interaction} setInteraction={setInteraction}/>;
     });
 
     let futureStorm = undefined;

@@ -246,6 +246,10 @@ const Widget = ({type, args, setArgs, config, interaction, setInteraction}) => {
         return <SelectOnMap mode="space-sector-select-end" args={args} setArgs={setArgs} config={config} interaction={interaction} setInteraction={setInteraction}/>;
     }
 
+    if (type === "traitor-select") {
+        return <SelectOnMap mode="traitor-select" interaction={interaction} setInteraction={setInteraction} setArgs={setArgs}/>;
+    }
+
 
     console.log(type);
     return <Input args={args} setArgs={setArgs} config={config} />;
