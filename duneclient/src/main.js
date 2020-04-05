@@ -88,20 +88,22 @@ function sendCommand(sessionID, roleID, cmd){
 }
 
 function getSession(sessionID, roleID){
-    $.getJSON("/api/sessions/" + sessionID, {role_id: roleID}, function(data){
+    const socket = io("/sessions");
+    socket.on('connect', () =>{
+        socket.emit('join', {
+            "session_id": sessionID,
+            "role_id": roleID,
+        });
+    });
+    socket.on('sessions', (data) => {
         document.title = `Shai-Hulud: ${data.role}`;
         renderSession(sessionID, roleID, data);
-        // setTimeout(()=>{
-        //     getSession(sessionID, roleID);
-        // }, 1000);
-    }).fail(function(error){
-        console.log(error.responseText);
+    });
+    socket.on('error', () => {
         document.getElementById("content").innerHTML = `${sessionID} does not exist :(`;
     });
+    document.getElementById("content").innerHTML = "Loading...";
 }
-
-
-
 
 function getAssignedRoles(sessionID) {
     const socket = io("/roles");
