@@ -78,6 +78,13 @@ class Constant(Args):
         }
 
 
+class TraitorLeader(String):
+    def to_dict(self):
+        return {
+            "widget": "traitor-select",
+        }
+
+
 class Leader(String):
     def to_dict(self):
         return {

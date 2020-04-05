@@ -4,6 +4,7 @@ import TokenPile from './components/token-pile';
 import Spice from './components/spice';
 import Card from './components/card';
 import LeaderToken from './components/leader-token';
+import update from 'immutability-helper';
 
 
 class Faction extends React.Component {
@@ -41,8 +42,25 @@ class Faction extends React.Component {
         if (this.props.me !== this.props.faction){
             return [];
         }
+        const interaction = this.props.interaction;
+        const mode = interaction.mode;
         return this.props.factionstate.traitors.map((traitor) => {
-            return <Card type="Traitor" key={"traitor-"+traitor[0]} name={traitor[0]} />;
+            const traitorName = traitor[0];
+            const selected = interaction["traitor-select"] == traitorName;
+            const onClick = mode === "traitor-select" ? () => {
+                this.props.setInteraction(update(
+                    interaction,
+                    {
+                        [mode]: {$set: traitorName},
+                        mode: {$set: null},
+                    }
+                ));
+            } : null;
+            return <Card type="Traitor"
+                    key={"traitor-"+traitorName}
+                    name={traitor[0]}
+                    selected={selected}
+                    onClick={onClick}/>;
         });
     }
     getTokens () {
