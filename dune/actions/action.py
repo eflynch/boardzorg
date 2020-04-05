@@ -119,4 +119,4 @@ class Action(object, metaclass=ActionMeta):
 
 # These unsed imports register the Action classes
 from dune.actions import setup, storm, spice, nexus, bidding  # noqa # pylint: disable=unused-import
-from dune.actions import revival, movement, battle, collection, control   # noqa # pylint: disable=unused-import
+from dune.actions import revival, movement, battle, collection, control, coexist   # noqa # pylint: disable=unused-import

@@ -123,20 +123,23 @@ class Sector(Integer):
 class SpaceSector(Args):
     def to_dict(self):
         return {
-            "widget": "space-sector-select-start"
+            "widget": "space-sector-select-start",
+            "args": {}
         }
 
 
 class SpaceSectorStart(Args):
     def to_dict(self):
         return {
-            "widget": "space-sector-select-start"
+            "widget": "space-sector-select-start",
+            "args": {}
         }
 
 class SpaceSectorEnd(Args):
     def to_dict(self):
         return {
-            "widget": "space-sector-select-end"
+            "widget": "space-sector-select-end",
+            "args": {}
         }
 
 

@@ -129,6 +129,12 @@ class ConcludeWinner(Action):
 
     def _execute(self, game_state):
         new_game_state = deepcopy(game_state)
+
+        space = new_game_state.map_state[new_game_state.round_state.stage_state.battle[2]]
+        # If bene-gesserit not present or alone, there can be no advisors
+        if "bene-gesserit" not in space.forces or len(space.forces) == 1:
+            space.coexist = False
+
         new_game_state.round_state.battles.remove(new_game_state.round_state.stage_state.battle)
         new_game_state.round_state.stage = "main"
         return new_game_state

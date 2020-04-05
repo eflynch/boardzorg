@@ -272,6 +272,7 @@ class Board extends React.Component {
                     <image xlinkHref="/static/app/png/board.png" x="0" y="0" width="1" height="1"/>
                     <Storm sector={this.props.stormSector} color="rgba(255, 0, 0, 0.5)"/>
                     {futureStorm}
+                    {this.getSpaces()}
                     {this.getSpaceSectors()}
                     {this.getLogos()}
                     {this.getSpice()}

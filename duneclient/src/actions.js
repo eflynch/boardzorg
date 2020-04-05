@@ -117,7 +117,7 @@ const Actions = (props) => {
             <li className={selectedAction === actionName ? "selected" : ""} key={i} onClick={()=>{
                 setSelectedAction(actionName);
                 setArgs(defaultArgsForAction(actionName, actions[actionName]));
-                setInteractionFlow(getFlowForWidget(actions[actionName].widget, actions[actionName].config));
+                setInteractionFlow(getFlowForWidget(actions[actionName].widget, actions[actionName].args));
             }} key={i}>
                 {actionName}
             </li>

@@ -10,12 +10,11 @@ from dune.actions import args
 from dune.actions.karama import discard_karama
 
 
-def ship_units(game_state, faction, units, space, sector, coexist=False):
+def ship_units(game_state, faction, units, space, sector):
     if "stronghold" in space.type:
         if len(space.forces) > 1:
             if faction not in space.forces:
-                if not coexist:
-                    raise BadCommand("Cannot ship into stronghold with 2 enemy factions")
+                raise BadCommand("Cannot ship into stronghold with 2 enemy factions")
     if sector not in space.sectors:
         raise BadCommand("You ain't going nowhere")
 
@@ -37,15 +36,20 @@ def ship_units(game_state, faction, units, space, sector, coexist=False):
         space.forces[faction][sector].append(u)
 
 
-def move_units(game_state, faction, units, space_a, sector_a, space_b, sector_b, coexist=False):
+    if faction != "bene-gesserit":
+        # Intrusion allows bene-gesserit to flip to advisors if they wish
+        if "bene-gesserit" in space.forces and not space.coexist:
+            game_state.round_state.stage_state.query_flip_to_advisors = space.name
+
+
+def move_units(game_state, faction, units, space_a, sector_a, space_b, sector_b):
     if "stronghold" in space_b.type:
         total_forces = len(space_b.forces)
         if "bene-gesserit" in space_b.forces and space_b.coexist:
             total_forces -= 1
         if total_forces > 1:
             if faction not in space_b.forces:
-                if not coexist:
-                    raise BadCommand("Cannot move into stronghold with 2 enemy factions")
+                raise BadCommand("Cannot move into stronghold with 2 enemy factions")
     if sector_b not in space_b.sectors:
         raise BadCommand("You ain't going nowhere")
 
@@ -82,7 +86,27 @@ def move_units(game_state, faction, units, space_a, sector_a, space_b, sector_b,
 
     if all(space_a.forces[faction][s] == [] for s in space_a.forces[faction]):
         del space_a.forces[faction]
-    if "bene-gesserit" not in space_a.forces:
+
+    # Update Coexist flags
+
+    if faction == "bene-gesserit":
+
+        # Advisors flip to Fighters if fighters join them
+        # Also If bene-gesserit not present or alone, there can be no advisors
+        if not space_a.coexist or len(space_b.forces) == 1:
+            space_b.coexist = False
+
+        # Advisors may flip to fighters if they move somewhere occupied
+        else:
+            game_state.round_state.stage_state.query_flip_to_fighters = space_b.name
+
+    else:
+        # Intrusion allows bene-gesserit to flip to advisors if they wish
+        if "bene-gesserit" in space_b.forces and not space_b.coexist:
+            game_state.round_state.stage_state.query_flip_to_advisors = space_b.name
+
+    # If bene-gesserit not present or alone, there can be no advisors
+    if "bene-gesserit" not in space_a.forces or len(space_a.forces) == 1:
         space_a.coexist = False
 
 
@@ -120,7 +144,7 @@ class KaramaBlockGuildTurnChoice(Action):
         faction_order = storm.get_faction_order(game_state)
         new_game_state.round_state.faction_turn = faction_order[0]
         new_game_state.round_state.turn_order = faction_order
-        new_game_state.round_state.stage_state = movement.CoexistStage()
+        new_game_state.round_state.stage_state = movement.TurnStage()
         discard_karama(new_game_state, self.faction)
         return new_game_state
 
@@ -163,71 +187,6 @@ class SkipKaramaGuildTurnChoice(Action):
             faction_order.insert(0, "guild")
         new_game_state.round_state.turn_order = faction_order
         new_game_state.round_state.faction_turn = faction_order[0]
-        new_game_state.round_state.stage_state = movement.CoexistStage()
-        return new_game_state
-
-
-class CoexistPlace(Action):
-    name = "coexist-place"
-    ck_round = "movement"
-    ck_stage = "coexist"
-    ck_faction = "bene-gesserit"
-
-    @classmethod
-    def parse_args(cls, faction, args):
-        spaces = args.split(" ")
-        return CoexistPlace(faction, spaces)
-
-    @classmethod
-    def get_arg_spec(cls, faction=None):
-        return args.Array(args.Space())
-
-    def __init__(self, faction, spaces):
-        self.faction = faction
-        self.spaces = spaces
-
-    def _execute(self, game_state):
-        new_game_state = deepcopy(game_state)
-        for s in self.spaces:
-            space = new_game_state.map_state[s]
-            if "bene-gesserit" not in space.forces:
-                raise BadCommand("No forces to coexist")
-            space.coexist = True
-
-        new_game_state.round_state.stage_state = movement.TurnStage()
-        return new_game_state
-
-
-class CoexistPersist(Action):
-    name = "coexist-persist"
-    ck_round = "movement"
-    ck_stage = "coexist"
-    ck_faction = "bene-gesserit"
-
-    def _execute(self, game_state):
-        new_game_state = deepcopy(game_state)
-        for s in new_game_state.map_state:
-            space = new_game_state.map_state[s]
-            if "bene-gesserit" in space.forces:
-                space.coexist = space.was_coexist
-
-        new_game_state.round_state.stage_state = movement.TurnStage()
-        return new_game_state
-
-
-class SkipCoexist(Action):
-    name = "coexist-skip"
-    ck_round = "movement"
-    ck_stage = "coexist"
-    su = True
-
-    @classmethod
-    def _check(cls, game_state, faction):
-        if "bene-gesserit" in game_state.faction_state:
-            raise IllegalAction("Cannot skip coexist if bene-gesserit are present")
-
-    def _execute(self, game_state):
-        new_game_state = deepcopy(game_state)
         new_game_state.round_state.stage_state = movement.TurnStage()
         return new_game_state
 
@@ -270,6 +229,13 @@ class EndMovementTurn(Action):
     def _check(cls, game_state, faction):
         cls.check_turn(game_state, faction)
 
+        if game_state.round_state.stage_state.query_flip_to_advisors:
+            raise IllegalAction("Query advisor flip in progress")
+
+        if game_state.round_state.stage_state.query_flip_to_fighters:
+            raise IllegalAction("Query fighter flip in progress")
+
+
     def _execute(self, game_state):
         new_game_state = deepcopy(game_state)
         idx = new_game_state.round_state.turn_order.index(self.faction)
@@ -296,6 +262,12 @@ class AutoEndMovementTurn(Action):
         if not game_state.round_state.stage_state.movement_used:
             raise IllegalAction("Movement still possible")
 
+        if game_state.round_state.stage_state.query_flip_to_advisors:
+            raise IllegalAction("Query advisor flip in progress")
+
+        if game_state.round_state.stage_state.query_flip_to_fighters:
+            raise IllegalAction("Query fighter flip in progress")
+
     def _execute(self, game_state):
         new_game_state = deepcopy(game_state)
         faction_turn = new_game_state.round_state.faction_turn
@@ -319,31 +291,23 @@ class Ship(Action):
         parts = args.split(" ")
         if len(parts) == 3:
             units, space, sector = parts
-            coexist = False
-        elif len(parts) == 4:
-            units, space, sector, coexist = parts
-            coexist = coexist == "coexist"
         else:
             raise BadCommand("Shipment Requires Different Arguments")
 
         units = [int(i) for i in units.split(",")]
         sector = int(sector)
 
-        return Ship(faction, units, space, sector, coexist)
+        return Ship(faction, units, space, sector)
 
     @classmethod
     def get_arg_spec(cls, faction=None):
-        return args.Union(
-            args.Struct(args.Units(faction), args.SpaceSector()),
-            args.Struct(args.Units(faction), args.SpaceSector(), args.Constant("coexist"))
-        )
+        return args.Struct(args.Units(faction), args.SpaceSector())
 
-    def __init__(self, faction, units, space, sector, coexist):
+    def __init__(self, faction, units, space, sector):
         self.faction = faction
         self.units = units
         self.space = space
         self.sector = sector
-        self.coexist = coexist
 
     @classmethod
     def _check(cls, game_state, faction):
@@ -355,6 +319,7 @@ class Ship(Action):
 
     def _execute(self, game_state):
         new_game_state = deepcopy(game_state)
+        new_game_state.round_state.ship_has_sailed = True
 
         space = new_game_state.map_state[self.space]
         if self.sector not in space.sectors:
@@ -374,7 +339,6 @@ class Ship(Action):
         new_game_state.round_state.stage_state.substage_state.units = self.units
         new_game_state.round_state.stage_state.substage_state.space = self.space
         new_game_state.round_state.stage_state.substage_state.sector = self.sector
-        new_game_state.round_state.stage_state.substage_state.coexist = self.coexist
 
         return new_game_state
 
@@ -466,7 +430,6 @@ class KaramaCheapShipment(Action):
         s = new_game_state.round_state.stage_state.substage_state.space
         space = new_game_state.map_state[s]
         sector = new_game_state.round_state.stage_state.substage_state.sector
-        coexist = new_game_state.round_state.stage_state.substage_state.coexist
 
         cost = spice_cost(new_game_state, "guild", len(units), space)
 
@@ -474,7 +437,6 @@ class KaramaCheapShipment(Action):
 
         ship_units(new_game_state, self.faction, units, space, sector)
         new_game_state.faction_state[self.faction].spice -= cost
-        space.coexist = coexist
 
         return new_game_state
 
@@ -499,7 +461,6 @@ class PayShipment(Action):
         s = new_game_state.round_state.stage_state.substage_state.space
         space = new_game_state.map_state[s]
         sector = new_game_state.round_state.stage_state.substage_state.sector
-        coexist = new_game_state.round_state.stage_state.substage_state.coexist
 
         cost = spice_cost(new_game_state, self.faction, len(units), space)
         if cost > new_game_state.faction_state[self.faction].spice:
@@ -510,7 +471,6 @@ class PayShipment(Action):
         if self.faction != "guild":
             if "guild" in new_game_state.faction_state:
                 new_game_state.faction_state["guild"].spice += cost
-        space.coexist = coexist
 
         return new_game_state
 
@@ -530,6 +490,10 @@ class SendSpiritualAdvisor(Action):
             raise IllegalAction("No guiding yourself guild")
         if not game_state.faction_state["bene-gesserit"].reserve_units:
             raise IllegalAction("You need units to send as advisors")
+        space_name = game_state.round_state.stage_state.substage_state.space
+        space = game_state.map_state[space_name]
+        if "bene-gesserit" in space.forces and not space.coexist:
+            raise IllegalAction("You cannot send a spiritual advisor where you have fighters") 
 
     def _execute(self, game_state):
         new_game_state = deepcopy(game_state)
@@ -572,7 +536,10 @@ class SkipSendSpiritualAdvisor(Action):
         if "bene-gesserit" in game_state.faction_state:
             if game_state.faction_state["bene-gesserit"].reserve_units:
                 if game_state.round_state.faction_turn != "bene-gesserit":
-                    raise IllegalAction("Cannot auto skip spiritual guide")
+                    space_name = game_state.round_state.stage_state.substage_state.space
+                    space = game_state.map_state[space_name]
+                    if ("bene-gesserit" not in space.forces) or space.coexist:
+                        raise IllegalAction("Cannot auto skip spiritual guide")
 
     def _execute(self, game_state):
         new_game_state = deepcopy(game_state)
@@ -642,36 +609,25 @@ class Move(Action):
         parts = args.split(" ")
         if len(parts) == 5:
             units, space_a, sector_a, space_b, sector_b = parts
-            coexist = False
-        elif len(parts) == 6:
-            units, space_a, sector_a, space_b, sector_b, coexist = parts
-            coexist = coexist == "coexist"
         else:
             raise BadCommand("wrong number of args")
-
-        if coexist and faction != "bene-gesserit":
-            raise BadCommand("Only the bene-gesserit may coexist")
 
         units = [int(u) for u in units.split(",")]
         sector_a = int(sector_a)
         sector_b = int(sector_b)
-        return Move(faction, units, space_a, sector_a, space_b, sector_b, coexist)
+        return Move(faction, units, space_a, sector_a, space_b, sector_b)
 
     @classmethod
     def get_arg_spec(cls, faction=None):
-        return args.Union(
-            args.Struct(args.Units(faction), args.SpaceSectorStart(), args.SpaceSectorEnd()),
-            args.Struct(args.Units(faction), args.SpaceSectorStart(), args.SpaceSectorEnd(), args.Constant("coexist"))
-        )
+        return args.Struct(args.Units(faction), args.SpaceSectorStart(), args.SpaceSectorEnd())
 
-    def __init__(self, faction, units, space_a, sector_a, space_b, sector_b, coexist):
+    def __init__(self, faction, units, space_a, sector_a, space_b, sector_b):
         self.faction = faction
         self.units = units
         self.space_a = space_a
         self.space_b = space_b
         self.sector_a = sector_a
         self.sector_b = sector_b
-        self.coexist = coexist
 
     @classmethod
     def _check(cls, game_state, faction):
@@ -704,10 +660,7 @@ class Move(Action):
         space_a = new_game_state.map_state[self.space_a]
         space_b = new_game_state.map_state[self.space_b]
         move_units(new_game_state, self.faction, self.units, space_a, self.sector_a, space_b,
-                   self.sector_b, self.coexist and self.faction == "bene-gesserit")
-
-        if self.coexist and self.faction == "bene-gesserit":
-            space_b.coexist = True
+                   self.sector_b)
 
         new_game_state.round_state.stage_state.movement_used = True
 
@@ -723,35 +676,27 @@ class CrossShip(Action):
     @classmethod
     def parse_args(cls, faction, args):
         parts = args.split(" ")
-        if len(parts) == 6:
-            units, space_a, sector_a, space_b, sector_b, coexist = parts
-            coexist = coexist == "coexist"
-        elif len(parts) == 5:
+        if len(parts) == 5:
             units, space_a, sector_a, space_b, sector_b = parts
-            coexist = False
         else:
             raise BadCommand("wrong number of args")
 
         units = [int(u) for u in units.split(",")]
         sector_a = int(sector_a)
         sector_b = int(sector_b)
-        return CrossShip(faction, units, space_a, sector_a, space_b, sector_b, coexist)
+        return CrossShip(faction, units, space_a, sector_a, space_b, sector_b)
 
     @classmethod
     def get_arg_spec(cls, faction=None):
-        return args.Union(
-            args.Struct(args.Units(faction), args.SpaceSectorStart(), args.SpaceSectorEnd()),
-            args.Struct(args.Units(faction), args.SpaceSectorStart(), args.SpaceSectorEnd(), args.Constant("coexist"))
-        )
+        return args.Struct(args.Units(faction), args.SpaceSectorStart(), args.SpaceSectorEnd())
 
-    def __init__(self, faction, units, space_a, sector_a, space_b, sector_b, coexist):
+    def __init__(self, faction, units, space_a, sector_a, space_b, sector_b):
         self.faction = faction
         self.units = units
         self.space_a = space_a
         self.space_b = space_b
         self.sector_a = sector_a
         self.sector_b = sector_b
-        self.coexist = coexist
 
     @classmethod
     def _check(cls, game_state, faction):
@@ -762,6 +707,7 @@ class CrossShip(Action):
 
     def _execute(self, game_state):
         new_game_state = deepcopy(game_state)
+        new_game_state.round_state.ship_has_sailed = True
 
         space_a = new_game_state.map_state[self.space_a]
         space_b = new_game_state.map_state[self.space_b]
@@ -772,8 +718,7 @@ class CrossShip(Action):
         if self.faction != "guild":
             if "guild" in new_game_state.faction_state:
                 new_game_state.faction_state["guild"] += cost
-        move_units(new_game_state, self.faction, self.units, space_a, self.sector_a, space_b, self.sector_b,
-                   self.coexist and self.faction == "bene-gesserit")
+        move_units(new_game_state, self.faction, self.units, space_a, self.sector_a, space_b, self.sector_b)
 
         new_game_state.round_state.stage_state.shipment_used = True
 
@@ -817,6 +762,7 @@ class ReverseShip(Action):
 
     def _execute(self, game_state):
         new_game_state = deepcopy(game_state)
+        new_game_state.round_state.ship_has_sailed = True
         if self.sector == new_game_state.storm_position:
             raise BadCommand("You cannot ship out of the storm")
 
@@ -877,6 +823,7 @@ class Deploy(Action):
     def _execute(self, game_state):
 
         new_game_state = deepcopy(game_state)
+        new_game_state.round_state.ship_has_sailed = True
         m = MapGraph()
         if m.distance("The-Great-Flat", 14, self.space, self.sector) > 2:
             print((self.space, self.sector))

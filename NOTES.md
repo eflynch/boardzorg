@@ -2,7 +2,7 @@
 
 ## Ready For Dev
 
-* Switch to using websockets instead of polling
+* Break up the Unions
 * Support Leader Capture mechanic
 * Support Special Treachery Cards
 * Support ANY TIME Karama powers
@@ -18,6 +18,8 @@
   * There shouldn't be a coexist persist option but rather the option to flip at any time before shipments occur
 * Show the discard piles on the board
 
+## Done
+* Switch to using websockets instead of polling
 
 # Notes
 

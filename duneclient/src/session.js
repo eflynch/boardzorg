@@ -49,7 +49,6 @@ const RoundState = ({roundState, stormPosition, logoPositions}) => {
 
 
 const Decks = ({state}) => {
-    console.log(state);
     return (
         <div style={{
             display:"flex",

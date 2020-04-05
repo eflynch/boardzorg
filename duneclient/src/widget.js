@@ -238,6 +238,10 @@ const Widget = ({type, args, setArgs, config, interaction, setInteraction}) => {
         return <Integer args={args} setArgs={setArgs} type={config.type} min={config.min} max={config.max} />;
     }
 
+    if (type === "space-select") {
+        return <SelectOnMap mode="space-select" args={args} setArgs={setArgs} config={config} interaction={interaction} setInteraction={setInteraction}/>;
+    }
+
     if (type === "space-sector-select-start") {
         return <SelectOnMap mode="space-sector-select-start" args={args} setArgs={setArgs} config={config} interaction={interaction} setInteraction={setInteraction}/>;
     }

@@ -66,7 +66,7 @@ class Session:
             if action:
                 action.check(self.game_log[-1], faction)
             else:
-                raise BadCommand("Not a known action")
+                raise BadCommand("Not a known action", action_type)
         action = valid_actions[action_type].parse_args(faction, args)
         self.execute_action(action)
         self.command_log.append((faction, cmd))

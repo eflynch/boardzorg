@@ -213,6 +213,7 @@ class AutoResolve(Action):
             if "Shield" in stage_state.attacker_plan.values() or "Shield" in stage_state.defender_plan.values():
 
                 space = new_game_state.map_state[battle_id[2]]
+                space.coexist = False
                 for fac in space.forces:
                     for sec in space.forces[fac]:
                         units_to_tank = space.forces[fac][sec][:]

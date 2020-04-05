@@ -3,10 +3,6 @@ from dune.state.rounds import RoundState, StageState, SubStageState
 # Setup
 #    # KARAMA GUILD
 #    # KARAMAGUILDSKIP (no Guild present, all karama passes in)
-# Coexist
-#    # COEXIST PLACE
-#    # COEXIST PERSIST
-#    # COEXISTSKIP (no bg Present)
 # turn
 #    # pass
 #    # reverse-ship (guild and allies)
@@ -28,10 +24,6 @@ class SetupStage(StageState):
         self.karama_passes = []
 
 
-class CoexistStage(StageState):
-    stage = "coexist"
-
-
 class TurnStage(StageState):
     stage = "turn"
 
@@ -39,6 +31,8 @@ class TurnStage(StageState):
         self.shipment_used = False
         self.movement_used = False
         self.substage_state = MainSubStage()
+        self.query_flip_to_fighters = None
+        self.query_flip_to_advisors = None
 
 
 class MainSubStage(SubStageState):
@@ -53,7 +47,6 @@ class ShipSubStage(SubStageState):
         self.units = None
         self.space = None
         self.sector = None
-        self.coexist = None
 
 
 class MovementRound(RoundState):
@@ -64,6 +57,7 @@ class MovementRound(RoundState):
         self.faction_turn = None
         self.guild_choice_blocked = False
         self.stage_state = SetupStage()
+        self.ship_has_sailed = False
 
     def visible(self, game_state, faction):
         visible = super().visible(game_state, faction)

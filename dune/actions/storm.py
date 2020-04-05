@@ -20,6 +20,7 @@ def destroy_in_path(game_state, sectors):
                             space.forces[faction][s] = []
                     if s == space.spice_sector:
                         space.spice = 0
+                    space.coexist = False
 
 
 def get_faction_order(game_state):
