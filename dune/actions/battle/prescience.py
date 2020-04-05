@@ -4,6 +4,7 @@ from logging import getLogger
 from dune.actions.action import Action
 from dune.exceptions import IllegalAction, BadCommand
 from dune.actions.battle import ops
+from dune.actions.karama import discard_karama
 
 logger = getLogger(__name__)
 
@@ -145,17 +146,14 @@ class KaramaPrescience(Action):
     ck_round = "battle"
     ck_stage = "battle"
     ck_substage = "karama-prescience"
-
-    @classmethod
-    def _check(cls, game_state, faction):
-        if "Karama" not in game_state.faction_state[faction].treachery:
-            raise IllegalAction("You do not have a Karama card to play")
+    ck_karama = True
 
     def _execute(self, game_state):
         new_game_state = deepcopy(game_state)
         new_game_state.round_state.stage_state.prescience = None
         new_game_state.round_state.stage_state.prescience_is_attacker = False
         new_game_state.round_state.stage_state.substage = "karama-entire"
+        discard_karama(new_game_state, self.faction)
         return new_game_state
 
 
@@ -165,11 +163,10 @@ class KaramaEntirePlan(Action):
     ck_stage = "battle"
     ck_substage = "karama-entire"
     ck_faction = "atreides"
+    ck_karama = True
 
     @classmethod
     def _check(cls, game_state, faction):
-        if "Karama" not in game_state.faction_state[faction].treachery:
-            raise IllegalAction("You need a karama card to do this")
         if "atreides" not in game_state.round_state.stage_state.battle:
             attacker, defender, _, _ = game_state.round_state.stage_state.battle
             if attacker not in game_state.alliances["atreides"]:
@@ -179,6 +176,7 @@ class KaramaEntirePlan(Action):
     def _execute(self, game_state):
         new_game_state = deepcopy(game_state)
         new_game_state.round_state.stage_state.substage = "reveal-entire"
+        discard_karama(new_game_state, self.faction)
         return new_game_state
 
 

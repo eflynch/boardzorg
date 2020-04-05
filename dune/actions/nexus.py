@@ -12,6 +12,7 @@ from dune.actions.movement import move_units
 from dune.exceptions import IllegalAction, BadCommand
 from dune.state.factions import FactionState
 from dune.actions import args
+from dune.actions.karama import discard_karama
 
 
 def fremen_allies_present(game_state):
@@ -48,6 +49,7 @@ def alliances_work(game_state):
 class KaramaWormRide(Action):
     name = "karama-worm-ride"
     ck_round = "nexus"
+    ck_karam = True
 
     def __init__(self, faction):
         self.faction = faction
@@ -60,14 +62,11 @@ class KaramaWormRide(Action):
         if game_state.round_state.worm_done:
             raise IllegalAction("Karama already used or passed")
 
-        if "Karama" not in game_state.faction_state[faction].treachery:
-            raise IllegalAction("You got to have a karama card to do that")
-
     def _execute(self, game_state):
         new_game_state = deepcopy(game_state)
         new_game_state.round_state.worm_done = True
-        new_game_state.faction_state[self.faction].treachery.remove("Karama")
-        new_game_state.treachery_discard.insert(0, "Karama")
+        discard_karama(new_game_state, self.faction)
+
 
         return new_game_state
 

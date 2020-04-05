@@ -3,6 +3,7 @@ from logging import getLogger
 
 from dune.actions.action import Action
 from dune.exceptions import IllegalAction, BadCommand
+from dune.actions.karama import discard_karama
 
 logger = getLogger(__name__)
 
@@ -106,11 +107,10 @@ class KaramaVoice(Action):
     ck_round = "battle"
     ck_stage = "battle"
     ck_substage = "karama-voice"
+    ck_karama = True
 
     @classmethod
     def _check(cls, game_state, faction):
-        if "Karama" not in game_state.faction_state[faction].treachery:
-            raise IllegalAction("You need a karama card to do this")
         if faction in game_state.round_state.stage_state.voice_karama_passes:
             raise IllegalAction("You have already passed")
 
@@ -119,6 +119,7 @@ class KaramaVoice(Action):
         new_game_state.round_state.stage_state.voice_is_attacker = False
         new_game_state.round_state.stage_state.voice = None
         new_game_state.round_state.stage_state.substage = "prescience"
+        discard_karama(game_state, self.faction)
         return new_game_state
 
 

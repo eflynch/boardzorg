@@ -1,5 +1,6 @@
 from dune.exceptions import IllegalAction
 from dune.actions.args import Args
+from dune.state.treachery_cards import WORTHLESS
 
 
 class ActionMeta(type):
@@ -28,6 +29,26 @@ class Action(object, metaclass=ActionMeta):
     @classmethod
     def get_arg_spec(cls):
         return Args()
+
+    @classmethod
+    def check_karama(cls, game_state, faction, exception=None):
+        is_bene = faction == "bene-gesserit"
+        if faction is None:
+            raise IllegalAction("Got to be someone to do this")
+        has_karama = "Karama" in game_state.faction_state[faction].treachery
+        worthless_count = sum([1 for card in game_state.faction_state[faction].treachery if card in WORTHLESS])
+        if is_bene:
+            if not has_karama and worthless_count == 0:
+                if exception is None:
+                    raise IllegalAction("You need a Karama card or Worthless card")
+                else:
+                    raise exception
+        else:
+            if not has_karama:
+                if exception is None:
+                    raise IllegalAction("You need a Karama card")
+                else:
+                    raise exception
 
     @classmethod
     def check_turn(cls, game_state, faction):
@@ -75,6 +96,9 @@ class Action(object, metaclass=ActionMeta):
         if hasattr(cls, "ck_faction"):
             if faction != cls.ck_faction:
                 raise IllegalAction("Only {} can {}".format(cls.ck_faction, cls.name))
+        if hasattr(cls, "ck_karama"):
+            cls.check_karama(game_state, faction) 
+
         if cls.su and faction is not None:
             raise IllegalAction("Only God can do that")
         if not cls.su and faction is None:

@@ -15,14 +15,14 @@ class AuctionStage(StageState):
         self.winning_bid = None
 
     def visible(self, game_state, faction):
-        bids = {f: self.bids[f] for f in self.bids if self.bids[f] < float("inf")}
+        bids = {f: self.bids[f] for f in self.bids if self.bids[f] != float("inf")}
         for f in self.bids:
             if self.bids[f] == float("inf"):
                 bids[f] = "inf"
         visible = super().visible(game_state, faction)
         visible["bids"] = bids
         visible["winner"] = self.winner
-        visible["winning_bid"] = self.winning_bid
+        visible["winning_bid"] = self.winning_bid if self.winning_bid != float("inf") else "inf"
         visible["substage_state"] = self.substage_state.visible(game_state, faction)
         return visible
 

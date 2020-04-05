@@ -6,6 +6,7 @@ from dune.exceptions import IllegalAction, BadCommand
 from dune.state.rounds.revival import RevivalRound
 from dune.state.rounds import bidding
 from dune.actions import args
+from dune.actions.karama import discard_karama
 
 
 def next_bidder(game_state):
@@ -30,6 +31,8 @@ def next_first_bidder(game_state):
 def do_payment(game_state):
     winner = game_state.round_state.stage_state.winner
     bid = game_state.round_state.stage_state.winning_bid
+    if bid > game_state.faction_state[winner].spice:
+        raise BadCommand("Cannot pay if you don't have enough spice")
     game_state.faction_state[winner].spice -= bid
     if winner != "emperor" and "emperor" in game_state.faction_state:
         game_state.faction_state["emperor"].spice += bid
@@ -122,8 +125,7 @@ class Bid(Action):
             raise BadCommand("Must bid higher than the highest bid")
 
         if self.spice > game_state.faction_state[self.faction].spice:
-            if "Karama" not in game_state.faction_state[self.faction].treachery:
-                raise BadCommand("Must not bid higher than you have spice")
+            self.check_karama(game_state, self.faction, BadCommand("Must not bid higher than you have spice"))
 
         new_game_state = deepcopy(game_state)
         new_game_state.round_state.stage_state.bids[self.faction] = self.spice
@@ -233,18 +235,16 @@ class KaramaFreeBid(Action):
     ck_round = "bidding"
     ck_stage = "auction"
     ck_substage = "payment"
+    ck_karama = True
 
     @classmethod
     def _check(cls, game_state, faction):
         if faction != game_state.round_state.stage_state.winner:
             raise IllegalAction("You need to be the winner first")
-        if "Karama" not in game_state.faction_state[faction].treachery:
-            raise IllegalAction("You don't have a karama card")
 
     def _execute(self, game_state):
         new_game_state = deepcopy(game_state)
-        new_game_state.faction_state[self.faction].treachery.remove("Karama")
-        new_game_state.treachery_discard.insert(0, "Karama")
+        discard_karama(new_game_state, self.faction)
         card = new_game_state.round_state.up_for_auction.pop(0)
         new_game_state.faction_state[self.faction].treachery.append(card)
 
@@ -297,11 +297,10 @@ class KaramaStopExtra(Action):
     ck_round = "bidding"
     ck_stage = "auction"
     ck_substage = "collect"
+    ck_karam = True
 
     @classmethod
     def _check(cls, game_state, faction):
-        if "Karama" not in game_state.faction_state[faction].treachery:
-            raise IllegalAction("You don't have a karama card anyway")
         if game_state.round_state.stage_state.winner != "harkonnen":
             raise IllegalAction("This only matters to the harkonnen")
         if not game_state.treachery_deck:
@@ -315,6 +314,7 @@ class KaramaStopExtra(Action):
         new_game_state = deepcopy(game_state)
         new_game_state.round_state.stage_state = bidding.AuctionStage()
         new_game_state.round_state.stage_state.substage_state.faction_turn = next_first_bidder(new_game_state)
+        discard_karama(game_state, self.faction)
         return new_game_state
 
 

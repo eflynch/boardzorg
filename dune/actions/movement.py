@@ -7,6 +7,7 @@ from dune.exceptions import IllegalAction, BadCommand
 from dune.state.rounds import movement, battle
 from dune.map.map import MapGraph
 from dune.actions import args
+from dune.actions.karama import discard_karama
 
 
 def ship_units(game_state, faction, units, space, sector, coexist=False):
@@ -101,6 +102,7 @@ class KaramaBlockGuildTurnChoice(Action):
     name = "karama-block-guild-turn-choice"
     ck_round = "movement"
     ck_stage = "setup"
+    ck_karama = True
 
     @classmethod
     def _check(cls, game_state, faction):
@@ -108,8 +110,6 @@ class KaramaBlockGuildTurnChoice(Action):
             raise IllegalAction("The guild cannot do that")
         if faction in game_state.round_state.stage_state.karama_passes:
             raise IllegalAction("You have already passed this option")
-        if "Karama" not in game_state.faction_state[faction].treachery:
-            raise IllegalAction("You need a karama card to block guild turn choice")
 
     def _execute(self, game_state):
         new_game_state = deepcopy(game_state)
@@ -118,8 +118,7 @@ class KaramaBlockGuildTurnChoice(Action):
         new_game_state.round_state.faction_turn = faction_order[0]
         new_game_state.round_state.turn_order = faction_order
         new_game_state.round_state.stage_state = movement.CoexistStage()
-        new_game_state.faction_state[self.faction].treachery.remove("Karama")
-        new_game_state.treachery_discard.insert(0, "Karama")
+        discard_karama(new_game_state, self.faction)
         return new_game_state
 
 
@@ -383,22 +382,20 @@ class KaramaStopShipment(Action):
     ck_stage = "turn"
     ck_substage = "ship"
     ck_faction = "guild"
+    ck_karama = True
 
     @classmethod
     def _check(cls, game_state, faction):
         if game_state.round_state.stage_state.substage_state.subsubstage != "halt":
             raise IllegalAction("Wrong subsubstage yo")
-        if "Karama" not in game_state.faction_state[faction].treachery:
-            raise IllegalAction("You need a Karama card to do this")
         if game_state.round_state.faction_turn == "guild":
             raise IllegalAction("No stopping yourself guild")
 
-    def _execute(self, game_state, faction):
+    def _execute(self, game_state):
         new_game_state = deepcopy(game_state)
         new_game_state.round_state.stage_state.shipment_used = True
         new_game_state.round_state.stage_state.substage = movement.MainSubStage()
-        new_game_state.faction_state[self.faction].treachery.remove("Karama")
-        new_game_state.treachery_discard.insert(0, "Karama")
+        discard_karama(game_state, self.faction)
         return new_game_state
 
 
@@ -448,12 +445,11 @@ class KaramaCheapShipment(Action):
     ck_round = "movement"
     ck_stage = "turn"
     ck_substage = "ship"
+    ck_karama = True
 
     @classmethod
     def _check(cls, game_state, faction):
         cls.check_turn(game_state, faction)
-        if "Karma" not in game_state.faction_state[faction].treachery:
-            raise IllegalAction("You need a karama card to do that")
         if game_state.round_state.stage_state.substage_state.subsubstage != "pay":
             raise IllegalAction("Wrong subsubstage yo")
         if game_state.round_state.faction_turn == "guild":
@@ -471,8 +467,7 @@ class KaramaCheapShipment(Action):
 
         cost = spice_cost(new_game_state, "guild", len(units), space)
 
-        new_game_state.faction_state[self.faction].treachery.remove("Karama")
-        new_game_state.treachery_discard.insert(0, "Karama")
+        discard_karama(new_game_state, self.faction)
 
         ship_units(new_game_state, self.faction, units, space, sector)
         new_game_state.faction_state[self.faction].spice -= cost
@@ -588,19 +583,17 @@ class KarmaStopSpiritualAdvisor(Action):
     ck_round = "movement"
     ck_stage = "turn"
     ck_substage = "ship"
+    ck_karama = True
 
     @classmethod
     def _check(cls, game_state, faction):
         cls.check_turn(game_state, faction)
         if game_state.round_state.stage_state.substage_state.subsubstage != "halt-guide":
             raise IllegalAction("Wrong subsubstage yo")
-        if "Karama" not in game_state.faction_state[faction].treachery:
-            raise IllegalAction("You need a Karama card")
 
     def _execute(self, game_state):
         new_game_state = deepcopy(game_state)
-        new_game_state.faction_state[self.faction].treachery.remove("Karama")
-        new_game_state.treachery_discard.insert(0, "Karama")
+        discard_karama(new_game_state, self.faction)
         new_game_state.round_state.stage_state.shipment_used = True
         new_game_state.round_state.stage_state.substage_state = movement.MainSubStage()
         return new_game_state

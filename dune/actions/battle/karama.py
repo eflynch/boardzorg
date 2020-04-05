@@ -3,6 +3,7 @@ from logging import getLogger
 
 from dune.actions.action import Action
 from dune.exceptions import IllegalAction
+from dune.actions.karama import discard_karama
 
 logger = getLogger(__name__)
 
@@ -12,13 +13,12 @@ class KaramaKwizatzHaderach(Action):
     ck_round = "battle"
     ck_stage = "battle"
     ck_substage = "karama-kwizatz-haderach"
+    ck_karama = True
 
     @classmethod
     def _check(cls, game_state, faction):
         if faction == "atreides":
             raise IllegalAction("You cannot karama your own messiah")
-        if "Karama" not in game_state.faction_state[faction].treachery:
-            raise IllegalAction("You need a karama card to do this")
         if "atreides" not in game_state.round_state.stage_state.battle:
             raise IllegalAction("No Kwizatz to Haderach")
 
@@ -26,6 +26,7 @@ class KaramaKwizatzHaderach(Action):
         new_game_state = deepcopy(game_state)
         new_game_state.round_state.stage_state.karama_kwizatz_haderach = True
         new_game_state.round_state.stage_state.substage = "karama-sardaukar"
+        discard_karama(game_state, self.faction)
         return new_game_state
 
 
@@ -76,13 +77,12 @@ class KaramaSardaukar(Action):
     ck_round = "battle"
     ck_stage = "battle"
     ck_substage = "karama-sardaukar"
+    ck_karama = True
 
     @classmethod
     def _check(cls, game_state, faction):
         if faction == "emperor":
             raise IllegalAction("You cannot karama your own slave soldier things")
-        if "Karama" not in game_state.faction_state[faction].treachery:
-            raise IllegalAction("You need a karama card to do this")
         if "emperor" not in game_state.round_state.stage_state.battle:
             raise IllegalAction("No sar to kar")
 
@@ -90,6 +90,7 @@ class KaramaSardaukar(Action):
         new_game_state = deepcopy(game_state)
         new_game_state.round_state.stage_state.karama_sardaukar = True
         new_game_state.round_state.stage_state.substage = "karama-fedaykin"
+        discard_karma(new_game_state, self.faction)
         return new_game_state
 
 
@@ -139,13 +140,12 @@ class KaramaFedaykin(Action):
     ck_round = "battle"
     ck_stage = "battle"
     ck_substage = "karama-fedaykin"
+    ck_karam = True
 
     @classmethod
     def _check(cls, game_state, faction):
         if faction == "fremen":
             raise IllegalAction("You cannot karama your own man dudes")
-        if "Karama" not in game_state.faction_state[faction].treachery:
-            raise IllegalAction("You need a karama card to do this")
         if "fremen" not in game_state.round_state.stage_state.battle:
             raise IllegalAction("No fedaykin")
 
@@ -153,6 +153,7 @@ class KaramaFedaykin(Action):
         new_game_state = deepcopy(game_state)
         new_game_state.round_state.stage_state.karama_fedaykin = True
         new_game_state.round_state.stage_state.substage = "finalize"
+        discard_karama(new_game_state, self.faction)
         return new_game_state
 
 
