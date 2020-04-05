@@ -16,11 +16,13 @@ if os.path.exists('/etc/config.json'):
 
     app.config['SECRET_KEY'] = config.get('SECRET_KEY')
 else:
+    print("hello2")
     print("Warning, running without a secret")
 
 
 @app.route("/", methods=['GET'])
 def index():
+    print("hello!")
     return reactstub("Shai-Hulud", ["app/css/styles.css", "app/css/slider.css"], ["app/main.js"], bootstrap=json.dumps({"sessionID": None}))
 
 
@@ -35,4 +37,4 @@ def view(session_id, role_id):
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=True, host='0.0.0.0')

@@ -1,4 +1,5 @@
 from dune.session import Session
+import os
 import rolewrapper
 
 import psycopg2 as psql
@@ -8,10 +9,20 @@ class SessionConflict(Exception):
     pass
 
 
+def _connect():
+    if os.getenv("FLASK_ENV") == "docker":
+        return psql.connect(host="postgres",
+                            dbname=os.getenv("POSTGRES_DB"),
+                            user=os.getenv("POSTGRES_USER"),
+                            password=os.getenv("POSTGRES_PASSWORD"),)
+    else:
+        return psql.connect("dbname=shai-hulud")
+
+
 class SessionWrapper:
     def __init__(self, session_id):
         self.session_id = session_id
-        self.conn = psql.connect("dbname=shai-hulud")
+        self.conn = _connect()
         self.cursor = self.conn.cursor()
 
     def __enter__(self):
@@ -41,7 +52,7 @@ class SessionWrapper:
 
     @staticmethod
     def create(name):
-        conn = psql.connect("dbname=shai-hulud")
+        conn = _connect()
         with conn.cursor() as cursor:
             cursor.execute("SELECT (id) from sessions where name=%(name)s", {"name": name})
             if cursor.rowcount != 0:
