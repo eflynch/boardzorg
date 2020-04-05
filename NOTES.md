@@ -2,7 +2,6 @@
 
 ## Ready For Dev
 
-* Break up the Unions
 * Support Leader Capture mechanic
 * Support Special Treachery Cards
 * Support ANY TIME Karama powers
@@ -11,15 +10,16 @@
 
 ## In Progress
 
+* Show the discard piles on the board
+
+## Done
+* Switch to using websockets instead of polling
 * Re-do BG coexist in a reasonable way
   * There shouldn't be any union arg specs with "coexist" constants, rather a ¿coexist? check command should happen before the movement resolves
     * This check happens when you move from a coexist into an occupied territory where you do not already have fighthers
     * This check happens when someone else moves into a territory you were the sole occupier of
   * There shouldn't be a coexist persist option but rather the option to flip at any time before shipments occur
-* Show the discard piles on the board
-
-## Done
-* Switch to using websockets instead of polling
+* Break up the Unions
 
 # Notes
 
