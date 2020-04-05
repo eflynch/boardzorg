@@ -12,7 +12,7 @@ class MapGraph:
                 self.g.add_node((name, s))
             for s1 in sectors:
                 for s2 in sectors:
-                    if abs(s1-s2) == 1:
+                    if abs(s1-s2) == 1 or abs(s1-s2) == 0:
                         self.g.add_edge((name, s1), (name, s2), 0)
 
         # Add edges

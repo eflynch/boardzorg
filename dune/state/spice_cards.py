@@ -3,7 +3,7 @@ SPICE_CARDS = [
     "Cielago-North",
     "Cielago-South",
     "Funeral-Plain",
-    "Great-Flat",
+    "The-Great-Flat",
     "Habbanya-Erg",
     "Habbanya-Ridge-Flat",
     "Hagga-Basin",

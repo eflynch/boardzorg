@@ -13,7 +13,7 @@ HOST_ACTIONS = ["undo"]
 
 class HostAction:
     @classmethod
-    def get_arg_spec(cls):
+    def get_arg_spec(cls, faction=None):
         return Args()
 
 

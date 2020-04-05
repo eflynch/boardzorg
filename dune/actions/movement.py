@@ -39,7 +39,10 @@ def ship_units(game_state, faction, units, space, sector, coexist=False):
 
 def move_units(game_state, faction, units, space_a, sector_a, space_b, sector_b, coexist=False):
     if "stronghold" in space_b.type:
-        if len(space_b.forces) > 1:
+        total_forces = len(space_b.forces)
+        if "bene-gesserit" in space_b.forces and space_b.coexist:
+            total_forces -= 1
+        if total_forces > 1:
             if faction not in space_b.forces:
                 if not coexist:
                     raise BadCommand("Cannot move into stronghold with 2 enemy factions")
@@ -176,7 +179,7 @@ class CoexistPlace(Action):
         return CoexistPlace(faction, spaces)
 
     @classmethod
-    def get_arg_spec(cls):
+    def get_arg_spec(cls, faction=None):
         return args.Array(args.Space())
 
     def __init__(self, faction, spaces):
@@ -329,10 +332,10 @@ class Ship(Action):
         return Ship(faction, units, space, sector, coexist)
 
     @classmethod
-    def get_arg_spec(cls):
+    def get_arg_spec(cls, faction=None):
         return args.Union(
-            args.Struct(args.Units(), args.SpaceSector()),
-            args.Struct(args.Units(), args.SpaceSector(), args.Constant("coexist"))
+            args.Struct(args.Units(faction), args.SpaceSector()),
+            args.Struct(args.Units(faction), args.SpaceSector(), args.Constant("coexist"))
         )
 
     def __init__(self, faction, units, space, sector, coexist):
@@ -655,10 +658,10 @@ class Move(Action):
         return Move(faction, units, space_a, sector_a, space_b, sector_b, coexist)
 
     @classmethod
-    def get_arg_spec(cls):
+    def get_arg_spec(cls, faction=None):
         return args.Union(
-            args.Struct(args.Units(), args.SpaceSector(), args.SpaceSector()),
-            args.Struct(args.Units(), args.SpaceSector(), args.SpaceSector(), args.Constant("coexist"))
+            args.Struct(args.Units(faction), args.SpaceSectorStart(), args.SpaceSectorEnd()),
+            args.Struct(args.Units(faction), args.SpaceSectorStart(), args.SpaceSectorEnd(), args.Constant("coexist"))
         )
 
     def __init__(self, faction, units, space_a, sector_a, space_b, sector_b, coexist):
@@ -735,10 +738,10 @@ class CrossShip(Action):
         return CrossShip(faction, units, space_a, sector_a, space_b, sector_b, coexist)
 
     @classmethod
-    def get_arg_spec(cls):
+    def get_arg_spec(cls, faction=None):
         return args.Union(
-            args.Struct(args.Units(), args.SpaceSector(), args.SpaceSector()),
-            args.Struct(args.Units(), args.SpaceSector(), args.SpaceSector(), args.Constant("coexist"))
+            args.Struct(args.Units(faction), args.SpaceSectorStart(), args.SpaceSectorEnd()),
+            args.Struct(args.Units(faction), args.SpaceSectorStart(), args.SpaceSectorEnd(), args.Constant("coexist"))
         )
 
     def __init__(self, faction, units, space_a, sector_a, space_b, sector_b, coexist):
@@ -796,8 +799,8 @@ class ReverseShip(Action):
         return ReverseShip(faction, units, space, sector)
 
     @classmethod
-    def get_arg_spec(cls):
-        return args.Struct(args.Units(), args.SpaceSector())
+    def get_arg_spec(cls, faction=None):
+        return args.Struct(args.Units(faction), args.SpaceSector())
 
     def __init__(self, faction, units, space, sector):
         self.faction = faction
@@ -856,8 +859,8 @@ class Deploy(Action):
         return Deploy(faction, units, space, sector)
 
     @classmethod
-    def get_arg_spec(cls):
-        return args.Struct(args.Units(), args.SpaceSector())
+    def get_arg_spec(cls, faction=None):
+        return args.Struct(args.Units(faction), args.SpaceSector())
 
     def __init__(self, faction, units, space, sector):
         self.faction = faction
@@ -875,7 +878,9 @@ class Deploy(Action):
 
         new_game_state = deepcopy(game_state)
         m = MapGraph()
-        if m.distance("Great-Flat", 14, self.space, self.sector) > 2:
+        if m.distance("The-Great-Flat", 14, self.space, self.sector) > 2:
+            print((self.space, self.sector))
+            print(m.g.edges[("The-Great-Flat", 14)])
             raise BadCommand("You cannot deploy there")
 
         space = new_game_state.map_state[self.space]

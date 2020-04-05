@@ -90,9 +90,9 @@ function getSession(sessionID, roleID){
     $.getJSON("/api/sessions/" + sessionID, {role_id: roleID}, function(data){
         document.title = `Shai-Hulud: ${data.role}`;
         renderSession(sessionID, roleID, data);
-        setTimeout(()=>{
-            getSession(sessionID, roleID);
-        }, 1000);
+        // setTimeout(()=>{
+        //     getSession(sessionID, roleID);
+        // }, 1000);
     }).fail(function(error){
         console.log(error.responseText);
         document.getElementById("content").innerHTML = `${sessionID} does not exist :(`;

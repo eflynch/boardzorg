@@ -46,21 +46,25 @@ class String(Args):
 
 
 class Integer(Args):
-    def to_dict(self):
-        return {
-            "widget": "integer"
-        }
+    def __init__(self, min=0, max=100, type=None):
+        self.min = min
+        self.max = max
+        self.type = type
 
-
-class Spice(Integer):
     def to_dict(self):
         return {
             "widget": "integer",
             "args": {
-                "min": 0,
-                "type": "spice"
+                "min": self.min,
+                "max": self.max,
+                "type": self.type
             }
         }
+
+
+class Spice(Integer):
+    def __init__(self):
+        super().__init__(min=0, type="spice")
 
 
 class Constant(Args):
@@ -82,10 +86,16 @@ class Leader(String):
 
 
 class Units(Args):
+    def __init__(self, faction=None):
+        self.fedaykin = faction == "fremen"
+        self.sardaukar = faction == "emperor"
     def to_dict(self):
         return {
             "widget": "units",
-            "args": {}
+            "args": {
+                "fedaykin": self.fedaykin,
+                "sardaukar": self.sardaukar
+            }
         }
 
 
@@ -106,7 +116,20 @@ class Sector(Integer):
 class SpaceSector(Args):
     def to_dict(self):
         return {
-            "widget": "space-sector-select"
+            "widget": "space-sector-select-start"
+        }
+
+
+class SpaceSectorStart(Args):
+    def to_dict(self):
+        return {
+            "widget": "space-sector-select-start"
+        }
+
+class SpaceSectorEnd(Args):
+    def to_dict(self):
+        return {
+            "widget": "space-sector-select-end"
         }
 
 
@@ -125,14 +148,8 @@ class Faction(String):
 
 
 class Turn(Integer):
-    def to_dict(self):
-        return {
-            "widget": "integer",
-            "args": {
-                "min": 0,
-                "max": 10
-            }
-        }
+    def __init__(self):
+        super().__init__(self, min=0, max=10)
 
 
 class Token(Integer):

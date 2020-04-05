@@ -48,7 +48,7 @@ class BeneGesseritPrediction(Action):
         return BeneGesseritPrediction(faction, other_faction, turn)
 
     @classmethod
-    def get_arg_spec(cls):
+    def get_arg_spec(cls, faction=None):
         return args.Struct(args.Faction(), args.Turn())
 
     def __init__(self, faction, other_faction, turn):
@@ -90,7 +90,7 @@ class PlaceToken(Action):
         return PlaceToken(faction, int(args))
 
     @classmethod
-    def get_arg_spec(cls):
+    def get_arg_spec(cls, faction=None):
         return args.Token()
 
     def __init__(self, faction, token_position):
@@ -147,7 +147,7 @@ class SelectTraitor(Action):
         return SelectTraitor(faction, traitor)
 
     @classmethod
-    def get_arg_spec(cls):
+    def get_arg_spec(cls, faction=None):
         return args.Leader()
 
     def __init__(self, faction, traitor):
@@ -225,7 +225,7 @@ class FremenPlacement(Action):
         return FremenPlacement(faction, tabr_units, west_units, south_units, west_sector, south_sector)
 
     @classmethod
-    def get_arg_spec(cls):
+    def get_arg_spec(cls, faction=None):
         return args.FremenPlacementSelector()
 
     def __init__(self, faction, tabr_units, west_units, south_units, west_sector, south_sector):
@@ -285,7 +285,7 @@ class BeneGesseritPlacement(Action):
         return BeneGesseritPlacement(faction, space, sector)
 
     @classmethod
-    def get_arg_spec(cls):
+    def get_arg_spec(cls, faction=None):
         return args.SpaceSector()
 
     def __init__(self, faction, space, sector):

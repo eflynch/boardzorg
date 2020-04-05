@@ -77,6 +77,21 @@ class Board extends React.Component {
                     }
                     let number = space.forces[faction][sector].length;
                     let power = space.forces[faction][sector].reduce((a, b) => a + b, 0);
+                    if (TokenLocations[space.name] === undefined) {
+                        console.warn(`Missing board-data for ${space.name} all sectors including ${sector}`);
+                        continue;
+                    }
+
+                    if (TokenLocations[space.name][sector] === undefined) {
+                        console.warn(`Missing board-data for ${space.name} :: ${sector}`);
+                        continue;
+                    }
+
+                    if (TokenLocations[space.name][sector][orders[space.name]] === undefined) {
+                        console.warn(`Missing board-data for ${space.name} :: ${sector} # ${orders[space.name]}`);
+                        continue;
+                    }
+
                     let {left, top} = TokenLocations[space.name][sector][orders[space.name]];
                     tokens.push(
                         <TokenPile key={i + faction + sector} x={left} y={top}
@@ -124,14 +139,15 @@ class Board extends React.Component {
                 return <Logo key={faction} diameter={0.05} faction={faction} x={left} y={top}/>;
             });
 
-        if (interaction.mode === "token-select") {
+        const mode = interaction.mode;
+        if (mode === "token-select") {
             logos = logos.concat(emptyPositions.map((position)=>{
                 const {top, left} = LogoLocations[position];
-                if (interaction.selected === null) {
+                if (interaction[mode] === null) {
                     return <BlankLogo key={position} diameter={0.05} x={left} y={top} onClick={(e)=>{
-                        setInteraction(update(interaction, {selected: {$set: position}}));
+                        setInteraction(update(interaction, {[mode]: {$set: position}}));
                     }}/>;
-                } else if (interaction.selected === position) {
+                } else if (interaction[mode] === position) {
                     return <Logo key={"me"} diameter={0.05} faction={me} x={left} y={top}/>;
                 }
             }));
@@ -161,21 +177,23 @@ class Board extends React.Component {
             return <g/>;
         }
         return this._getMapParts(spacePaths, "space", (space)=>{
-            setInteraction(update(interaction, {selected: {$set: space}}));
-        }, interaction.selected);
+            setInteraction(update(interaction, {[interaction.mode]: {$set: space}, mode: {$set: null}}));
+        }, interaction[interaction.mode]);
     }
 
     getSpaceSectors () {
         const {interaction, setInteraction} = this.props;
-        if (interaction.mode !== "space-sector-select") {
+        if (interaction.mode !== "space-sector-select-start" && interaction.mode !== "space-sector-select-end") {
             return <g/>;
         }
         return  this._getMapParts(spaceSectorPaths, "spaceSector", (spaceSector)=>{
             let split = spaceSector.split("-")
             const sector = split.pop()
             const space = split.join("-")
-            setInteraction(update(interaction, {selected: {$set: [space, sector].join(" ")}}));
-        }, interaction.selected);
+            setInteraction(update(interaction, {
+                [interaction.mode]: {$set: [space, sector].join(" ")},
+                mode: {$set: null}}));
+        }, interaction[interaction.mode]);
     }
 
     getSectors () {
@@ -184,8 +202,8 @@ class Board extends React.Component {
             return <g/>;
         }
         return this._getMapParts(sectorPaths, "sector", (sector)=>{
-            setInteraction(update(interaction, {selected: {$set: sector}}));
-        }, interaction.selected);
+            setInteraction(update(interaction, {[interaction.mode]: {$set: sector}, mode: {$set: null}}));
+        }, interaction[interaction.mode]);
     }
 
     render () {
@@ -205,7 +223,7 @@ class Board extends React.Component {
         if (round_state.stage !== undefined) {
             text += ": " + round_state.stage;
         }
-        if (round_state.stage_state !== undefined) {
+        if (round_state.stage_state !== undefined && round_state.stage_state !== null) {
             text += ": " + round_state.stage_state.stage;
         }
 

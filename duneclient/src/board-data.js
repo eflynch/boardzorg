@@ -16,6 +16,11 @@ export const SpiceLocations = {
 }
 
 export const TokenLocations = {
+    "The-Great-Flat": {
+        14: {
+            1: {top: 0.45, left:0.16},
+        }
+    },
     "Habbanya-Sietch": {
         16: {
             1: {top: 0.65, left: 0.16},
@@ -31,8 +36,9 @@ export const TokenLocations = {
     },
     "Carthag": {
         10: {
-            1: {top: 0.24, left: 0.455},
-            2: {top: 0.19, left: 0.475},
+            1: {top: 0.25, left: 0.455},
+            2: {top: 0.20, left: 0.495},
+            3: {top: 0.19, left: 0.445},
         }
     },
     "Imperial-Basin": {
@@ -53,6 +59,10 @@ export const TokenLocations = {
         }
     },
     "Pasty-Mesa": {
+        5: {
+            1: {top: 0.53, left: 0.79},
+            2: {top: 0.53, left: 0.69}
+        },
         6: {
             1: {top: 0.43, left: 0.79}
         }

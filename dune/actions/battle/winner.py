@@ -1,6 +1,7 @@
 from copy import deepcopy
 from logging import getLogger
 
+from dune.actions import args
 from dune.actions.action import Action
 from dune.exceptions import IllegalAction, BadCommand
 from dune.actions.battle import ops
@@ -23,6 +24,10 @@ class TankUnits(Action):
             sector = int(sector)
             groups.append((sector, units))
         return TankUnits(faction, groups)
+
+    @classmethod
+    def get_arg_spec(cls, faction):
+        return args.String()
 
     def __init__(self, faction, groups):
         self.faction = faction

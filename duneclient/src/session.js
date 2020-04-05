@@ -6,6 +6,21 @@ import Faction from './faction';
 import History from './history';
 
 import Bidding from './rounds/bidding';
+import Movement from './rounds/movement';
+
+
+const getFactionOrder = (logoPositions, stormSector) => {
+    const factionOrder = []
+    for (let i=0; i<18; i++){
+        const sector = (stormSector + i + 1) % 18
+        logoPositions.forEach(([name, position]) => {
+            if (position === sector) {
+                factionOrder.push(name);
+            }
+        });
+    }
+    return factionOrder;
+};
 
 
 class Session extends React.Component {
@@ -22,8 +37,12 @@ class Session extends React.Component {
     getRoundState = (round_state) => {
         const {state, actions, history} = this.props;
         let stateDiv = null;
+        let factionOrder = getFactionOrder(this.getLogoPositions(), state.storm_position);
         if (round_state && round_state.round == "bidding"){
-            stateDiv = <Bidding stormSector={state.storm_position} roundstate={round_state} logoPositions={this.getLogoPositions()}/>;
+            stateDiv = <Bidding factionOrder={factionOrder} roundstate={round_state} />;
+        }
+        if (round_state && round_state.round == "movement"){
+            stateDiv = <Movement roundstate={round_state} />;
         }
         if (stateDiv === null){
             return <div className="roundstate">{JSON.stringify(round_state)}</div>;

@@ -65,27 +65,32 @@ const Constant = ({value, setArgs}) => {
 const SelectOnMap = ({args, setArgs, interaction, setInteraction, mode}) => {
     let pieces;
     if (interaction.mode === mode) {
-        if (interaction.selected === null) {
+        if (interaction[mode] === null) {
             pieces = <div className="select-on-map on">Select on Board</div>;
         } else {
             pieces = [
                 <div key="select" className="select-on-map on" onClick={(e)=>{
-                    setArgs("$interaction.selected");
+                    setArgs(`$interaction.${mode}`);
                     setInteraction(update(interaction, {
-                        selected: {$set: null}
+                        [mode]: {$set: null}
                     }));
                 }}>Select on Board</div>,
-                <div key="value">Selected: {interaction.selected}</div>
+                <div key="value">Selected: {interaction[mode]}</div>
             ];
         }
     } else {
-        pieces = <div className="select-on-map off" onClick={(e)=>{
-            setArgs("$interaction.selected");
-            setInteraction(update(interaction, {
-                mode: {$set: mode},
-                selected: {$set: null}
-            }));
-        }}>Select on Board</div>;
+        pieces = [
+            <div key="select" className="select-on-map off" onClick={(e)=>{
+                setArgs(`$interaction.${mode}`);
+                setInteraction(update(interaction, {
+                    mode: {$set: mode},
+                    [mode]: {$set: null}
+                }));
+            }}>Select on Board</div>
+        ];
+        if (interaction[mode]) {
+            pieces.push(<div key="value">Selected: {interaction[mode]}</div>);
+        }
     }
     return (
         <div style={{display:"flex", flexDirection: "column", alignItems:"center"}}>
@@ -214,7 +219,7 @@ const Widget = ({type, args, setArgs, config, interaction, setInteraction}) => {
     }
 
     if (type === "units") {
-        return <Units args={args} setArgs={setArgs} fedakyin={config.fedaykin} sardaukar={config.sardaukar}/>;
+        return <Units args={args} setArgs={setArgs} fedaykin={config.fedaykin} sardaukar={config.sardaukar}/>;
     }
 
     if (type === "token-select") {
@@ -233,8 +238,12 @@ const Widget = ({type, args, setArgs, config, interaction, setInteraction}) => {
         return <Integer args={args} setArgs={setArgs} type={config.type} min={config.min} max={config.max} />;
     }
 
-    if (type === "space-sector-select") {
-        return <SelectOnMap mode="space-sector-select" args={args} setArgs={setArgs} config={config} interaction={interaction} setInteraction={setInteraction}/>;
+    if (type === "space-sector-select-start") {
+        return <SelectOnMap mode="space-sector-select-start" args={args} setArgs={setArgs} config={config} interaction={interaction} setInteraction={setInteraction}/>;
+    }
+
+    if (type === "space-sector-select-end") {
+        return <SelectOnMap mode="space-sector-select-end" args={args} setArgs={setArgs} config={config} interaction={interaction} setInteraction={setInteraction}/>;
     }
 
 

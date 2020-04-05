@@ -3,18 +3,6 @@ import React from 'react';
 import TreacheryCard from '../components/treachery-card';
 import FactionOrder from '../components/faction-order';
 
-const getFactionOrder = (roundstate, logoPositions, stormSector) => {
-    const factionOrder = []
-    for (let i=0; i<18; i++){
-        const sector = (stormSector + i + 1) % 18
-        logoPositions.forEach(([name, position]) => {
-            if (position === sector) {
-                factionOrder.push(name);
-            }
-        });
-    }
-    return factionOrder;
-};
 
 
 class Bidding extends React.Component {
@@ -32,8 +20,7 @@ class Bidding extends React.Component {
         return cards;
     }
     render () {
-        let {roundstate, logoPositions, stormSector} = this.props;
-        const factionOrder = getFactionOrder(roundstate, logoPositions, stormSector);
+        let {roundstate, factionOrder} = this.props;
         let turnOrder = <FactionOrder factions={factionOrder.map((faction)=>{
             return {
                 faction: faction,

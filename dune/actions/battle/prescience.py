@@ -1,6 +1,7 @@
 from copy import deepcopy
 from logging import getLogger
 
+from dune.actions import args
 from dune.actions.action import Action
 from dune.exceptions import IllegalAction, BadCommand
 from dune.actions.battle import ops
@@ -19,11 +20,17 @@ class Prescience(Action):
     @classmethod
     def parse_args(cls, faction, args):
         part = args
+        if part not in ["leader", "number", "weapon", "defense"]:
+            raise BadCommand("Not a valid prescience question")
         return Prescience(faction, part)
 
     def __init__(self, faction, part):
         self.faction = faction
         self.part = part
+
+    @classmethod
+    def get_arg_spec(cls, faction=None):
+        return args.String();
 
     @classmethod
     def _check(cls, game_state, faction):
@@ -102,6 +109,11 @@ class AnswerPrescience(Action):
     def parse_args(cls, faction, args):
         part = args
         return AnswerPrescience(faction, part)
+
+    @classmethod
+    def get_arg_spec(cls, faction=None):
+        return args.String();
+
 
     def __init__(self, faction, part):
         self.faction = faction

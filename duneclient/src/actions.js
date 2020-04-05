@@ -11,6 +11,9 @@ const defaultArgsForAction = (actionName) => {
     if (actionName === "fremen-placement") {
         return ":::16:3";
     }
+    if (actionName === "movement-select") {
+        return "   ";
+    }
     return "";
 };
 

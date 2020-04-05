@@ -47,7 +47,7 @@ WEAPONS = [
     "Crysknife",
     "Chaumas",
     "Chaumurky",
-    "Elacca-Drug",
+    "Ellaca-Drug",
     "Gom-Jabbar",
     "Lasgun",
     "Maula-Pistol",

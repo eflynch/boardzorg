@@ -113,7 +113,7 @@ class ProposeAlliance(Action):
         return ProposeAlliance(faction, factions)
 
     @classmethod
-    def get_arg_spec(cls):
+    def get_arg_spec(cls, faction=None):
         return args.Array(args.String())
 
     def __init__(self, faction, factions):
@@ -184,7 +184,7 @@ class WormRide(Action):
         return WormRide(faction, space, sector)
 
     @classmethod
-    def get_arg_spec(cls):
+    def get_arg_spec(cls, faction=None):
         return args.SpaceSector()
 
     def __init__(self, faction, space, sector):

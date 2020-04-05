@@ -98,7 +98,7 @@ class Bid(Action):
         return Bid(faction, spice)
 
     @classmethod
-    def get_arg_spec(cls):
+    def get_arg_spec(cls, faction=None):
         return args.Union(args.Constant("inf"), args.Spice())
 
     def __init__(self, faction, spice):

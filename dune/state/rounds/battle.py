@@ -60,6 +60,9 @@ class BattleStage(StageState):
         self.prescience = None
         self.prescience_is_attacker = False
 
+        self.reveal_entire = None
+        self.reveal_entire_is_attacker = False
+
         self.voice_karama_passes = []
 
         self.karama_sardaukar = False
@@ -72,6 +75,45 @@ class BattleStage(StageState):
         self.karama_kwizatz_haderach_passes = []
 
         self.traitor_passes = []
+
+    def visible(self, game_state, faction):
+        visible = super().visible(game_state, faction)
+        visible["battle"] = self.battle
+        visible["winner"] = self.winner
+        visible["prescience"] = self.prescience
+        visible["prescience_is_attacker"] = self.prescience_is_attacker
+        visible["reveal_entire"] = self.reveal_entire
+        visible["reveal_entire_is_attacker"] = self.reveal_entire_is_attacker
+        visible["substage"] = self.substage
+        visible["voice"] = self.voice
+        visible["voice_is_attacker"] = self.voice_is_attacker
+        visible["karama_sardaukar"] = self.karama_sardaukar
+        visible["karama_fedaykin"] = self.karama_fedaykin
+        visible["karama_kwizatz_haderach"] = self.karama_kwizatz_haderach
+
+        attacker = None
+        defender = None
+        if self.battle is not None:
+            attacker = self.battle[0]
+            defender = self.battle[1]
+
+        reveal_entire_attack = attacker == faction or (self.reveal_entire and self.reveal_entire_is_attacker) 
+        reveal_entire_defense = defender == faction or (self.reveal_entire and not self.reveal_entire_is_attacker) 
+
+        if reveal_entire_attack:
+            visible["attacker_plan"] = self.attacker_plan
+        if reveal_entire_defense:
+            visible["defender_plan"] = self.defender_plan
+
+        if self.prescience is not None:
+            relevant_plan = self.attacker_plan if self.prescience_is_attacker else self.defender_plan
+            relevant_plan_key = "attacker_plan" if self.prescience_is_attacker else "defender_plan"
+            if self.prescience in relevant_plan:
+                if relevant_plan_key not in visible:
+                    visible[relevant_plan_key] = {self.prescience: relevant_plan[self.prescience]}
+
+        return visible
+
 
 
 class BattleRound(RoundState):

@@ -1,9 +1,10 @@
 from copy import deepcopy
 from logging import getLogger
 
+from dune.actions import args
 from dune.actions.action import Action
 from dune.state.rounds import battle
-from dune.exceptions import IllegalAction
+from dune.exceptions import IllegalAction, BadCommand
 from dune.state.leaders import get_leader_faction
 from dune.actions.battle import ops
 
@@ -18,7 +19,10 @@ class CommitPlan(Action):
 
     @classmethod
     def parse_args(cls, faction, args):
-        leader, number, weapon, defense = args.split(" ")
+        parts = args.split(" ")
+        if len(parts) != 4:
+            raise BadCommand("Need four values")
+        leader, number, weapon, defense = parts
         if weapon == "-":
             weapon = None
         if defense == "-":
@@ -32,6 +36,10 @@ class CommitPlan(Action):
         self.number = number
         self.weapon = weapon
         self.defense = defense
+
+    @classmethod
+    def get_arg_spec(cls, faction=None):
+        return args.Struct(args.Leader(), args.Integer(max=20, type="units"), args.String(), args.String())
 
     @classmethod
     def _check(cls, game_state, faction):
@@ -63,6 +71,11 @@ class RevealEntire(CommitPlan):
 
     def _execute(self, game_state):
         new_game_state = super()._execute(game_state)
+        is_attacker = False
+        if self.faction == new_game_state.round_state.stage_state.battle[0]:
+            is_attacker = True
+        new_game_state.round_state.stage_state.reveal_entire = True
+        new_game_state.round_state.stage_state.reval_entire_is_attacker = is_attacker
         new_game_state.round_state.stage_state.substage = "karama-kwizatz-haderach"
         return new_game_state
 

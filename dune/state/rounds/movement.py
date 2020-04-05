@@ -64,3 +64,11 @@ class MovementRound(RoundState):
         self.faction_turn = None
         self.guild_choice_blocked = False
         self.stage_state = SetupStage()
+
+    def visible(self, game_state, faction):
+        visible = super().visible(game_state, faction)
+        visible["turn_order"] = self.turn_order
+        visible["faction_turn"] = self.faction_turn
+        visible["stage_state"] = self.stage_state.visible(game_state, faction)
+        return visible
+

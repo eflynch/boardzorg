@@ -4,11 +4,14 @@ const Logo = ({faction, diameter, x, y, ...props}) => {
     return <image {...props} xlinkHref={`/static/app/png/${faction}_logo.png`} x={x} y={y} width={diameter} height={diameter}/>;
 };
 
+const PASS_LABELS = ["pass", "done", "moved"];
+
 export default function FactionOrder({factions}) {
     return (
         <svg width="600px" height="100px" viewBox="2.5 0 1 1">
             {factions.map((factionInfo, i)=> {
-                let opacity = factionInfo.label === "pass" ? 0.2 : 1.0;
+                const passed = PASS_LABELS.indexOf(factionInfo.label) !== -1;
+                const opacity = passed ? 0.2 : 1.0;
                 let circle = <g/>
                 if (factionInfo.active) {
                     circle = <circle cx={i+0.5} cy={0.5} r={0.48} style={{
