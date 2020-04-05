@@ -307,6 +307,13 @@ img.alive {
     fill: rgba(255, 255, 255, 0.4);
 }
 
+.card.active:hover {
+    filter: brightness(1.25);
+}
+
+.card.selected {
+    filter: brightness(2);
+}
 
 .storm {
 }

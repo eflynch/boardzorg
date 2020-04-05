@@ -148,7 +148,7 @@ class SelectTraitor(Action):
 
     @classmethod
     def get_arg_spec(cls, faction=None):
-        return args.Leader()
+        return args.TraitorLeader()
 
     def __init__(self, faction, traitor):
         self.faction = faction
