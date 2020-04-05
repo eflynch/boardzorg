@@ -140,14 +140,23 @@ class Board extends React.Component {
             });
 
         const mode = interaction.mode;
-        if (mode === "token-select") {
+        if (mode === "token-select" || interaction["token-select"]) {
             logos = logos.concat(emptyPositions.map((position)=>{
                 const {top, left} = LogoLocations[position];
-                if (interaction[mode] === null) {
-                    return <BlankLogo key={position} diameter={0.05} x={left} y={top} onClick={(e)=>{
-                        setInteraction(update(interaction, {[mode]: {$set: position}}));
-                    }}/>;
-                } else if (interaction[mode] === position) {
+                const onClick = mode === "token-select" ? () => {
+                    setInteraction(update(interaction, {
+                        [mode]: {$set: position},
+                        mode: {$set: null},
+                    }));
+                } : null;
+                if (interaction["token-select"] === null) {
+                    return <BlankLogo
+                            key={position}
+                            diameter={0.05}
+                            x={left} y={top}
+                            onClick={onClick}
+                            className={onClick ? "active" : ""}/>;
+                } else if (interaction["token-select"] === position) {
                     return <Logo key={"me"} diameter={0.05} faction={me} x={left} y={top}/>;
                 }
             }));
@@ -159,9 +168,11 @@ class Board extends React.Component {
         let transform=`translate(0.000000,1.000000) scale(${0.100000/848},${-0.100000/848})`;
         let spaces = Object.keys(paths).map((territory) => {
             const isSelected = (selected !== undefined && selected !== null) && (territory == selected.replace(" ", "-"));
-            return <g className={className + (isSelected ? " selected": "")}
+            return <g className={className + (isSelected ? " selected" : "") + (onClick? " active" : "")}
                 onClick={()=>{
-                    onClick(territory);
+                    if (onClick) {
+                        onClick(territory);
+                    }
                 }}
                 key={territory +"path"} transform={transform}>
                 {paths[territory].map((p, i)=><path key={i} d={p}/>)}
@@ -173,37 +184,59 @@ class Board extends React.Component {
 
     getSpaces () {
         const {interaction, setInteraction} = this.props;
-        if (interaction.mode !== "space-select") {
+        const inInteraction = interaction.mode === "space-select";
+        const selected = interaction["space-select"];
+
+        if (!inInteraction && !selected) {
             return <g/>;
         }
-        return this._getMapParts(spacePaths, "space", (space)=>{
+
+        const onClick = inInteraction ? (space) => {
             setInteraction(update(interaction, {[interaction.mode]: {$set: space}, mode: {$set: null}}));
-        }, interaction[interaction.mode]);
+        } : null;
+
+        return this._getMapParts(spacePaths, "space", onClick, selected);
     }
 
     getSpaceSectors () {
         const {interaction, setInteraction} = this.props;
-        if (interaction.mode !== "space-sector-select-start" && interaction.mode !== "space-sector-select-end") {
+
+        const inInteraction =
+              interaction.mode === "space-sector-select-start" ||
+              interaction.mode === "space-sector-select-end";
+
+        const selected =
+              interaction["space-sector-select-end"] || interaction["space-sector-select-start"];
+        if (!inInteraction && !selected) {
             return <g/>;
         }
-        return  this._getMapParts(spaceSectorPaths, "spaceSector", (spaceSector)=>{
-            let split = spaceSector.split("-")
-            const sector = split.pop()
-            const space = split.join("-")
+
+        const onClick = inInteraction ? (spaceSector) => {
+            let split = spaceSector.split("-");
+            const sector = split.pop();
+            const space = split.join("-");
             setInteraction(update(interaction, {
                 [interaction.mode]: {$set: [space, sector].join(" ")},
                 mode: {$set: null}}));
-        }, interaction[interaction.mode]);
+        } : null;
+
+        return  this._getMapParts(spaceSectorPaths, "spaceSector", onClick, selected);
     }
 
     getSectors () {
         const {interaction, setInteraction} = this.props;
-        if (interaction.mode !== "sector-select") {
+        const inInteraction = interaction.mode === "sector-select";
+        const selected = interaction["sector-select"];
+
+        if (!inInteraction && !selected) {
             return <g/>;
         }
-        return this._getMapParts(sectorPaths, "sector", (sector)=>{
+
+        const onClick = inInteraction ? (space) => {
             setInteraction(update(interaction, {[interaction.mode]: {$set: sector}, mode: {$set: null}}));
-        }, interaction[interaction.mode]);
+        } : null;
+
+        return this._getMapParts(sectorPaths, "sector", onClick, selected);
     }
 
     render () {
