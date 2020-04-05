@@ -5,10 +5,13 @@
 * Switch to using websockets instead of polling
 * Show the discard piles on the board
 * Re-do BG coexist in a reasonable way
+  * There shouldn't be any union arg specs with "coexist" constants, rather a ¿coexist? check command should happen before the movement resolves
+  * There shouldn't be a coexist persist option but rather the option to flip at any time before shipments occur
 * Support Leader Capture mechanic
 * Support Special Treachery Cards
 * Support ANY TIME Karama powers
-* Show movement round turn order
+* Show battle round state
+* Improve widgets for battle round
 
 ## In Progress
 
