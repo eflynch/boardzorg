@@ -1,6 +1,7 @@
 import React from 'react';
 import $ from 'jquery';
 import {render} from 'react-dom';
+import io from 'socket.io-client';
 
 import Header from './header'
 import Session from './session'
@@ -87,28 +88,37 @@ function sendCommand(sessionID, roleID, cmd){
 }
 
 function getSession(sessionID, roleID){
-    $.getJSON("/api/sessions/" + sessionID, {role_id: roleID}, function(data){
+    const socket = io("/sessions");
+    socket.on('connect', () =>{
+        socket.emit('join', {
+            "session_id": sessionID,
+            "role_id": roleID,
+        });
+    });
+    socket.on('sessions', (data) => {
         document.title = `Shai-Hulud: ${data.role}`;
         renderSession(sessionID, roleID, data);
-        // setTimeout(()=>{
-        //     getSession(sessionID, roleID);
-        // }, 1000);
-    }).fail(function(error){
-        console.log(error.responseText);
+    });
+    socket.on('error', () => {
         document.getElementById("content").innerHTML = `${sessionID} does not exist :(`;
     });
+    document.getElementById("content").innerHTML = "Loading...";
 }
 
-
 function getAssignedRoles(sessionID) {
-    $.getJSON(`/api/sessions/${sessionID}/roles`, function(data){
-        renderAssignment(sessionID, data);
-        setTimeout(()=>{
-            getAssignedRoles(sessionID);
-        }, 1000);
-    }).fail(function(error){
+    const socket = io("/roles");
+    socket.on('connect', () =>{
+        socket.emit('join', {
+            "session_id": sessionID,
+        });
+    });
+    socket.on('roles', (roles) => {
+        renderAssignment(sessionID, roles);
+    });
+    socket.on('error', () => {
         document.getElementById("content").innerHTML = `${sessionID} does not exist :(`;
-    })
+    });
+    document.getElementById("content").innerHTML = "Loading...";
 }
 
 

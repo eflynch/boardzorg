@@ -64,7 +64,7 @@ class Integer(Args):
 
 class Spice(Integer):
     def __init__(self):
-        super().__init__(min=0, type="spice")
+        super(Spice, self).__init__(min=0, type="spice")
 
 
 class Constant(Args):
@@ -149,7 +149,7 @@ class Faction(String):
 
 class Turn(Integer):
     def __init__(self):
-        super().__init__(self, min=0, max=10)
+        super(Turn, self).__init__(min=0, max=10)
 
 
 class Token(Integer):

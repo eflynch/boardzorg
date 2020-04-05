@@ -1,0 +1,31 @@
+version: '2.1'
+services:
+  postgres:
+    restart: always
+    build:
+      context: .
+      dockerfile: Dockerfile.db
+    environment:
+      - POSTGRES_USER=dune
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=shai-hulud
+    volumes:
+      - ./postgres-data/postgres:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+  app:
+    restart: always
+    build: .
+    environment:
+      - POSTGRES_USER=dune
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=shai-hulud
+    ports:
+      - 5005:5000
+    volumes:
+      - ./duneserver:/app
+      - ./dune:/dune
+      - ./duneclient:/duneclient
+    depends_on:
+      - postgres
+    entrypoint: ["python", "app.py"]
