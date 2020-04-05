@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useState, useEffect} from 'react';
 import ReactDOM from 'react-dom';
 
 import Board from './board';
@@ -67,49 +67,48 @@ const Decks = ({state}) => {
 };
 
 
-class Session extends React.Component {
-    constructor(props) {
-        super(props);
-        this.state = {interaction: {
-            mode: null
-        }};
-    }
+export default function Session({state, actions, history, me, error, sendCommand}) {
+    const [interaction, setInteraction] = useState({mode: null});
+    const [errorState, setErrorState] = useState(error);
 
-    setInteraction = (interaction) => {
-        this.setState({interaction: interaction});
-    }
-
-    render () {
-        const {state, actions, history, me} = this.props;
-        const fs = Object.keys(state.faction_state).sort((x,y)=>{ return x == me ? -1 : y == me ? 1 : 0; });;
-
-        const factions = fs.map((faction)=> {
-            return <Faction key={faction} me={this.props.me} faction={faction} factionstate={state.faction_state[faction]}/>;
-        });
-
-        let futureStorm = undefined;
-        if (state.storm_deck.next !== undefined) {
-            futureStorm = (state.storm_deck.next + state.storm_position) % 18;
+    useEffect(()=>{
+        if (error !== undefined) {
+            setErrorState(error);
+        } else {
+            const timeout = setTimeout(()=> {
+                setErrorState(undefined);
+            }, 5000);
+            return () => {
+                clearTimeout(timeout);
+            }
         }
-        const logoPositions = GetLogoPositions(state.faction_state);
-        return (
-            <div className="session">
-                <div>
-                    <div style={{display:"flex", alignItems:"flex-start"}}>
-                        <Board me={this.props.me} interaction={this.state.interaction} setInteraction={this.setInteraction} logoPositions={logoPositions}
-                               stormSector={state.storm_position} futureStorm={futureStorm} state={state} />
-                        <Decks state={state} />
-                    </div>
-                    <RoundState roundState={state.round_state} logoPositions={logoPositions} stormPosition={state.storm_position} />
-                </div>
-                <History interaction={this.state.interaction} setInteraction={this.setInteraction} error={this.props.error} actions={actions} sendCommand={this.props.sendCommand} commandLog={history}/>
-                <div className="factions">
-                    {factions}
-                </div>
-            </div>
-        );
+    }, [error])
+
+    const fs = Object.keys(state.faction_state).sort((x,y)=>{ return x == me ? -1 : y == me ? 1 : 0; });;
+
+    const factions = fs.map((faction)=> {
+        return <Faction key={faction} me={me} faction={faction} factionstate={state.faction_state[faction]}/>;
+    });
+
+    let futureStorm = undefined;
+    if (state.storm_deck.next !== undefined) {
+        futureStorm = (state.storm_deck.next + state.storm_position) % 18;
     }
+    const logoPositions = GetLogoPositions(state.faction_state);
+    return (
+        <div className="session">
+            <div>
+                <div style={{display:"flex", alignItems:"flex-start"}}>
+                    <Board me={me} interaction={interaction} setInteraction={setInteraction} logoPositions={logoPositions}
+                           stormSector={state.storm_position} futureStorm={futureStorm} state={state} />
+                    <Decks state={state} />
+                </div>
+                <RoundState roundState={state.round_state} logoPositions={logoPositions} stormPosition={state.storm_position} />
+            </div>
+            <History interaction={interaction} setInteraction={setInteraction} error={errorState} actions={actions} sendCommand={sendCommand} commandLog={history}/>
+            <div className="factions">
+                {factions}
+            </div>
+        </div>
+    );
 }
-
-
-module.exports = Session;
