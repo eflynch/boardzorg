@@ -356,3 +356,28 @@ img.alive {
 .spice-pile {
     pointer-events: none;
 }
+
+.history-item {
+
+}
+
+.history-item.mine {
+    font-weight: bold;
+}
+
+.history-item.su {
+    opacity: 0.5;
+    font-style:italic;
+}
+
+.su-button {
+    border: none;
+    cursor: pointer;
+    outline:none;
+    position:absolute;
+    right: 2px;
+    top: 1px;
+}
+
+.su-button:hover {
+}

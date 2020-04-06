@@ -35,6 +35,7 @@ class Session:
             logger.critical("SUPERVISOR ERROR:", supervisor_actions)
         for s in supervisor_actions:
             self.execute_action(supervisor_actions[s]())
+            self.command_log.append(("su", supervisor_actions[s].name))
 
     def execute_action(self, action):
         old_state = self.game_log[-1]
@@ -83,7 +84,7 @@ class Session:
     def get_visible_command_log(self, faction):
         def _filtfilt(command):
             (cmd_faction, cmd) = command
-            redacted = ["predict", "select-traitor"]
+            redacted = ["predict", "select-traitor", "commit-plan"]
             if cmd.split(" ")[0] in redacted:
                 if cmd_faction != faction:
                     return False

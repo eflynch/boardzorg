@@ -1,17 +1,27 @@
-import React from 'react';
+import React, {useState} from 'react';
 
 import Actions from './actions';
 
-export default History = ({error, actions, sendCommand, commandLog, faction, interaction, setInteraction, setInteractionFlow}) => {
+const Command = ({me, faction, cmd}) => {
+    return <li className={"history-item" + (faction === me ? " mine" : "") + (faction === "su" ? " su" : "")}>{faction}: {cmd}</li>;
+}
+
+export default History = ({error, actions, sendCommand, commandLog, me, interaction, setInteraction, setInteractionFlow}) => {
+    const [showSu, setShowSu] = useState(false);
     return (    
         <div className="history">
             <b>Available Actions</b>
             <Actions interaction={interaction} setInteraction={setInteraction} error={error} actions={actions} sendCommand={sendCommand} setInteractionFlow={setInteractionFlow}/>
             <br/>
-            <b>Actions Log</b>
+            <div style={{position:"relative"}}>
+                <b>Actions Log</b>
+                <button className="su-button" onClick={()=>{setShowSu(!showSu);}}>{showSu ? "hide su" : "show su"}</button>
+            </div>
             <div className="log">
                 <ul>
-                    {commandLog.map((command, i) => <li key={i}>{command[0]}: {command[1]}</li>)}
+                    {commandLog.filter((command)=>{
+                        return showSu || command[0] !== "su";
+                    }).map((command, i) => <Command key={i} me={me} faction={command[0]} cmd={command[1]}/>)}
                 </ul>
             </div>
         </div>
