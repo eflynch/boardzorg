@@ -15,7 +15,26 @@ class Faction extends React.Component {
 
         if (Array.isArray(this.props.factionstate.treachery)){
             return this.props.factionstate.treachery.map((name, i) => {
-                return <Card type="Treachery" key={i} name={name} />;
+                const interaction = this.props.interaction;
+                const mode = interaction.mode;
+
+                let onClick = null;
+                let selected = false;
+                if (name === "Cheap-Hero/Heroine") {
+                    selected = interaction["leader-input"] === name;
+                    if (mode === "leader-input") {
+                        onClick = () => {
+                            this.props.setInteraction(update(
+                                interaction,
+                                {
+                                    [mode]: {$set: name},
+                                    mode: {$set: null},
+                                }
+                            ));
+                        };
+                    }
+                }
+                return <Card type="Treachery" key={i} name={name} selected={selected} onClick={onClick}/>;
             });
         } else {
             let treachery = [];
@@ -33,7 +52,25 @@ class Faction extends React.Component {
                     if (this.props.factionstate.tank_leaders.indexOf(leader) !== -1){
                         dead = true;
                     }
-                    return <LeaderToken key={"leader-"+leader[0]} name={leader[0]} dead={dead}/>;
+                    const leaderName = leader[0];
+                    const interaction = this.props.interaction;
+                    const mode = interaction.mode;
+                    const selected = interaction["leader-input"] === leaderName;
+                    const onClick = (mode === "leader-input") && (this.props.me === this.props.faction) ? () => {
+                        this.props.setInteraction(update(
+                            interaction,
+                            {
+                                [mode]: {$set: leaderName},
+                                mode: {$set: null},
+                            }
+                        ));
+                    } : null;
+                    return <LeaderToken
+                            key={"leader-"+leaderName}
+                            name={leaderName}
+                            onClick={onClick}
+                            selected={selected}
+                            dead={dead}/>;
                 })}
             </div>
         );
@@ -46,7 +83,7 @@ class Faction extends React.Component {
         const mode = interaction.mode;
         return this.props.factionstate.traitors.map((traitor) => {
             const traitorName = traitor[0];
-            const selected = interaction["traitor-select"] == traitorName;
+            const selected = interaction["traitor-select"] === traitorName;
             const onClick = mode === "traitor-select" ? () => {
                 this.props.setInteraction(update(
                     interaction,

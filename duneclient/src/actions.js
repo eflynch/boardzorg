@@ -3,6 +3,19 @@ import update from 'immutability-helper';
 
 import Widget from './widget';
 
+
+const interactionWidgets = [
+    "token-select",
+    "space-sector-select",
+    "space-sector-select-start",
+    "space-sector-select-end",
+    "sector-select",
+    "space-select",
+    "traitor-select",
+    "leader-input",
+    "battle-select",
+];
+
 const defaultArgsForAction = (actionName, argSpec) => {
     if (actionName === "bribe") {
         return "emperor 2";
@@ -14,8 +27,7 @@ const defaultArgsForAction = (actionName, argSpec) => {
         return "   ";
     }
 
-    const selectWidgets = ["token-select", "space-sector-select", "space-sector-select-start", "space-sector-select-end", "sector-select", "space-select", "traitor-select"];
-    if (selectWidgets.indexOf(argSpec.widget) !== -1) {
+    if (interactionWidgets.indexOf(argSpec.widget) !== -1) {
         return `$interaction.${argSpec.widget}`;
     }
 
@@ -58,8 +70,7 @@ const ActionArgs = ({args, setArgs, sendCommand, actionName, argSpec, interactio
 
 
 const getFlowForWidget = (type, config) => {
-    const selectModes = ["token-select", "space-sector-select", "space-sector-select-start", "space-sector-select-end", "sector-select", "space-select", "traitor-select", "battle-select"];
-    if (selectModes.indexOf(type) !== -1) {
+    if (interactionWidgets.indexOf(type) !== -1) {
         return [type];
     }
 

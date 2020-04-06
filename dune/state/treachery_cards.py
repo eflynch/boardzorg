@@ -70,7 +70,7 @@ PROJECTILE_WEAPONS = [
 POISON_WEAPONS = [
     "Chaumas",
     "Chaumurky",
-    "Elacca-Drug",
+    "Ellaca-Drug",
     "Gom-Jabbar"
 ]
 
