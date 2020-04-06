@@ -13,7 +13,7 @@ const TokenPile = ({width, faction, coexist, number, bonus, x, y}) => {
     const unitHeight = (tokenAspect + number * tokenHeight + textHeight);
 
     x = x === undefined ? "0" : x - width/2;
-    y = y === undefined ? "0" : y - (width * unitHeight);
+    y = y === undefined ? "0" : y - (width * (unitHeight - tokenAspect/2));
 
     let tokens = [];
     for (let i=0; i < number; i++){
