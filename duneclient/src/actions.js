@@ -13,6 +13,7 @@ const interactionWidgets = [
     "space-select",
     "traitor-select",
     "leader-input",
+    "battle-select",
 ];
 
 const defaultArgsForAction = (actionName, argSpec) => {

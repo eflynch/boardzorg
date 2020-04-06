@@ -143,9 +143,9 @@ class AnswerPrescience(Action):
         elif prescience == "number":
             ops.pick_number(new_game_state, is_attacker, int(self.part))
         elif prescience == "weapon":
-            ops.pick_weapon(new_game_state, is_attacker, self.part)
+            ops.pick_weapon(new_game_state, is_attacker, self.part if self.part != "-" else None)
         elif prescience == "defense":
-            ops.pick_defense(new_game_state, is_attacker, self.part)
+            ops.pick_defense(new_game_state, is_attacker, self.part if self.part != "-" else None)
         else:
             raise BadCommand("Something bad happened")
 

@@ -36,7 +36,6 @@ def connect_namespace(socketio, namespace_info):
             subs[room_id].clients.append(client_id)
         else:
             def _on_change(session, roles):
-                print(f"emit {namespace_info.name} room={namespace_info.room_for_data(data)}", flush=True)
                 emit(namespace_info.name,
                      namespace_info.serialize(session, roles, data),
                      room=room_id,

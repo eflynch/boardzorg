@@ -222,8 +222,10 @@ class AutoResolve(Action):
 
                 ops.tank_leader(new_game_state, battle_id[0], stage_state.attacker_plan["leader"])
                 ops.tank_leader(new_game_state, battle_id[1], stage_state.defender_plan["leader"])
-                for leader in new_game_state.round_state.leaders_used:
-                    space, sector = new_game_state.round_state.leaders_used[leader]
+                for leader_name in new_game_state.round_state.leaders_used:
+
+                    space, sector = new_game_state.round_state.leaders_used[leader_name]["location"]
+                    leader = new_game_state.round_state.leaders_used[leader_name]["leader"]
                     if space == battle_id[2]:
                         if leader != stage_state.attacker_plan["leader"]:
                             if leader != stage_state.defender_plan["leader"]:
@@ -243,23 +245,22 @@ class AutoResolve(Action):
         defender_power = 0
         dead_leaders = []
 
-        if ops.clash_weapons(stage_state.defender_plan["weapon"], stage_state.attacker_plan["defense"]):
-            ops.tank_leader(new_game_state, battle_id[0], stage_state.attacker_plan["leader"])
-            dead_leaders.append(stage_state.attacker_plan["leader"])
-        else:
-            if stage_state.attacker_plan["leader"] != "Cheap-Hero/Heroine":
-                attacker_power += stage_state.attacker_plan["leader"][1]
-                new_game_state.round_state.leaders_used[stage_state.attacker_plan["leader"]] = (
-                    battle_id[2], battle_id[3])
 
-        if ops.clash_weapons(stage_state.defender_plan["weapon"], stage_state.defender_plan["defense"]):
-            ops.tank_leader(new_game_state, battle_id[1], stage_state.defender_plan["leader"])
-            dead_leaders.append(stage_state.defender_plan["leader"])
-        else:
-            if stage_state.defender_plan["leader"] != "Cheap-Hero/Heroine":
-                defender_power += stage_state.defender_plan["leader"][1]
-                new_game_state.round_state.leaders_used[stage_state.defender_plan["leader"]] = (
-                    battle_id[2], battle_id[3])
+        def clash_leaders(plan_a, plan_b, faction_b, location):
+            if ops.clash_weapons(plan_a["weapon"], plan_b["defense"]):
+                ops.tank_leader(new_game_state, faction_b, plan_b["leader"])
+                dead_leaders.append(plan_b["leader"])
+                return 0
+            if plan_b["leader"] != "Cheap-Hero/Heroine":
+                new_game_state.round_state.leaders_used[plan_b["leader"][0]] = {
+                    "location": location,
+                    "leader": plan_b["leader"]
+                }
+                return plan_b["leader"][1]
+            return 0
+
+        attacker_power += clash_leaders(stage_state.defender_plan, stage_state.attacker_plan, battle_id[0], (battle_id[2], battle_id[3]))
+        defender_power += clash_leaders(stage_state.attacker_plan, stage_state.defender_plan, battle_id[1], (battle_id[2], battle_id[3]))
 
         space = new_game_state.map_state[battle_id[2]]
         # Count Attacker Power

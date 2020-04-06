@@ -348,3 +348,11 @@ img.alive {
 .leader-token.selected {
     filter: brightness(2);
 }
+
+.token-pile {
+    pointer-events: none;
+}
+
+.spice-pile {
+    pointer-events: none;
+}
