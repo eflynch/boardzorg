@@ -58,7 +58,7 @@ const ActionArgs = ({args, setArgs, sendCommand, actionName, argSpec, interactio
 
 
 const getFlowForWidget = (type, config) => {
-    const selectModes = ["token-select", "space-sector-select", "space-sector-select-start", "space-sector-select-end", "sector-select", "space-select", "traitor-select"];
+    const selectModes = ["token-select", "space-sector-select", "space-sector-select-start", "space-sector-select-end", "sector-select", "space-select", "traitor-select", "battle-select"];
     if (selectModes.indexOf(type) !== -1) {
         return [type];
     }

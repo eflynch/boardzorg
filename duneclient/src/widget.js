@@ -254,6 +254,10 @@ const Widget = ({type, args, setArgs, config, interaction, setInteraction}) => {
         return <SelectOnMap mode="traitor-select" interaction={interaction} setInteraction={setInteraction} setArgs={setArgs}/>;
     }
 
+    if (type === "battle-select") {
+        return <SelectOnMap mode="battle-select" interaction={interaction} setInteraction={setInteraction} setArgs={setArgs}/>;
+    }
+
 
     console.log(type);
     return <Input args={args} setArgs={setArgs} config={config} />;

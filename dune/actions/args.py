@@ -150,6 +150,13 @@ class FremenPlacementSelector(Args):
         }
 
 
+class Battle(Args):
+    def to_dict(self):
+        return {
+            "widget": "battle-select"
+        }
+
+
 class Faction(String):
     def to_dict(self):
         return {

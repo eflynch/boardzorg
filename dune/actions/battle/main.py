@@ -2,7 +2,7 @@ from copy import deepcopy
 from logging import getLogger
 
 from dune.actions.action import Action
-from dune.actions import storm
+from dune.actions import storm, args
 from dune.state.rounds import battle
 from dune.exceptions import IllegalAction, BadCommand
 from dune.actions.battle import ops
@@ -32,13 +32,18 @@ class PickBattle(Action):
     ck_stage = "main"
 
     @classmethod
+    def get_arg_spec(cls, faction=None):
+        return args.Battle();
+
+    @classmethod
     def parse_args(cls, faction, args):
-        (space, min_sector, defender) = args.split(" ")
+        (defender, space, min_sector) = args.split(" ")
         return PickBattle(faction, space, min_sector, defender)
 
     def __init__(self, faction, space, min_sector, defender):
         self.faction = faction
-        self.battle_id = (faction, defender, space, min_sector)
+        self.battle_id = (faction, defender, space, int(min_sector))
+        self.defender = defender
 
     @classmethod
     def _check(cls, game_state, faction):
@@ -47,6 +52,7 @@ class PickBattle(Action):
     def _execute(self, game_state):
         new_game_state = deepcopy(game_state)
 
+        print(self.battle_id, game_state.round_state.battles)
         if self.battle_id not in game_state.round_state.battles:
             raise BadCommand("There is no fight there")
 

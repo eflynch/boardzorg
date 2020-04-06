@@ -6,6 +6,7 @@ import Faction from './faction';
 import History from './history';
 
 import Bidding from './rounds/bidding';
+import Battle from './rounds/battle';
 import Movement from './rounds/movement';
 import Deck from './components/deck';
 import update from 'immutability-helper';
@@ -32,7 +33,7 @@ const GetLogoPositions = (faction_state) => {
 }
 
 
-const RoundState = ({roundState, stormPosition, logoPositions}) => {
+const RoundState = ({roundState, stormPosition, logoPositions, interaction, setInteraction}) => {
     let stateDiv = null;
     let factionOrder = GetFactionOrder(logoPositions, stormPosition);
     if (roundState && roundState.round == "bidding"){
@@ -40,6 +41,9 @@ const RoundState = ({roundState, stormPosition, logoPositions}) => {
     }
     if (roundState && roundState.round == "movement"){
         stateDiv = <Movement roundstate={roundState} />;
+    }
+    if (roundState && roundState.round == "battle"){
+        stateDiv = <Battle factionOrder={factionOrder} roundstate={roundState} interaction={interaction} setInteraction={setInteraction} />;
     }
     if (stateDiv === null){
         return <div className="roundstate">{JSON.stringify(roundState)}</div>;
@@ -130,7 +134,7 @@ export default function Session({state, actions, history, me, error, sendCommand
                            stormSector={state.storm_position} futureStorm={futureStorm} state={state} />
                     <Decks state={state} />
                 </div>
-                <RoundState roundState={state.round_state} logoPositions={logoPositions} stormPosition={state.storm_position} />
+                <RoundState interaction={interaction} setInteraction={setInteraction} roundState={state.round_state} logoPositions={logoPositions} stormPosition={state.storm_position} />
             </div>
             <History interaction={interaction} setInteraction={setInteraction} error={errorState} actions={actions} sendCommand={sendCommand} commandLog={history} setInteractionFlow={setInteractionFlow}/>
             <div className="factions">
