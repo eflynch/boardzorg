@@ -1260,7 +1260,7 @@ export const TokenLocations = {
       }
     }
   },
-  "Hole-In-The-Rock": {
+  "Hole-in-the-Rock": {
     "8": {
       "1": {
         "top": 0.29750000000000004,
