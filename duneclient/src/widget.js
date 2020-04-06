@@ -6,6 +6,14 @@ import update from 'immutability-helper';
 
 const AllFactions = ["emperor", "fremen", "guild", "bene-gesserit", "harkonnen", "atreides"];
 
+const humanReadable = {
+    "token-select": "Token Placement",
+    "space-sector-select-start": "From",
+    "space-sector-select-end": "To",
+    "traitor-select": "Traitor",
+    "leader-input": "Leader",
+};
+
 const Choice = ({args, setArgs, config, ...props}) => {
     return (
         <div>
@@ -94,6 +102,7 @@ const SelectOnMap = ({args, setArgs, interaction, setInteraction, mode}) => {
     }
     return (
         <div style={{display:"flex", flexDirection: "column", alignItems:"center"}}>
+            <span>{(mode in humanReadable) ? humanReadable[mode] : mode}:</span>
             {pieces}
         </div>
     );
@@ -258,9 +267,15 @@ const Widget = ({type, args, setArgs, config, interaction, setInteraction}) => {
         return <SelectOnMap mode="battle-select" interaction={interaction} setInteraction={setInteraction} setArgs={setArgs}/>;
     }
 
+    if (type === "leader-input") {
+        return <SelectOnMap mode="leader-input" interaction={interaction} setInteraction={setInteraction} setArgs={setArgs}/>;
+    }
 
     console.log(type);
-    return <Input args={args} setArgs={setArgs} config={config} />;
+    return <span>
+        <span>{(type in humanReadable) ? humanReadable[type] : type}:</span>
+        <Input args={args} setArgs={setArgs} config={config} />
+    </span>;
 };
 
 module.exports = Widget;
