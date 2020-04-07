@@ -3,10 +3,18 @@
 ## Ready For Dev
 
 * Support Leader Capture mechanic
+* Support Kwizatz Haderach
 * Support Special Treachery Cards
 * Support ANY TIME Karama powers
 * Show battle round state
+  * What leaders have been used
+  * What battle powers have been "karamed"
+  * What has been voiced
+  * What has been prescienced
 * Improve widgets for battle round
+  * Battle Plan Selection
+  * Voice Selection
+  * Prescience Selection
 
 ## In Progress
 
