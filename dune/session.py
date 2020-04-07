@@ -28,6 +28,7 @@ class Session:
         self.game_log = [init_state]
         self.action_log = []
         self.command_log = []
+        self.su_commands = {}
 
     def execute_supervisor(self):
         supervisor_actions = Action.get_valid_actions(self.game_log[-1], None)
@@ -35,7 +36,9 @@ class Session:
             logger.critical("SUPERVISOR ERROR:", supervisor_actions)
         for s in supervisor_actions:
             self.execute_action(supervisor_actions[s]())
-            self.command_log.append(("su", supervisor_actions[s].name))
+            if len(self.command_log) not in self.su_commands:
+                self.su_commands[len(self.command_log)] = []
+            self.su_commands[len(self.command_log)].append(supervisor_actions[s].name)
 
     def execute_action(self, action):
         old_state = self.game_log[-1]
@@ -69,8 +72,8 @@ class Session:
             else:
                 raise BadCommand("Not a known action", action_type)
         action = valid_actions[action_type].parse_args(faction, args)
-        self.execute_action(action)
         self.command_log.append((faction, cmd))
+        self.execute_action(action)
 
     def get_visible_state(self, role):
         return self.game_log[-1].visible(role)
@@ -82,14 +85,18 @@ class Session:
         return Action.get_valid_actions(self.game_log[-1], faction)
 
     def get_visible_command_log(self, faction):
-        def _filtfilt(command):
+        def _redact(command):
             (cmd_faction, cmd) = command
             redacted = ["predict", "select-traitor", "commit-plan"]
             if cmd.split(" ")[0] in redacted:
                 if cmd_faction != faction:
-                    return False
-            return True
-        return list(filter(_filtfilt, self.command_log))
+                    return (cmd_faction, cmd.split(" ")[0] + " ?¿?¿?")
+            return command
+        redacted_commands = list(map(_redact, self.command_log))
+        for cmd_idx in reversed(sorted(self.su_commands)):
+            for su_cmd in self.su_commands[cmd_idx]:
+                redacted_commands.insert(cmd_idx, ("su", su_cmd))
+        return redacted_commands
 
     @staticmethod
     def new_session(factions=None, treachery_deck=None, seed=None):

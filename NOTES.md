@@ -15,6 +15,8 @@
   * Battle Plan Selection
   * Voice Selection
   * Prescience Selection
+  * Tank Units
+  * Discard
 
 ## In Progress
 
