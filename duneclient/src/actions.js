@@ -14,6 +14,8 @@ const interactionWidgets = [
     "traitor-select",
     "leader-input",
     "battle-select",
+    "treachery-select-weapon",
+    "treachery-select-defense"
 ];
 
 const defaultArgsForAction = (actionName, argSpec) => {
@@ -79,6 +81,7 @@ const getFlowForWidget = (type, config) => {
         for (const subWidget of config) {
             ret = ret.concat(getFlowForWidget(subWidget.widget, subWidget.args));
         }
+        console.log(ret);
         return ret;
     }
     return [];

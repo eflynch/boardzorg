@@ -11,9 +11,9 @@ class ActivateAdvisors(Action):
 
     @classmethod
     def _check(cls, game_state, faction):
-        if game_state.round_state.round not in ["bidding", "revival", "movement"]:
+        if game_state.round not in ["bidding", "revival", "movement"]:
             raise IllegalAction("Cannot activate advisors right now") 
-        if game_state.round_state.round == "movement":
+        if game_state.round == "movement":
             if game_state.round_state.ship_has_sailed:
                 raise IllegalAction("This ship has already sailed")
         can_activate = False

@@ -4,7 +4,6 @@ import {randInt} from '../utils';
 
 
 export default function Card({type, name, selected, onClick, width, children, peak}) {
-
     const [examine, setExamine] = useState(false);
 
     if (width === undefined) {
@@ -34,7 +33,7 @@ export default function Card({type, name, selected, onClick, width, children, pe
                         setExamine(true);
                         return;
                     }
-                    if (onClick !== undefined) {
+                    if (onClick !== undefined && onClick !== null) {
                         onClick(e);
                     }
                 }}

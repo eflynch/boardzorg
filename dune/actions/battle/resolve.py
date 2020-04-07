@@ -39,7 +39,7 @@ class CommitPlan(Action):
 
     @classmethod
     def get_arg_spec(cls, faction=None):
-        return args.Struct(args.Leader(), args.Integer(max=20, type="units"), args.String(), args.String())
+        return args.Struct(args.Leader(), args.Integer(max=20, type="units"), args.TreacheryCard(kind="weapon"), args.TreacheryCard(kind="defense"))
 
     @classmethod
     def _check(cls, game_state, faction):
@@ -108,6 +108,8 @@ class RevealTraitor(Action):
 
     @classmethod
     def _check(cls, game_state, faction):
+        if game_state.round_state.stage_state.traitor_revealer is not None:
+            raise IllegalAction("Traitor has been revealed")
         battle_id = game_state.round_state.stage_state.battle
 
         if faction == battle_id[0]:
@@ -127,6 +129,28 @@ class RevealTraitor(Action):
 
         if leader not in game_state.faction_state[faction].traitors:
             raise IllegalAction("That leader is not in your pay!")
+
+    def _execute(self, game_state):
+        new_game_state = deepcopy(game_state)
+        stage_state = new_game_state.round_state.stage_state
+        battle_id = stage_state.battle
+        new_game_state.pause.extend(battle_id[:2])
+        stage_state.traitor_revealer = self.faction
+        return new_game_state
+
+
+class AutoResolveWithTraitor(Action):
+    name = "resolve-reveal-traitor"
+    ck_round = "battle"
+    ck_stage = "battle"
+    ck_substage = "traitors"
+    su = True
+
+    @classmethod
+    def _check(cls, game_state, faction):
+        battle_id = game_state.round_state.stage_state.battle
+        if game_state.round_state.stage_state.traitor_revealer is None:
+            raise IllegalAction("No traitor has been revealed")
 
     def _execute(self, game_state):
         new_game_state = deepcopy(game_state)
@@ -166,6 +190,8 @@ class PassRevealTraitor(Action):
 
     @classmethod
     def _check(cls, game_state, faction):
+        if game_state.round_state.stage_state.traitor_revealer is not None:
+            raise IllegalAction("Traitor has been revealed")
         battle_id = game_state.round_state.stage_state.battle
 
         if faction not in battle_id:
@@ -194,6 +220,7 @@ class SkipRevealTraitor(Action):
     def _execute(self, game_state):
         new_game_state = deepcopy(game_state)
         new_game_state.round_state.stage_state.substage = "resolve"
+        new_game_state.pause.extend(new_game_state.round_state.stage_state.battle[:2])
         return new_game_state
 
 

@@ -84,7 +84,11 @@ const maybeFlowInteraction = (interaction, flow) => {
 };
 
 export default function Session({state, actions, history, me, error, sendCommand}) {
-    const [interaction, setInteractionRaw] = useState({mode: null});
+    const [interaction, setInteractionRaw] = useState({
+        mode: null,
+        "treachery-select-weapon": "-",
+        "treachery-select-defense": "-"
+    });
     const [errorState, setErrorState] = useState(error);
     const [interactionFlow, setInteractionFlowRaw] = useState([]);
 

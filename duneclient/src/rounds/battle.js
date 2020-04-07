@@ -64,7 +64,7 @@ class Battle extends React.Component {
         return (
             <div style={{display:"flex", flexDirection:"column"}}>
                 <h4>Battle Round</h4>
-                Current Battle Picker: {turnOrder}
+                Battle Picker: {turnOrder}
                 <StageState roundstate={roundstate} interaction={interaction} setInteraction={setInteraction} />
                 {JSON.stringify(roundstate)}
             </div>

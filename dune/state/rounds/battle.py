@@ -75,6 +75,7 @@ class BattleStage(StageState):
         self.karama_kwizatz_haderach_passes = []
 
         self.traitor_passes = []
+        self.traitor_revealer = None
 
     def visible(self, game_state, faction):
         visible = super().visible(game_state, faction)
@@ -90,6 +91,7 @@ class BattleStage(StageState):
         visible["karama_sardaukar"] = self.karama_sardaukar
         visible["karama_fedaykin"] = self.karama_fedaykin
         visible["karama_kwizatz_haderach"] = self.karama_kwizatz_haderach
+        visible["traitor_revealer"] = self.traitor_revealer
 
         attacker = None
         defender = None
@@ -97,8 +99,10 @@ class BattleStage(StageState):
             attacker = self.battle[0]
             defender = self.battle[1]
 
-        reveal_entire_attack = attacker == faction or (self.reveal_entire and self.reveal_entire_is_attacker) 
-        reveal_entire_defense = defender == faction or (self.reveal_entire and not self.reveal_entire_is_attacker) 
+        stage_allows = self.substage in ["traitors", "resolve"]
+
+        reveal_entire_attack = attacker == faction or (self.reveal_entire and self.reveal_entire_is_attacker) or stage_allows 
+        reveal_entire_defense = defender == faction or (self.reveal_entire and not self.reveal_entire_is_attacker) or stage_allows 
 
         if reveal_entire_attack:
             visible["attacker_plan"] = self.attacker_plan

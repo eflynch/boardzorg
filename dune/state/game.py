@@ -46,6 +46,7 @@ class GameState(State):
         self.storm_deck = storm_deck
         self.spice_discard = []
         self.treachery_discard = []
+        self.pause = []
 
         self.faction_state = {f: FactionState.from_name(f) for f in factions}
         self._round_state = SetupRound()

@@ -104,6 +104,9 @@ class Action(object, metaclass=ActionMeta):
         if not cls.su and faction is None:
             raise IllegalAction("God cannot do that")
 
+        if cls.su and game_state.pause:
+            raise IllegalAction("Wait for players to accept pause.")
+
         if hasattr(cls, "_check"):
             cls._check(game_state, faction)
 

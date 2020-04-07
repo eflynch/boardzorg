@@ -2,6 +2,21 @@ from copy import deepcopy
 
 from dune.actions.action import Action
 from dune.map.map import MapGraph
+from dune.exceptions import IllegalAction, BadCommand
+
+
+class Continue(Action):
+    name = "continue"
+
+    @classmethod
+    def _check(cls, game_state, faction):
+        if faction not in game_state.pause:
+            raise IllegalAction("Cannot continue if you are not one of the pausers")
+
+    def _execute(self, game_state):
+        new_game_state = deepcopy(game_state)
+        new_game_state.pause.remove(self.faction)
+        return new_game_state
 
 
 class DoCollection(Action):

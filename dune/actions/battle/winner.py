@@ -85,28 +85,17 @@ class DiscardTreachery(Action):
         ss = new_game_state.round_state.stage_state
         fs = new_game_state.faction_state[self.faction]
         winner_is_attacker = ss.winner == ss.battle[0]
+        winner_plan = ss.attacker_plan if (ss.winner == ss.battle[0]) else ss.defender_plan
 
-        if self.weapon:
-            if winner_is_attacker:
-                ops.discard_treachery(new_game_state, ss.attacker_plan["weapon"])
-            else:
-                ops.discard_treachery(new_game_state, ss.defender_plan["weapon"])
-        else:
-            if winner_is_attacker:
-                fs.treachery.append(ss.attacker_plan["weapon"])
-            else:
-                fs.treachery.append(ss.defender_plan["weapon"])
+        if self.weapon and winner_plan["weapon"] is not None:
+            ops.discard_treachery(new_game_state, winner_plan["weapon"])
+        elif winner_plan["weapon"] is not None:
+            fs.treachery.append(winner_plan["weapon"])
 
-        if self.defense:
-            if winner_is_attacker:
-                ops.discard_treachery(new_game_state, ss.attacker_plan["defense"])
-            else:
-                ops.discard_treachery(new_game_state, ss.defender_plan["defense"])
-        else:
-            if winner_is_attacker:
-                fs.treachery.append(ss.attacker_plan["defense"])
-            else:
-                fs.treachery.append(ss.defender_plan["defense"])
+        if self.defense and winner_plan["defense"] is not None:
+            ops.discard_treachery(new_game_state, winner_plan["defense"])
+        elif winner_plan["weapon"] is not None:
+            fs.treachery.append(winner_plan["defense"])
 
         ss.substage_state.discard_done = True
 
@@ -123,7 +112,10 @@ class ConcludeWinner(Action):
     @classmethod
     def _check(cls, game_state, faction):
         if not game_state.round_state.stage_state.substage_state.discard_done:
-            raise IllegalAction("Winner must decide what to discard if anything")
+            ss = game_state.round_state.stage_state
+            winner_plan = ss.attacker_plan if (ss.winner == ss.battle[0]) else ss.defender_plan
+            if winner_plan["weapon"] or winner_plan["defense"]:
+                raise IllegalAction("Winner must decide what to discard if anything")
         if game_state.round_state.stage_state.substage_state.power_left_to_tank > 0:
             raise IllegalAction("Winner must still tank some units")
 

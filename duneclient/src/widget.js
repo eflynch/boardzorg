@@ -70,7 +70,16 @@ const Constant = ({value, setArgs}) => {
 }
 
 
-const SelectOnMap = ({args, setArgs, interaction, setInteraction, mode}) => {
+const SelectOnMap = ({args, setArgs, interaction, setInteraction, mode, nullable}) => {
+    let clearButton = <span/>;
+    if (nullable) {
+        clearButton = <div onClick={(e)=>{
+            setInteraction(update(interaction, {
+                mode: {$set: null},
+                [mode]: {$set: "-"}
+            }))
+        }}>x</div>;
+    }
     let pieces;
     if (interaction.mode === mode) {
         if (interaction[mode] === null) {
@@ -83,7 +92,7 @@ const SelectOnMap = ({args, setArgs, interaction, setInteraction, mode}) => {
                         [mode]: {$set: null}
                     }));
                 }}>Select on Board</div>,
-                <div key="value">Selected: {interaction[mode]}</div>
+                <div key="value">Selected: {interaction[mode]} {clearButton}</div>
             ];
         }
     } else {
@@ -96,7 +105,7 @@ const SelectOnMap = ({args, setArgs, interaction, setInteraction, mode}) => {
                 }));
             }}>Select on Board</div>
         ];
-        if (interaction[mode]) {
+        if (interaction[mode] || args === "-") {
             pieces.push(<div key="value">Selected: {interaction[mode]}</div>);
         }
     }
@@ -270,6 +279,15 @@ const Widget = ({type, args, setArgs, config, interaction, setInteraction}) => {
     if (type === "leader-input") {
         return <SelectOnMap mode="leader-input" interaction={interaction} setInteraction={setInteraction} setArgs={setArgs}/>;
     }
+
+    if (type === "treachery-select-weapon") {
+        return <SelectOnMap mode={"treachery-select-weapon"} interaction={interaction} setInteraction={setInteraction} args={args} setArgs={setArgs} nullable={true}/>;
+    }
+
+    if (type === "treachery-select-defense") {
+        return <SelectOnMap mode={"treachery-select-defense"} interaction={interaction} setInteraction={setInteraction} args={args} setArgs={setArgs} nullable={true}/>;
+    }
+
 
     console.log(type);
     return <span>

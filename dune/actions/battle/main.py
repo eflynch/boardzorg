@@ -96,6 +96,7 @@ class AutoPickBattle(Action):
             new_game_state.round_state.battles.remove(b)
         if not new_game_state.round_state.battles:
             new_game_state.round = "collection"
+            new_game_state.pause = list(game_state.faction_state.keys())
             return new_game_state
 
         battle_1 = game_state.round_state.battles[0]
