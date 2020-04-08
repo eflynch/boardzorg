@@ -18,6 +18,19 @@ const humanReadable = {
     "leader-input": "Leader",
 };
 
+const Prescience = ({args, setArgs}) => {
+    const options = ["leader", "number", "weapon", "defense"];
+    return (
+        <div style={{display:"flex", justifyContent:"space-around"}}>
+            {options.map((option)=> {
+                return <div key={option} class={"prescience-option" + (option === args ? " selected": "")} onClick={()=>{
+                    setArgs(option);
+                }}>{option}</div>;
+            })}
+        </div>
+    );
+};
+
 const Choice = ({args, setArgs, config, ...props}) => {
     return (
         <div>
@@ -231,6 +244,10 @@ const Widget = ({me, state, type, args, setArgs, config, interaction, setInterac
 
     if (type === "battle-plan") {
         return <BattlePlan me={me} state={state} args={args} setArgs={setArgs} />;
+    }
+
+    if (type === "prescience") {
+        return <Prescience args={args} setArgs={setArgs} />;
     }
 
     console.log(type);

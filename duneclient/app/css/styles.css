@@ -156,6 +156,20 @@ a {
     margin: 5px;
 }
 
+.prescience-option {
+    padding: 5px;
+    font-size: 16px;
+    border-radius: 5px;
+    border: 2px solid green;
+    cursor: pointer;
+}
+
+.prescience-option.selected {
+    background-color: green;
+    color: white;
+}
+
+
 .board {
     background-color: black;
     cursor: default;
@@ -343,7 +357,6 @@ img.alive {
     align-items: center;
     border: 1px solid white;
     border-radius: 10px;
-    width: 250px;
 }
 
 .picker.active:hover {

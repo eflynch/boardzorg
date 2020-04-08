@@ -30,7 +30,7 @@ class Prescience(Action):
 
     @classmethod
     def get_arg_spec(cls, faction=None):
-        return args.String();
+        return args.Prescience();
 
     @classmethod
     def _check(cls, game_state, faction):

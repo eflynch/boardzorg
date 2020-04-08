@@ -175,6 +175,13 @@ class Faction(String):
         }
 
 
+class Prescience(Args):
+    def to_dict(self):
+        return {
+            "widget": "prescience"
+        } 
+
+
 class Turn(Integer):
     def __init__(self):
         super(Turn, self).__init__(min=0, max=10)

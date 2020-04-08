@@ -10,14 +10,19 @@ const Logo = ({faction, diameter, ...props}) => {
 };
 
 const Plan = ({faction, isAttacker, leader, number, weapon, defense, dead}) => {
+    const leaderToken = leader !== undefined ? <LeaderToken name={leader[0]}/> : <div>?</div>;
+    const numberText = number !== undefined ? number : <span>?</span>;
+    const resultText = (number !== undefined && leader !== undefined) ? <span>{number + (dead ? 0 : leader[1])}</span> : <span>?</span>;
+    const weaponShow = weapon !== undefined ? <Card type="Treachery" name={weapon ? weapon : "Reverse"} width={100} /> : <span>?</span>;
+    const defenseShow = defense !== undefined ? <Card type="Treachery" name={defense ? defense : "Reverse"} width={100} /> : <span>?</span>;
     return (
         <div style={{display:"flex"}}>
             <Logo faction={faction} diameter={20}/>
             <div style={{display:"flex", alignItems: "center"}}>
-                <LeaderToken name={leader[0]}/><div className="big-unit"> + {number} = {number + (dead ? 0 : leader[1])}</div> 
+                {leaderToken}<div className="big-unit"> + {numberText} = {resultText}</div>
             </div>
-            <Card type="Treachery" name={weapon ? weapon : "Reverse"} width={100} />
-            <Card type="Treachery" name={defense ? defense : "Reverse"} width={100} />
+            {weaponShow}
+            {defenseShow}
         </div>
     );
 }
@@ -55,7 +60,11 @@ export default function Battle({roundstate, factionOrder, interaction, setIntera
                         }));
                     }
                 }}>
-                    <Logo faction={battle[1]} diameter={80}/> {battle[2]} {battle[3]}
+                    <Logo faction={battle[1]} diameter={80}/>
+                    <div style={{display:"flex", flexDirection: "column", alignItems:"center", marginLeft:5}}>
+                        <div>{battle[2]}</div>
+                        <div>{battle[3]}</div>
+                    </div>
                 </div>
             );
         });
@@ -68,7 +77,8 @@ export default function Battle({roundstate, factionOrder, interaction, setIntera
     };
 
     const plansRevealed = () => {
-        if (roundstate.stage_state !== undefined && roundstate.stage_state.substage !== undefined && (roundstate.stage_state.substage === "resolve" || roundstate.stage_state.substage === "traitors")) {
+        const revealSubStages = ["resolve", "traitors"];
+        if (roundstate.stage_state !== undefined && roundstate.stage_state.battle !== undefined) {
             const battle = roundstate.stage_state.battle;
             return (
                 <div>
