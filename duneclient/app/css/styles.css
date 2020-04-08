@@ -319,6 +319,10 @@ img.alive {
     filter: brightness(1.25) drop-shadow(3px 3px 3px #888888);
 }
 
+.card.selected:hover {
+    filter: brightness(2) drop-shadow(3px 3px 3px #888888);
+}
+
 .card.selected {
     filter: brightness(2) drop-shadow(3px 3px 3px #888888);
 }
@@ -350,6 +354,10 @@ img.alive {
 
 .leader-token.active:hover {
     filter: brightness(1.25) drop-shadow(3px 3px 3px #888888);
+}
+
+.leader-token.selected:hover {
+    filter: brightness(2) drop-shadow(3px 3px 3px #888888);
 }
 
 .leader-token.selected {

@@ -22,8 +22,8 @@ export default function BattlePlan({me, state, args, setArgs}) {
     };
 
     let selectedLeaderPower = 0;
-    const meLeaders = meFactionState.leaders.map((leader) => {
-        const [name, power] = leader;
+
+    const handleLeader = (name, power) => {
         if (selected.leader === name) {
             selectedLeaderPower = power;
         }
@@ -33,13 +33,30 @@ export default function BattlePlan({me, state, args, setArgs}) {
                 const newArgs = [name, selected.units, selected.weapon ? selected.weapon : "-", selected.defense ? selected.defense : "-"].join(" ");
                 setArgs(newArgs); 
             };
-        }
+        };
+        return {
+            onClick: onClick,
+            isSelected: selected.leader === name,
+        };
+    }
+    let meLeaders = meFactionState.leaders.map((leader) => {
+        const [name, power] = leader;
+        const {onClick, isSelected} = handleLeader(name, power);
         return <LeaderToken
                     key={name}
                     name={name}
-                    selected={selected.leader === name}
+                    selected={isSelected}
                     dead={false} onClick={onClick}/>;
     });
+    if (meFactionState.treachery.indexOf("Cheap-Hero/Heroine") !== -1) {
+        const {onClick, isSelected} = handleLeader("Cheap-Here/Heroine", 0);
+        meLeaders.push(
+            <Card key="Cheap-Hero/Heroine"
+                type="Treachery" name="Cheap-Hero/Heroine"
+                width={isSelected ? 100 : 75}
+                selected={isSelected}
+                onClick={onClick} />);
+    }
 
     const units = () => {
         let unitSetArgs = undefined;
@@ -47,7 +64,6 @@ export default function BattlePlan({me, state, args, setArgs}) {
             unitSetArgs = (units)=>{
                 const unitCount = units === "" ? 0 : units.split(",").length;
                 const newArgs = [selected.leader, unitCount, selected.weapon ? selected.weapon : "-", selected.defense ? selected.defense : "-"].join(" ");
-                console.log(newArgs);
                 setArgs(newArgs);
             };
         }
