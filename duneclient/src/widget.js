@@ -3,6 +3,10 @@ import Select from 'react-select';
 import Slider, { Range } from 'rc-slider';
 import update from 'immutability-helper';
 
+import BattlePlan from './widgets/battle-plan';
+import Integer from './widgets/integer';
+import Units from './widgets/units';
+
 
 const AllFactions = ["emperor", "fremen", "guild", "bene-gesserit", "harkonnen", "atreides"];
 
@@ -155,63 +159,8 @@ const FremenPlacementSelect = ({args, setArgs, config}) => {
     );
 };
 
-const Units = ({args, setArgs, fedaykin, sardaukar}) => {
-    const units = args.split(",").map((i)=>parseInt(i));
-    const numOnes = units.filter((i)=>i===1).length;
-    const numTwos = units.filter((i)=>i===2).length;
 
-    let bonus = <div/>;
-    if (fedaykin || sardaukar) {
-        bonus = (
-            <div style={{display: "flex"}}>
-                <div className="label">{fedaykin ? "Fedaykin: " : "Sardaukar: "}{numTwos}</div>
-                <Slider min={0} max={fedaykin ? 3 : 5} step={1} dots={true} value={numTwos}
-                    onChange={(value)=>{
-                        const ones = Array(numOnes).fill("1").join(",");
-                        const twos = Array(value).fill("2").join(",");
-                        if (ones && twos){
-                            setArgs([ones, twos].join(","));
-                        } else {
-                            setArgs(ones + twos);
-                        }
-                    }} />
-            </div>
-        );
-    }
-    return (
-        <div className="unit-select">
-            <div style={{display: "flex"}}>
-                <div className="label">Units: {numOnes}</div>
-                <Slider min={0} max={20} step={1} dots={true} value={numOnes}
-                    onChange={(value)=>{
-                        const ones = Array(value).fill("1").join(",");
-                        const twos = Array(numTwos).fill("2").join(",");
-                        if (ones && twos){
-                            setArgs([ones, twos].join(","));
-                        } else {
-                            setArgs(ones + twos);
-                        }
-                    }} />
-            </div>
-            {bonus} 
-        </div>
-    );
-};
-
-const Integer = ({args, setArgs, type, min, max}) => {
-    return (
-        <div>
-            {args} {type ? type : ""}
-            <Slider min={min} max={max} step={1} value={parseInt(args)}
-                onChange={(value)=>{
-                    setArgs(value.toString());
-            }} />
-        </div>
-    );
-};
-
-
-const Widget = ({type, args, setArgs, config, interaction, setInteraction}) => {
+const Widget = ({me, state, type, args, setArgs, config, interaction, setInteraction}) => {
     if (type === "null") {
         return "";
     }
@@ -280,14 +229,9 @@ const Widget = ({type, args, setArgs, config, interaction, setInteraction}) => {
         return <SelectOnMap mode="leader-input" interaction={interaction} setInteraction={setInteraction} setArgs={setArgs}/>;
     }
 
-    if (type === "treachery-select-weapon") {
-        return <SelectOnMap mode={"treachery-select-weapon"} interaction={interaction} setInteraction={setInteraction} args={args} setArgs={setArgs} nullable={true}/>;
+    if (type === "battle-plan") {
+        return <BattlePlan me={me} state={state} interaction={interaction} args={args} setArgs={setArgs} setInteraction={setInteraction} />;
     }
-
-    if (type === "treachery-select-defense") {
-        return <SelectOnMap mode={"treachery-select-defense"} interaction={interaction} setInteraction={setInteraction} args={args} setArgs={setArgs} nullable={true}/>;
-    }
-
 
     console.log(type);
     return <span>

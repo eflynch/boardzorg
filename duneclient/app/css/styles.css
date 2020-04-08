@@ -381,3 +381,8 @@ img.alive {
 
 .su-button:hover {
 }
+
+.battle-plan {
+    width: 400px;
+    background-color:black; 
+}

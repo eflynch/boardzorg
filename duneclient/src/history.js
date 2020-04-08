@@ -6,12 +6,12 @@ const Command = ({me, faction, cmd}) => {
     return <li className={"history-item" + (faction === me ? " mine" : "") + (faction === "su" ? " su" : "")}>{faction}: {cmd}</li>;
 }
 
-export default History = ({error, actions, sendCommand, commandLog, me, interaction, setInteraction, setInteractionFlow}) => {
+export default History = ({state, error, actions, sendCommand, commandLog, me, interaction, setInteraction, setInteractionFlow}) => {
     const [showSu, setShowSu] = useState(false);
     return (    
         <div className="history">
             <b>Available Actions</b>
-            <Actions interaction={interaction} setInteraction={setInteraction} error={error} actions={actions} sendCommand={sendCommand} setInteractionFlow={setInteractionFlow}/>
+            <Actions me={me} state={state} interaction={interaction} setInteraction={setInteraction} error={error} actions={actions} sendCommand={sendCommand} setInteractionFlow={setInteractionFlow}/>
             <br/>
             <div style={{position:"relative"}}>
                 <b>Actions Log</b>

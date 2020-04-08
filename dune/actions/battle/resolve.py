@@ -39,7 +39,7 @@ class CommitPlan(Action):
 
     @classmethod
     def get_arg_spec(cls, faction=None):
-        return args.Struct(args.Leader(), args.Integer(max=20, type="units"), args.TreacheryCard(kind="weapon"), args.TreacheryCard(kind="defense"))
+        return args.BattlePlan(faction=faction)
 
     @classmethod
     def _check(cls, game_state, faction):

@@ -85,16 +85,6 @@ class TraitorLeader(String):
         }
 
 
-class TreacheryCard(String):
-    def __init__(self, kind):
-        self.kind = kind
-    def to_dict(self):
-        return {
-            "widget": "treachery-select-" + self.kind,
-            "args": {}
-        }
-
-
 class Leader(String):
     def to_dict(self):
         return {
@@ -166,6 +156,17 @@ class Battle(Args):
             "widget": "battle-select"
         }
 
+class BattlePlan(Args):
+    def __init__(self, faction):
+        self.faction = faction
+
+    def to_dict(self):
+        return {
+            "widget": "battle-plan",
+            "args": {
+                "faction": self.faction
+            }
+        }
 
 class Faction(String):
     def to_dict(self):

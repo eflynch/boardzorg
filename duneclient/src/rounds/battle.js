@@ -66,7 +66,7 @@ class Battle extends React.Component {
                 <h4>Battle Round</h4>
                 Battle Picker: {turnOrder}
                 <StageState roundstate={roundstate} interaction={interaction} setInteraction={setInteraction} />
-                {JSON.stringify(roundstate)}
+                {/*JSON.stringify(roundstate).replace(",", ", ").replace(":", ": ")*/}
             </div>
         );
     }

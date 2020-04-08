@@ -45,9 +45,10 @@ class Faction extends React.Component {
         }
     }
     getLeaders () {
+        const allLeaders = this.props.factionstate.leaders.concat(this.props.factionstate.tank_leaders); 
         return (
             <div style={{display:"flex", flexWrap:"wrap"}}>
-                {this.props.factionstate.leaders.map((leader) => {
+                {allLeaders.map((leader) => {
                     let dead = false;
                     if (this.props.factionstate.tank_leaders.indexOf(leader) !== -1){
                         dead = true;

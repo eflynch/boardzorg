@@ -140,7 +140,7 @@ export default function Session({state, actions, history, me, error, sendCommand
                 </div>
                 <RoundState interaction={interaction} setInteraction={setInteraction} roundState={state.round_state} logoPositions={logoPositions} stormPosition={state.storm_position} />
             </div>
-            <History me={me} interaction={interaction} setInteraction={setInteraction} error={errorState} actions={actions} sendCommand={sendCommand} commandLog={history} setInteractionFlow={setInteractionFlow}/>
+            <History state={state} me={me} interaction={interaction} setInteraction={setInteraction} error={errorState} actions={actions} sendCommand={sendCommand} commandLog={history} setInteractionFlow={setInteractionFlow}/>
             <div className="factions">
                 {factions}
             </div>

@@ -14,8 +14,6 @@ const interactionWidgets = [
     "traitor-select",
     "leader-input",
     "battle-select",
-    "treachery-select-weapon",
-    "treachery-select-defense"
 ];
 
 const defaultArgsForAction = (actionName, argSpec) => {
@@ -27,6 +25,9 @@ const defaultArgsForAction = (actionName, argSpec) => {
     }
     if (actionName === "movement-select") {
         return "   ";
+    }
+    if (actionName === "commit-plan") {
+        return " 0 - -";
     }
 
     if (interactionWidgets.indexOf(argSpec.widget) !== -1) {
@@ -44,10 +45,12 @@ const defaultArgsForAction = (actionName, argSpec) => {
     return "";
 };
 
-const ActionArgs = ({args, setArgs, sendCommand, actionName, argSpec, interaction, setInteraction}) => {
+const ActionArgs = ({me, state, args, setArgs, sendCommand, actionName, argSpec, interaction, setInteraction}) => {
     return (
         <div>
             <Widget
+                me={me}
+                state={state}
                 interaction={interaction}
                 setInteraction={setInteraction}
                 setArgs={setArgs}
@@ -112,7 +115,7 @@ const Actions = (props) => {
     const [args, setArgs] = useState("");
     const [selectedAction, setSelectedAction] = useState(null);
 
-    let {error, actions, sendCommand, setInteraction, setInteractionFlow, interaction} = props;
+    let {me, state, error, actions, sendCommand, setInteraction, setInteractionFlow, interaction} = props;
     let errordiv = <div/>;
     if (error !== null && error !== undefined){
         if (error.BadCommand !== undefined){
@@ -139,7 +142,7 @@ const Actions = (props) => {
     });
     let actionArgs = <span/>;
     if (actionNames.indexOf(selectedAction) != -1) {
-        actionArgs = <ActionArgs args={args} setArgs={setArgs} interaction={interaction} setInteraction={setInteraction} sendCommand={sendCommand} actionName={selectedAction} argSpec={actions[selectedAction]}/>
+        actionArgs = <ActionArgs me={me} state={state} args={args} setArgs={setArgs} interaction={interaction} setInteraction={setInteraction} sendCommand={sendCommand} actionName={selectedAction} argSpec={actions[selectedAction]}/>
     }
     return (
         <div className="actions-wrapper">
