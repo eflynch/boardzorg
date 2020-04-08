@@ -5,7 +5,7 @@ import Card from './card';
 
 export default function Deck({facedown, faceup, type}) {
     const Faceup = (faceup) => {
-        return faceup.reverse().map((name, i )=> {
+        return faceup.concat().reverse().map((name, i )=> {
             return (
                 <div key={name} style={i != 0 ? {position: "absolute", top:0, left: 0} : undefined}>
                     <Card type={type} name={name} width={100}/>
