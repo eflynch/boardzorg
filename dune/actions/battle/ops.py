@@ -52,6 +52,7 @@ def find_battles(game_state):
                     if f_msec in g_map:
                         if (g, f, s, f_msec) not in battles:
                             battles.append((f, g, s, f_msec))
+    battles.sort(key=lambda b:faction_order.index(b[0]))
     return battles
 
 

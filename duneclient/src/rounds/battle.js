@@ -22,15 +22,31 @@ const Plan = ({faction, isAttacker, leader, number, weapon, defense, dead}) => {
     );
 }
 
-const StageState = ({roundstate, interaction, setInteraction}) => {
-    if (roundstate.stage === "main") {
+export default function Battle({roundstate, factionOrder, interaction, setInteraction}) {
+    const battlesToPick = () => {
         const pickable = roundstate.battles.filter((battle)=>{
             return battle[0] == roundstate.faction_turn;
         });
 
+        let active = false;
+        if (roundstate.stage === "main" && interaction.mode === "battle-select"){
+            active = true;
+        }
+
+
         const pickers = pickable.map((battle)=> {
+            let selected = false;
+            if (interaction["battle-select"] === battle.slice(1).join(" ")){
+                selected = true;
+            }
+            if (roundstate.stage === "battle") {
+                const activeBattle = roundstate.stage_state.battle;
+                if (activeBattle.join(" ") === battle.join(" ")) {
+                    selected = true;
+                }
+            }
             return (
-                <div className={"picker" + (interaction.mode === "battle-select" ? " active" : "")} 
+                <div className={"picker" + (active ? " active" : "") + (selected ? " selected": "")} 
                      key={battle.join("-")} onClick={()=>{
                     if (interaction.mode === "battle-select") {
                         setInteraction(update(interaction, {
@@ -45,33 +61,28 @@ const StageState = ({roundstate, interaction, setInteraction}) => {
         });
 
         return (
-            <div>
-                Battles To Pick From:
-                <div style={{display:"flex", flexWrap:"wrap"}}>
-                    {pickers}
-                </div>
+            <div style={{display:"flex", flexWrap:"wrap"}}>
+                {pickers}
             </div>
         );
-    }
-    if (roundstate.stage_state.substage === "resolve" || roundstate.stage_state.substage === "traitors") {
-        const battle = roundstate.stage_state.battle;
-        return (
-            <div>
-                Plans Revealed:
-                <div style={{display:"flex"}}>
-                    <Plan faction={battle[0]} isAttacker={true} {...roundstate.stage_state.attacker_plan} />
-                    <Plan faction={battle[1]} isAttacker={false} {...roundstate.stage_state.defender_plan} />
+    };
+
+    const plansRevealed = () => {
+        if (roundstate.stage_state !== undefined && roundstate.stage_state.substage !== undefined && (roundstate.stage_state.substage === "resolve" || roundstate.stage_state.substage === "traitors")) {
+            const battle = roundstate.stage_state.battle;
+            return (
+                <div>
+                    Plans Revealed:
+                    <div style={{display:"flex"}}>
+                        <Plan faction={battle[0]} isAttacker={true} {...roundstate.stage_state.attacker_plan} />
+                        <Plan faction={battle[1]} isAttacker={false} {...roundstate.stage_state.defender_plan} />
+                    </div>
                 </div>
-            </div>
-        );
+            );
+        }
     }
-    return <div/>;
-};
 
-
-class Battle extends React.Component {
-    render () {
-        let {roundstate, factionOrder, interaction, setInteraction} = this.props;
+    const attackerOrder = () => {
         const allFactionsInBattle = {};
         roundstate.battles.forEach((battle)=>{
             allFactionsInBattle[battle[0]] = true;
@@ -80,23 +91,23 @@ class Battle extends React.Component {
             return allFactionsInBattle[faction] !== undefined;
         });
         const turnIndex = relevantFactionOrder.indexOf(roundstate.faction_turn);
-        let turnOrder = <FactionOrder factions={relevantFactionOrder.map((faction, i)=>{
+        return <FactionOrder factions={relevantFactionOrder.map((faction, i)=>{
             return {
                 faction: faction,
                 label: turnIndex > i ? "done" : "",
                 active: faction === roundstate.faction_turn
             };
         })} />;
+    };
 
-        return (
-            <div style={{display:"flex", flexDirection:"column"}}>
-                <h4>Battle Round</h4>
-                Battle Picker: {turnOrder}
-                <StageState roundstate={roundstate} interaction={interaction} setInteraction={setInteraction} />
-                {/*JSON.stringify(roundstate).replace(",", ", ").replace(":", ": ")*/}
+    return (
+        <div style={{display:"flex", flexDirection:"column", justifyContent:"space-between", alignItems:"stretch"}}>
+            <h4>Battle Round</h4>
+            <div style={{display:"flex", justifyContent: "space-around", alignItems:"center"}}>
+                {attackerOrder()} <span style={{fontSize:30, fontWeight:"bold"}}>vs</span> {battlesToPick()}
             </div>
-        );
-    }
-}
-
-module.exports = Battle;
+            {plansRevealed()}
+            {/*JSON.stringify(roundstate).replace(",", ", ").replace(":", ": ")*/}
+        </div>
+    );
+};
