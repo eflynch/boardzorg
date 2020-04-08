@@ -12,11 +12,11 @@ var last_data;
 var last_assignment_data;
 
 
-function newSession(name){
+function newSession(name, factions){
     $.ajax({
         type: "POST",
         url: "/api/sessions",
-        data: JSON.stringify({session_id: name}),
+        data: JSON.stringify({session_id: name, factions: factions}),
         success: function(data){
             window.location = "/" + data.id;
         },
@@ -61,7 +61,8 @@ function renderSession(sessionID, roleID, data, error){
 
 function renderAssignment(sessionID, data, error) {
     last_assignment_data = data;
-    render(<Assignment assignedRoles={data.assigned_roles} assignRole={(role)=>{
+    console.log(data);
+    render(<Assignment assignedRoles={data.assigned_roles} unassignedRoles={data.unassigned_roles} assignRole={(role)=>{
         assignRole(sessionID, role);}} />, document.getElementById("content"));
 }
 

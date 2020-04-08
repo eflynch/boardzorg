@@ -416,3 +416,11 @@ img.alive {
     font-size: 30px;
     margin-left: 10px;
 }
+
+.select-faction {
+    filter: brightness(0.3) drop-shadow(3px 3px 3px #888888);
+}
+
+.select-faction.selected {
+    filter: brightness(1.0) drop-shadow(3px 3px 3px #888888);
+}

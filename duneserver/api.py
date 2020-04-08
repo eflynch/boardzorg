@@ -11,8 +11,10 @@ api = Blueprint("api", __name__)
 
 @api.route("/sessions", methods=['POST'])
 def insert():
-    session_id = request.get_json()["session_id"]
-    SessionWrapper.create(session_id)
+    r_dict = request.get_json()
+    session_id = r_dict["session_id"]
+    factions = r_dict.get("factions", None)
+    SessionWrapper.create(session_id, factions=factions)
     return jsonify({"id": session_id})
 
 
@@ -53,6 +55,8 @@ def assign_role(session_id):
         raise RoleException("{} is not a valid role".format(role))
 
     with SessionWrapper(session_id) as (session, roles):
+        if role not in session.get_factions_in_play():
+            raise RoleException("{} is not a valid role".format(role))
         role_id = rolewrapper.assign(roles, role)
         ret = {
             "role": role,
@@ -88,8 +92,11 @@ def command(session_id):
 def get_assigned_roles(session_id):
     with SessionWrapper(session_id) as (session, roles):
         assigned_roles = list(roles.values())
+        all_roles = session.get_factions_in_play()
+        all_roles.append("host")
         return jsonify({
-            "assigned_roles": assigned_roles
+            "assigned_roles": assigned_roles,
+            "unassigned_roles": list(filter(lambda f: f not in assigned_roles, all_roles))
         })
 
 

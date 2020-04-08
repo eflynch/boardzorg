@@ -83,9 +83,19 @@ def connect_socketio(socketio):
         room_for_data=lambda data: f"{data['session_id']}/{data['role_id']}/session",
     ))
 
+    def _serialize_roles(session, roles, data):
+        assigned_roles = list(roles.values())
+        all_roles = session.get_factions_in_play()
+        all_roles.append("host")
+        unassigned_roles = list(filter(lambda r: r not in assigned_roles, all_roles))
+        return {
+            "assigned_roles": assigned_roles,
+            "unassigned_roles": unassigned_roles
+        }
+
     connect_namespace(socketio, _NamespaceInfo(
         name="roles",
         check_data=lambda data: True,
-        serialize=lambda _session, roles, _data: { "assigned_roles": list(roles.values()) },
+        serialize=_serialize_roles,
         room_for_data=lambda data: f"{data['session_id']}/roles",
     ))

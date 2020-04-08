@@ -84,6 +84,9 @@ class Session:
         faction = role
         return Action.get_valid_actions(self.game_log[-1], faction)
 
+    def get_factions_in_play(self):
+        return list(self.game_log[0].faction_state.keys())
+
     def get_visible_command_log(self, faction):
         def _redact(command):
             (cmd_faction, cmd) = command

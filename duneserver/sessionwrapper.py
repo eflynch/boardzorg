@@ -87,7 +87,7 @@ class SessionWrapper:
         self.cursor.__exit__(*args)
 
     @staticmethod
-    def create(name):
+    def create(name, factions=None):
         conn = _connect()
         with conn.cursor() as cursor:
             cursor.execute("SELECT (id) from sessions where name=%(name)s", {"name": name})
@@ -98,7 +98,7 @@ class SessionWrapper:
                 "INSERT INTO sessions (name, serialized, roles) VALUES (%(name)s, %(serialized)s, %(roles)s)",
                 {
                     "name": name,
-                    "serialized": Session.serialize(Session.new_session()),
+                    "serialized": Session.serialize(Session.new_session(factions=factions)),
                     "roles": rolewrapper.serialize(rolewrapper.new())
                 })
         conn.commit()

@@ -52,7 +52,6 @@ class PickBattle(Action):
     def _execute(self, game_state):
         new_game_state = deepcopy(game_state)
 
-        print(self.battle_id, game_state.round_state.battles)
         if self.battle_id not in game_state.round_state.battles:
             raise BadCommand("There is no fight there")
 
