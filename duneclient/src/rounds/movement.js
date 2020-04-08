@@ -17,7 +17,6 @@ class Movement extends React.Component {
         })} />;
         return (
             <div style={{display:"flex", flexDirection:"column"}}>
-                <h4>Movement Round</h4>
                 {turnOrder}
             </div>
         );

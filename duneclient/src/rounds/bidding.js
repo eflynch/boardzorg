@@ -31,7 +31,6 @@ class Bidding extends React.Component {
         if (roundstate.stage_state.stage === "auction"){
             return (
                 <div style={{display:"flex", flexDirection:"column"}}>
-                    <h4>Bidding Round</h4>
                     {turnOrder}
                     <div>
                         {this.getCards()}

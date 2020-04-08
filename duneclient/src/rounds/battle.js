@@ -112,7 +112,6 @@ export default function Battle({roundstate, factionOrder, interaction, setIntera
 
     return (
         <div style={{display:"flex", flexDirection:"column", justifyContent:"space-between", alignItems:"stretch"}}>
-            <h4>Battle Round</h4>
             <div style={{display:"flex", justifyContent: "space-around", alignItems:"center"}}>
                 {attackerOrder()} <span style={{fontSize:30, fontWeight:"bold"}}>vs</span> {battlesToPick()}
             </div>

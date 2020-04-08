@@ -179,6 +179,7 @@ a {
     -webkit-user-select: none;
     -webkit-user-drag: none;
     -ms-user-select: none;
+    padding-bottom: 10px;
 }
 
 .board img {
@@ -199,7 +200,7 @@ img.alive {
 }
 
 .roundstate {
-    padding: 20px;
+    padding: 10px;
     background-color: black;
     color: white;
     min-height: 50px;
@@ -210,6 +211,11 @@ img.alive {
     -webkit-user-select: none;
     -webkit-user-drag: none;
     -ms-user-select: none;
+}
+
+.roundstate h4 {
+    margin: 0;
+    margin-bottom: 5px;
 }
 
 

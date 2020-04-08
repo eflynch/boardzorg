@@ -252,14 +252,6 @@ class Board extends React.Component {
                 </g>
             });
 
-        let text = round_state.round;
-        if (round_state.stage !== undefined) {
-            text += ": " + round_state.stage;
-        }
-        if (round_state.stage_state !== undefined && round_state.stage_state !== null) {
-            text += ": " + round_state.stage_state.stage;
-        }
-
         let futureStorm = <g/>;
         if (this.props.futureStorm !== undefined) {
             futureStorm = <Storm sector={this.props.futureStorm} color="rgba(0, 0, 255, 0.2)"/>;
@@ -268,7 +260,6 @@ class Board extends React.Component {
             <div className="board">
                 <svg width={this.state.size} height={this.state.size} viewBox={`0 0 1 1`}>
                     <text x={0.04} y={0.04} style={{fill: "white", font: "normal 0.02px Optima"}}>Turn {turn} / 10</text>
-                    <text x={0.04} y={0.06} style={{fill: "white", font: "normal 0.02px Optima"}}>{text}</text>
                     <image xlinkHref="/static/app/png/board.png" x="0" y="0" width="1" height="1"/>
                     <Storm sector={this.props.stormSector} color="rgba(255, 0, 0, 0.5)"/>
                     {futureStorm}
