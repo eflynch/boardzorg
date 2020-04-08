@@ -1,7 +1,7 @@
 import random
 
 from dune.state import State
-from dune.state.treachery_cards import TREACHERY_CARDS
+from dune.state.treachery_cards import TREACHERY_CARDS, WORTHLESS, WEAPONS, DEFENSES
 from dune.state.spaces import SPACES, SpaceState
 from dune.state.spice_cards import SPICE_CARDS
 from dune.state.rounds.setup import SetupRound
@@ -48,6 +48,12 @@ class GameState(State):
         self.treachery_discard = []
         self.pause = []
 
+        self.treachery_reference = {
+            "worthless": WORTHLESS,
+            "weapons": WEAPONS,
+            "defenses": DEFENSES
+        }
+
         self.faction_state = {f: FactionState.from_name(f) for f in factions}
         self._round_state = SetupRound()
         self._round = None
@@ -90,6 +96,7 @@ class GameState(State):
         visible = super().visible(self, faction)
         visible["treachery_deck"] = {"length": len(self.treachery_deck)}
         visible["treachery_discard"] = self.treachery_discard
+        visible["treachery_reference"] = self.treachery_reference
 
         visible["spice_deck"] = {"length": len(self.spice_deck)}
         if faction == "atreides" and self.spice_deck:

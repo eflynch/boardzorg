@@ -2,10 +2,25 @@ import React from 'react';
 import update from 'immutability-helper';
 
 import FactionOrder from '../components/faction-order';
+import LeaderToken from '../components/leader-token';
+import Card from '../components/card';
 
 const Logo = ({faction, diameter, ...props}) => {
     return <img {...props} src={`/static/app/png/${faction}_logo.png`} width={diameter} height={diameter}/>;
 };
+
+const Plan = ({faction, isAttacker, leader, number, weapon, defense, dead}) => {
+    return (
+        <div style={{display:"flex"}}>
+            <Logo faction={faction} diameter={20}/>
+            <div style={{display:"flex", alignItems: "center"}}>
+                <LeaderToken name={leader[0]}/><div className="big-unit"> + {number} = {number + (dead ? 0 : leader[1])}</div> 
+            </div>
+            <Card type="Treachery" name={weapon ? weapon : "Reverse"} width={100} />
+            <Card type="Treachery" name={defense ? defense : "Reverse"} width={100} />
+        </div>
+    );
+}
 
 const StageState = ({roundstate, interaction, setInteraction}) => {
     if (roundstate.stage === "main") {
@@ -34,6 +49,18 @@ const StageState = ({roundstate, interaction, setInteraction}) => {
                 Battles To Pick From:
                 <div style={{display:"flex", flexWrap:"wrap"}}>
                     {pickers}
+                </div>
+            </div>
+        );
+    }
+    if (roundstate.stage_state.substage === "resolve" || roundstate.stage_state.substage === "traitors") {
+        const battle = roundstate.stage_state.battle;
+        return (
+            <div>
+                Plans Revealed:
+                <div style={{display:"flex"}}>
+                    <Plan faction={battle[0]} isAttacker={true} {...roundstate.stage_state.attacker_plan} />
+                    <Plan faction={battle[1]} isAttacker={false} {...roundstate.stage_state.defender_plan} />
                 </div>
             </div>
         );

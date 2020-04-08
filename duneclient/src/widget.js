@@ -230,7 +230,7 @@ const Widget = ({me, state, type, args, setArgs, config, interaction, setInterac
     }
 
     if (type === "battle-plan") {
-        return <BattlePlan me={me} state={state} interaction={interaction} args={args} setArgs={setArgs} setInteraction={setInteraction} />;
+        return <BattlePlan me={me} state={state} args={args} setArgs={setArgs} />;
     }
 
     console.log(type);
