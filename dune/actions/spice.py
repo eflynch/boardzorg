@@ -23,7 +23,7 @@ class Gift(Action):
         return Gift(faction, other_faction, spice)
 
     @classmethod
-    def get_arg_spec(cls, faction=None):
+    def get_arg_spec(cls, faction=None, game_state=None):
         return args.Struct(args.Faction(), args.Spice())
 
     def __init__(self, faction, other_faction, spice):
@@ -59,7 +59,7 @@ class Bribe(Action):
         return Bribe(faction, other_faction, spice)
 
     @classmethod
-    def get_arg_spec(cls, faction=None):
+    def get_arg_spec(cls, faction=None, game_state=None):
         return args.Struct(args.Faction(), args.Spice())
 
     def __init__(self, faction, other_faction, spice):

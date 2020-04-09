@@ -62,7 +62,7 @@ class Revive(Action):
         return Revive(faction, units, leader)
 
     @classmethod
-    def get_arg_spec(cls, faction=None):
+    def get_arg_spec(cls, faction=None, game_state=None):
         return args.Union(args.Leader(), args.Units())
 
     def __init__(self, faction, units, leader):

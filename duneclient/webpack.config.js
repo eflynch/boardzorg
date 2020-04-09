@@ -7,6 +7,7 @@ var APP_DIR = path.resolve(__dirname, 'src')
 
 var config = {
     entry: APP_DIR + '/main.js',
+    mode: "development",
     output: {
         path: BUILD_DIR,
         filename: 'main.js'

@@ -13,7 +13,7 @@ HOST_ACTIONS = ["undo"]
 
 class HostAction:
     @classmethod
-    def get_arg_spec(cls, faction=None):
+    def get_arg_spec(cls, faction=None, game_state=None):
         return Args()
 
 
@@ -29,16 +29,17 @@ class Session:
         self.action_log = []
         self.command_log = []
         self.su_commands = {}
+        self._next_command_index = 0
 
     def execute_supervisor(self):
         supervisor_actions = Action.get_valid_actions(self.game_log[-1], None)
         if len(supervisor_actions) > 1:
-            logger.critical("SUPERVISOR ERROR:", supervisor_actions)
+            logger.critical("SUPERVISOR ERROR: {}".format(supervisor_actions))
         for s in supervisor_actions:
             self.execute_action(supervisor_actions[s]())
-            if len(self.command_log) not in self.su_commands:
-                self.su_commands[len(self.command_log)] = []
-            self.su_commands[len(self.command_log)].append(supervisor_actions[s].name)
+            if self._next_command_index not in self.su_commands:
+                self.su_commands[self._next_command_index] = []
+            self.su_commands[self._next_command_index].append(supervisor_actions[s].name)
 
     def execute_action(self, action):
         old_state = self.game_log[-1]
@@ -72,8 +73,9 @@ class Session:
             else:
                 raise BadCommand("Not a known action", action_type)
         action = valid_actions[action_type].parse_args(faction, args)
-        self.command_log.append((faction, cmd))
+        self._next_command_index += 1
         self.execute_action(action)
+        self.command_log.append((faction, cmd))
 
     def get_visible_state(self, role):
         return self.game_log[-1].visible(role)

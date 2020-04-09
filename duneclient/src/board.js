@@ -24,7 +24,7 @@ const MapPart = ({className, selected, onClick, paths, ...props}) => {
         <g {...props} className={className + (selected ? " selected" : "") + (onClick? " active" : "")}
             onClick={()=>{
                 if (onClick) {
-                    onClick(territory);
+                    onClick();
                 }
             }}
             transform={TRANSFORM}>
@@ -181,8 +181,9 @@ class Board extends React.Component {
 
     _getMapParts(paths, className, onClick, selected) {
         let spaces = Object.keys(paths).map((territory) => {
+            let thisOnClick = onClick ? ()=>{onClick(territory);} : undefined;
             const isSelected = (selected !== undefined && selected !== null) && (territory == selected.replace(" ", "-"));
-            return <MapPart key={territory +"path"} className={className} onClick={()=>{onClick(territory);}} selected={isSelected} paths={paths[territory]} />;
+            return <MapPart key={territory +"path"} className={className} onClick={thisOnClick} selected={isSelected} paths={paths[territory]} />;
         });
         return spaces;
     }

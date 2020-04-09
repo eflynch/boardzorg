@@ -25,7 +25,7 @@ class KaramaKwizatzHaderach(Action):
     def _execute(self, game_state):
         new_game_state = deepcopy(game_state)
         new_game_state.round_state.stage_state.karama_kwizatz_haderach = True
-        new_game_state.round_state.stage_state.substage = "karama-sardaukar"
+        new_game_state.round_state.stage_state.substage = "finalize"
         discard_karama(game_state, self.faction)
         return new_game_state
 
@@ -68,7 +68,7 @@ class SkipKaramaKwizatzHaderach(Action):
 
     def _execute(self, game_state):
         new_game_state = deepcopy(game_state)
-        new_game_state.round_state.stage_state.substage = "karama-sardaukar"
+        new_game_state.round_state.stage_state.substage = "finalize"
         return new_game_state
 
 
@@ -140,7 +140,7 @@ class KaramaFedaykin(Action):
     ck_round = "battle"
     ck_stage = "battle"
     ck_substage = "karama-fedaykin"
-    ck_karam = True
+    ck_karama = True
 
     @classmethod
     def _check(cls, game_state, faction):
@@ -152,7 +152,7 @@ class KaramaFedaykin(Action):
     def _execute(self, game_state):
         new_game_state = deepcopy(game_state)
         new_game_state.round_state.stage_state.karama_fedaykin = True
-        new_game_state.round_state.stage_state.substage = "finalize"
+        new_game_state.round_state.stage_state.substage = "prescience"
         discard_karama(new_game_state, self.faction)
         return new_game_state
 
@@ -194,5 +194,5 @@ class SkipKaramaFedaykin(Action):
 
     def _execute(self, game_state):
         new_game_state = deepcopy(game_state)
-        new_game_state.round_state.stage_state.substage = "finalize"
+        new_game_state.round_state.stage_state.substage = "prescience"
         return new_game_state

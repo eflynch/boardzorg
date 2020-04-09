@@ -27,7 +27,7 @@ class Action(object, metaclass=ActionMeta):
         return cls(faction)
 
     @classmethod
-    def get_arg_spec(cls, faction=None):
+    def get_arg_spec(cls, faction=None, game_state=None):
         return Args()
 
     @classmethod

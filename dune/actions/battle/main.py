@@ -32,7 +32,7 @@ class PickBattle(Action):
     ck_stage = "main"
 
     @classmethod
-    def get_arg_spec(cls, faction=None):
+    def get_arg_spec(cls, faction=None, game_state=None):
         return args.Battle();
 
     @classmethod

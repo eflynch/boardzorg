@@ -29,7 +29,7 @@ class Prescience(Action):
         self.part = part
 
     @classmethod
-    def get_arg_spec(cls, faction=None):
+    def get_arg_spec(cls, faction=None, game_state=None):
         return args.Prescience();
 
     @classmethod
@@ -111,8 +111,8 @@ class AnswerPrescience(Action):
         return AnswerPrescience(faction, part)
 
     @classmethod
-    def get_arg_spec(cls, faction=None):
-        return args.PrescienceAnswer()
+    def get_arg_spec(cls, faction=None, game_state=None):
+        return args.PrescienceAnswer(max_power=ops.compute_max_power_faction(game_state, faction))
 
     def __init__(self, faction, part):
         self.faction = faction

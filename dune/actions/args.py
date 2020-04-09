@@ -159,14 +159,16 @@ class Battle(Args):
 
 
 class BattlePlan(Args):
-    def __init__(self, faction):
+    def __init__(self, faction, max_power):
         self.faction = faction
+        self.max_power = max_power
 
     def to_dict(self):
         return {
             "widget": "battle-plan",
             "args": {
-                "faction": self.faction
+                "faction": self.faction,
+                "max_power": self.max_power
             }
         }
 
@@ -186,9 +188,15 @@ class Prescience(Args):
 
 
 class PrescienceAnswer(Args):
+    def __init__(self, max_power):
+        self.max_power = max_power
+
     def to_dict(self):
         return {
-            "widget": "prescience-answer"
+            "widget": "prescience-answer",
+            "args": {
+                "max_power": self.max_power
+            }
         }
 
 

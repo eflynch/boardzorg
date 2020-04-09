@@ -18,13 +18,13 @@ from dune.state.rounds import RoundState, StageState, SubStageState
 # battle :
 #   voice : Voice / Voice Pass / Voice Skip
 #   karam-voice : KARAMA_Cancel_Voice / pass
+#   karama-sardaukar : KARama / pass / skip
+#   karama-fedykin : karama / pass / skip
 #   prescience : Prescience / Pass / Skip
 #   karama-prescience : KARAMA_CAncel_Presecience / Answer Prescience question
 #   karama-entire : KARMA_Entire Battle plan / Pass / skip
 #   reveal-entire : Reveal entire plan
 #   karama-kwizatz-harderach : KARAMA_cancel_kh / pass / skip
-#   karama-sardaukar : KARama / pass / skip
-#   karama-fedykin : karama / pass / skip
 #   commit-battle-plans : commit-plan / auto-commit-plan
 #   traitors : reveal-traitor / pass-reveal-traitor / skip
 #   resolve-battle : auto-resolve

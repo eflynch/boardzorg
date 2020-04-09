@@ -6,6 +6,32 @@ from dune.state.treachery_cards import WEAPONS, DEFENSES, WORTHLESS
 from dune.state.treachery_cards import PROJECTILE_WEAPONS, POISON_WEAPONS, PROJECTILE_DEFENSES, POISON_DEFENSES
 
 
+def compute_max_powers(game_state):
+    stage_state = game_state.round_state.stage_state
+    battle_id = game_state.round_state.stage_state.battle
+
+    # Count Attacker Power
+    space = game_state.map_state[battle_id[2]]
+    attacker_sectors = get_min_sector_map(game_state, space, battle_id[0])[battle_id[3]]
+    attacker_max_power = count_power(space, battle_id[0], battle_id[1], attacker_sectors,
+                                         stage_state.karama_fedaykin, stage_state.karama_sardaukar)
+    # Count Defender Power
+    defender_sectors = get_min_sector_map(game_state, space, battle_id[1])[battle_id[3]]
+    defender_max_power = count_power(space, battle_id[1], battle_id[0], defender_sectors,
+                                         stage_state.karama_fedaykin, stage_state.karama_sardaukar)
+
+    return attacker_max_power, defender_max_power
+
+
+def compute_max_power_faction(game_state, faction):
+    stage_state = game_state.round_state.stage_state
+    battle_id = game_state.round_state.stage_state.battle
+    is_attacker = faction == battle_id[0]
+
+    attacker_power, defender_power = compute_max_powers(game_state)
+    return attacker_power if is_attacker else defender_power
+
+
 def get_min_sector_map(game_state, space, faction):
     m = MapGraph()
     m.remove_sector(game_state.storm_position)
@@ -215,9 +241,9 @@ def pick_defense(game_state, is_attacker, defense):
         game_state.round_state.stage_state.defender_plan["defense"] = defense
 
 
-def pick_number(game_state, is_attacker, number):
-    if number > 20 or number < 0:
-        raise BadCommand("Number must be between 0 and 20")
+def pick_number(game_state, max_power, is_attacker, number):
+    if number > max_power or number < 0:
+        raise BadCommand("Number must be between 0 and {}".format(max_power))
     if is_attacker:
         if "number" in game_state.round_state.stage_state.attacker_plan:
             if game_state.round_state.stage_state.attacker_plan["number"] != number:

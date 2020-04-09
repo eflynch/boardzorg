@@ -83,12 +83,12 @@ export function PlanTreachery({title, cards, active, selectedCard, setSelectedCa
 };
 
 
-export default function BattlePlan({me, state, args, setArgs}) {
+export default function BattlePlan({me, state, args, setArgs, maxPower}) {
 
     const stageState = state.round_state.stage_state;
     const meFactionState = state.faction_state[me];
     const [attacker, defender, space, sector] = stageState.battle;
-    const meMaxNumber = state.map_state.filter(s=>s.name === space)[0].forces[me][sector].reduce((a,b)=>a+b, 0);
+    const meMaxNumber = maxPower;
     const iAmAttacker = me === attacker;
 
     const mePlan = iAmAttacker ? stageState.attacker_plan : stageState.defender_plan;

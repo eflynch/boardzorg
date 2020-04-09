@@ -37,7 +37,6 @@ const defaultArgsForAction = (state, me, actionName, argSpec) => {
         const mePlan = iAmAttacker ? stageState.attacker_plan : stageState.defender_plan;
 
         const defaultArg =`${mePlan.leader ? mePlan.leader : ""} ${mePlan.number ? mePlan.number : "0"} ${mePlan.weapon ? mePlan.weapon : "-"} ${mePlan.defense ? mePlan.defense : "-"}`;
-        console.log(defaultArg);
         return defaultArg;
     }
     if (actionName === "answer-prescience") {
@@ -105,7 +104,6 @@ const getFlowForWidget = (type, config) => {
         for (const subWidget of config) {
             ret = ret.concat(getFlowForWidget(subWidget.widget, subWidget.args));
         }
-        console.log(ret);
         return ret;
     }
     return [];

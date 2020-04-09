@@ -32,15 +32,14 @@ const Prescience = ({args, setArgs}) => {
     );
 };
 
-const PrescienceAnswer = ({me, state, args, setArgs}) => {
+const PrescienceAnswer = ({me, state, args, setArgs, maxPower}) => {
     const stageState = state.round_state.stage_state;
     const query = stageState.prescience;
     if (query === "leader") {
         return <PlanLeader factionState={state.faction_state[me]} selectedLeader={args} setLeader={setArgs} active={true} />;
     } else if (query === "number") {
         const [space, sector] = stageState.battle.slice(2);
-        const maxNumber = state.map_state.filter(s=>s.name === space)[0].forces[me][sector].reduce((a,b)=>a+b, 0);
-        return <PlanNumber maxNumber={maxNumber} number={parseInt(args)} setNumber={(number)=>{
+        return <PlanNumber maxNumber={maxPower} number={parseInt(args)} setNumber={(number)=>{
             setArgs("" +number);
         }} active={true} />;
     } else if (query === "weapon") {
@@ -391,7 +390,7 @@ const Widget = ({me, state, type, args, setArgs, config, interaction, setInterac
     }
 
     if (type === "battle-plan") {
-        return <BattlePlan me={me} state={state} args={args} setArgs={setArgs} />;
+        return <BattlePlan me={me} state={state} args={args} setArgs={setArgs} maxPower={config.max_power} />;
     }
 
     if (type === "prescience") {
@@ -399,7 +398,7 @@ const Widget = ({me, state, type, args, setArgs, config, interaction, setInterac
     }
 
     if (type === "prescience-answer") {
-        return <PrescienceAnswer state={state} me={me} args={args} setArgs={setArgs} />;
+        return <PrescienceAnswer state={state} me={me} args={args} setArgs={setArgs} maxPower={config.max_power} />;
     }
 
     if (type === "tank-units") {

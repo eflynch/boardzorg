@@ -72,7 +72,7 @@ def connect_socketio(socketio):
         return {
             "role": role,
             "state": session.get_visible_state(role),
-            "actions": {a: actions[a].get_arg_spec(role).to_dict() for a in actions},
+            "actions": {a: actions[a].get_arg_spec(faction=role, game_state=session.game_log[-1]).to_dict() for a in actions},
             "history": session.get_visible_command_log(role)
         }
 

@@ -300,7 +300,7 @@ class Ship(Action):
         return Ship(faction, units, space, sector)
 
     @classmethod
-    def get_arg_spec(cls, faction=None):
+    def get_arg_spec(cls, faction=None, game_state=None):
         return args.Struct(args.Units(faction), args.SpaceSector())
 
     def __init__(self, faction, units, space, sector):
@@ -618,7 +618,7 @@ class Move(Action):
         return Move(faction, units, space_a, sector_a, space_b, sector_b)
 
     @classmethod
-    def get_arg_spec(cls, faction=None):
+    def get_arg_spec(cls, faction=None, game_state=None):
         return args.Struct(args.Units(faction), args.SpaceSectorStart(), args.SpaceSectorEnd())
 
     def __init__(self, faction, units, space_a, sector_a, space_b, sector_b):
@@ -687,7 +687,7 @@ class CrossShip(Action):
         return CrossShip(faction, units, space_a, sector_a, space_b, sector_b)
 
     @classmethod
-    def get_arg_spec(cls, faction=None):
+    def get_arg_spec(cls, faction=None, game_state=None):
         return args.Struct(args.Units(faction), args.SpaceSectorStart(), args.SpaceSectorEnd())
 
     def __init__(self, faction, units, space_a, sector_a, space_b, sector_b):
@@ -744,7 +744,7 @@ class ReverseShip(Action):
         return ReverseShip(faction, units, space, sector)
 
     @classmethod
-    def get_arg_spec(cls, faction=None):
+    def get_arg_spec(cls, faction=None, game_state=None):
         return args.Struct(args.Units(faction), args.SpaceSector())
 
     def __init__(self, faction, units, space, sector):
@@ -805,7 +805,7 @@ class Deploy(Action):
         return Deploy(faction, units, space, sector)
 
     @classmethod
-    def get_arg_spec(cls, faction=None):
+    def get_arg_spec(cls, faction=None, game_state=None):
         return args.Struct(args.Units(faction), args.SpaceSector())
 
     def __init__(self, faction, units, space, sector):

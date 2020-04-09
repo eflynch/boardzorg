@@ -38,8 +38,8 @@ class CommitPlan(Action):
         self.defense = defense
 
     @classmethod
-    def get_arg_spec(cls, faction=None):
-        return args.BattlePlan(faction=faction)
+    def get_arg_spec(cls, faction=None, game_state=None):
+        return args.BattlePlan(faction=faction, max_power=ops.compute_max_power_faction(game_state, faction))
 
     @classmethod
     def _check(cls, game_state, faction):
@@ -54,11 +54,14 @@ class CommitPlan(Action):
 
     def _execute(self, game_state):
         new_game_state = deepcopy(game_state)
-        is_attacker = False
-        if self.faction == new_game_state.round_state.stage_state.battle[0]:
-            is_attacker = True
+        stage_state = new_game_state.round_state.stage_state
+        battle_id = new_game_state.round_state.stage_state.battle
+        is_attacker = (self.faction == battle_id[0])
+
+        max_power = ops.compute_max_power_faction(new_game_state, self.faction)
+
         ops.pick_leader(new_game_state, is_attacker, self.leader)
-        ops.pick_number(new_game_state, is_attacker, self.number)
+        ops.pick_number(new_game_state, max_power, is_attacker, self.number)
         ops.pick_weapon(new_game_state, is_attacker, self.weapon)
         ops.pick_defense(new_game_state, is_attacker, self.defense)
 
@@ -150,7 +153,6 @@ class RevealTraitor(Action):
         new_game_state = deepcopy(game_state)
         stage_state = new_game_state.round_state.stage_state
         battle_id = stage_state.battle
-        new_game_state.pause.extend(battle_id[:2])
         stage_state.traitor_revealers.append(self.faction)
         return new_game_state
 
@@ -197,6 +199,7 @@ class AutoResolveWithTraitor(Action):
                 ops.tank_unit(new_game_state, loser, space, sec, u)
 
         new_game_state.round_state.stage_state.winner = winner
+        new_game_state.pause.extend(battle_id[:2])
         new_game_state.round_state.stage_state.substage_state = battle.WinnerSubStage()
         new_game_state.round_state.stage_state.substage_state.power_left_to_tank = 0
         return new_game_state
@@ -216,6 +219,8 @@ class PassRevealTraitor(Action):
             raise IllegalAction("You don't even go here")
         if faction in game_state.round_state.stage_state.traitor_passes:
             raise IllegalAction("You already passed yo")
+        if faction in game_state.round_state.stage_state.traitor_revealers:
+            raise IllegalAction("You already revealed yo")
 
     def _execute(self, game_state):
         new_game_state = deepcopy(game_state)
@@ -238,7 +243,6 @@ class SkipRevealTraitor(Action):
     def _execute(self, game_state):
         new_game_state = deepcopy(game_state)
         new_game_state.round_state.stage_state.substage = "resolve"
-        new_game_state.pause.extend(new_game_state.round_state.stage_state.battle[:2])
         return new_game_state
 
 
@@ -306,6 +310,7 @@ class AutoResolveDisaster(Action):
         ops.discard_treachery(new_game_state, stage_state.defender_plan["weapon"])
         ops.discard_treachery(new_game_state, stage_state.defender_plan["defense"])
 
+        new_game_state.pause.extend(battle_id[:2])
         new_game_state.round_state.stage = "main"
         return new_game_state
 
@@ -316,6 +321,11 @@ class AutoResolve(Action):
     ck_stage = "battle"
     ck_substage = "resolve"
     su = True
+
+    @classmethod
+    def _check(cls, game_state, faction):
+        if game_state.round_state.stage_state.traitor_revealers:
+            raise IllegalAction("Cannot auto resolve with a traitor in the mix")
 
     def _execute(self, game_state):
         new_game_state = deepcopy(game_state)
@@ -343,16 +353,9 @@ class AutoResolve(Action):
         defender_power += clash_leaders(stage_state.attacker_plan, stage_state.defender_plan, battle_id[1], (battle_id[2], battle_id[3]))
 
         space = new_game_state.map_state[battle_id[2]]
-        # Count Attacker Power
-        attacker_sectors = ops.get_min_sector_map(new_game_state, space, battle_id[0])[battle_id[3]]
-        attacker_max_power = ops.count_power(space, battle_id[0], battle_id[1], attacker_sectors,
-                                             stage_state.karama_fedaykin, stage_state.karama_sardaukar)
-        attacker_power += min(attacker_max_power, stage_state.attacker_plan["number"])
 
-        # Count Defender Power
-        defender_sectors = ops.get_min_sector_map(new_game_state, space, battle_id[1])[battle_id[3]]
-        defender_max_power = ops.count_power(space, battle_id[1], battle_id[0], defender_sectors,
-                                             stage_state.karama_fedaykin, stage_state.karama_sardaukar)
+        attacker_max_power, defender_max_power = ops.compute_max_powers(new_game_state)
+        attacker_power += min(attacker_max_power, stage_state.attacker_plan["number"])
         defender_power += min(defender_max_power, stage_state.defender_plan["number"])
 
         if attacker_power >= defender_power:
@@ -381,6 +384,7 @@ class AutoResolve(Action):
         # Winner Must Tank Units (increase KH count if atreides)
         # Winner Must decide whether to discard treachery (return remaining ones to winner)
 
+        new_game_state.pause.extend(battle_id[:2])
         new_game_state.round_state.stage_state.winner = winner
         new_game_state.round_state.stage_state.substage_state = battle.WinnerSubStage()
         new_game_state.round_state.stage_state.substage_state.power_left_to_tank = power_left_to_tank

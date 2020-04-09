@@ -98,7 +98,7 @@ class SkipVoice(Action):
 
     def _execute(self, game_state):
         new_game_state = deepcopy(game_state)
-        new_game_state.round_state.stage_state.substage = "prescience"
+        new_game_state.round_state.stage_state.substage = "karama-sardaukar"
         return new_game_state
 
 
@@ -118,7 +118,7 @@ class KaramaVoice(Action):
         new_game_state = deepcopy(game_state)
         new_game_state.round_state.stage_state.voice_is_attacker = False
         new_game_state.round_state.stage_state.voice = None
-        new_game_state.round_state.stage_state.substage = "prescience"
+        new_game_state.round_state.stage_state.substage = "karama-sardaukar"
         discard_karama(game_state, self.faction)
         return new_game_state
 
@@ -154,5 +154,5 @@ class SkipKaramaVoice(Action):
 
     def _execute(self, game_state):
         new_game_state = deepcopy(game_state)
-        new_game_state.round_state.stage_state.substage = "prescience"
+        new_game_state.round_state.stage_state.substage = "karama-sardaukar"
         return new_game_state

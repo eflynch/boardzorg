@@ -29,7 +29,7 @@ class ActivateAdvisors(Action):
         return ActivateAdvisors(faction, space)
 
     @classmethod
-    def get_arg_spec(cls, faction=None):
+    def get_arg_spec(cls, faction=None, game_state=None):
         return args.Space()
 
     def __init__(self, faction, space):
