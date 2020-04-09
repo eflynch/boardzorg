@@ -462,6 +462,14 @@ img.alive {
     border: 1px solid white;
     border-radius: 5px;
     background-color: black;
-    width: 80;
-    height: 120;
+    width: 98;
+    height: 140;
+    color: white;
+}
+
+.winner {
+    font-size: 30px;
+    margin: 10px;
+    text-transform: uppercase;
+    text-align: center;
 }

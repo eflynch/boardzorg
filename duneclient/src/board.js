@@ -94,17 +94,21 @@ class Board extends React.Component {
 
                     let {left, top} = TokenLocations[space.name][sector][orders[space.name]];
                     tokens.push(
-                        <TokenPile key={i + faction + sector} x={left} y={top}
-                                   number={number}
-                                   bonus={number !== power ? power - number : null}
-                                   width={0.05}
-                                   coexist={space.coexist}
-                                   faction={faction}/>
+                        [
+                            top, 
+                            <TokenPile key={i + faction + sector} x={left} y={top}
+                                       number={number}
+                                       bonus={number !== power ? power - number : null}
+                                       width={0.05}
+                                       coexist={space.coexist}
+                                       faction={faction}/>
+                        ]
                     );
                 }
             }
         }
-        return tokens;
+        tokens.sort((a, b) => {return a[0] - b[0]});
+        return tokens.map(([top, pile])=>pile);
     }
 
     getSpice () {
@@ -261,13 +265,13 @@ class Board extends React.Component {
                 <svg width={this.state.size} height={this.state.size} viewBox={`0 0 1 1`}>
                     <text x={0.04} y={0.04} style={{fill: "white", font: "normal 0.02px Optima"}}>Turn {turn} / 10</text>
                     <image xlinkHref="/static/app/png/board.png" x="0" y="0" width="1" height="1"/>
-                    <Storm sector={this.props.stormSector} color="rgba(255, 0, 0, 0.5)"/>
                     {futureStorm}
                     {this.getSpaces()}
                     {this.getSpaceSectors()}
                     {this.getLogos()}
                     {this.getSpice()}
                     {this.getTokenPiles()}
+                    <Storm sector={this.props.stormSector} color="rgba(255, 0, 0, 0.5)"/>
                 </svg>
             </div>
         );

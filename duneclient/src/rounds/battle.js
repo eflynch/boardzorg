@@ -75,7 +75,7 @@ export default function Battle({roundstate, factionOrder, interaction, setIntera
 
     const plansRevealed = () => {
         const revealSubStages = ["resolve", "traitors"];
-        if (roundstate.stage_state !== undefined && roundstate.stage_state.battle !== undefined) {
+        if (roundstate.stage_state !== undefined && roundstate.stage_state.battle !== undefined && !roundstate.stage_state.winner) {
             const battle = roundstate.stage_state.battle;
             return (
                 <div>
@@ -86,6 +86,16 @@ export default function Battle({roundstate, factionOrder, interaction, setIntera
                     </div>
                 </div>
             );
+        }
+    }
+
+    const winner = () => {
+        if (roundstate.stage_state !== undefined && roundstate.stage_state.battle !== undefined && roundstate.stage_state.winner) {
+            return (
+                <div className="winner">
+                    {roundstate.stage_state.winner} Wins!
+                </div>
+            ); 
         }
     }
 
@@ -113,6 +123,7 @@ export default function Battle({roundstate, factionOrder, interaction, setIntera
                 {attackerOrder()} <span style={{fontSize:30, fontWeight:"bold"}}>vs</span> {battlesToPick()}
             </div>
             {plansRevealed()}
+            {winner()}
             {/*JSON.stringify(roundstate).replace(",", ", ").replace(":", ": ")*/}
         </div>
     );
