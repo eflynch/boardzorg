@@ -97,6 +97,20 @@ class RevealPlans(Action):
     def _execute(self, game_state):
         new_game_state = deepcopy(game_state)
         new_game_state.round_state.stage_state.substage = "traitors"
+        [attacker, defender, _, _] = new_game_state.round_state.stage_state.battle
+
+        def _maybe_remove_item(game_state, plan, faction, kind):
+            if plan[kind] is not None:
+                game_state.faction_state[faction].treachery.remove(plan[kind])
+
+        _maybe_remove_item(new_game_state, new_game_state.round_state.stage_state.attacker_plan,
+                           attacker, "weapon")
+        _maybe_remove_item(new_game_state, new_game_state.round_state.stage_state.attacker_plan,
+                           attacker, "defense")
+        _maybe_remove_item(new_game_state, new_game_state.round_state.stage_state.defender_plan,
+                           defender, "weapon")
+        _maybe_remove_item(new_game_state, new_game_state.round_state.stage_state.defender_plan,
+                           defender, "defense")
         return new_game_state
 
 

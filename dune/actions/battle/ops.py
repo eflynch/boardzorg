@@ -168,8 +168,6 @@ def pick_weapon(game_state, is_attacker, weapon):
             if game_state.round_state.stage_state.defender_plan["weapon"] != weapon:
                 raise BadCommand("You cannot change the weapon in your plan")
         game_state.round_state.stage_state.defender_plan["weapon"] = weapon
-    if weapon is not None:
-        game_state.faction_state[faction].treachery.remove(weapon)
 
 
 def pick_defense(game_state, is_attacker, defense):
@@ -215,8 +213,6 @@ def pick_defense(game_state, is_attacker, defense):
             if game_state.round_state.stage_state.defender_plan["defense"] != defense:
                 raise BadCommand("You cannot change the defense in your plan")
         game_state.round_state.stage_state.defender_plan["defense"] = defense
-    if defense is not None:
-        game_state.faction_state[faction].treachery.remove(defense)
 
 
 def pick_number(game_state, is_attacker, number):

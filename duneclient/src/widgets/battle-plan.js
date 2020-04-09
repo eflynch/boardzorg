@@ -139,8 +139,8 @@ export default function BattlePlan({me, state, args, setArgs}) {
             }}/>
             Total Power: {selectedLeaderPower + parseInt(selectedUnits)}
             <div style={{display:"flex", justifyContent:"space-around"}}>
-                {weapons()}
-                {defenses()}
+                {weapons}
+                {defenses}
             </div>
         </div>
     );
