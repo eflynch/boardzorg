@@ -156,7 +156,7 @@ a {
     margin: 5px;
 }
 
-.prescience-option {
+.option {
     padding: 5px;
     font-size: 16px;
     border-radius: 5px;
@@ -164,7 +164,7 @@ a {
     cursor: pointer;
 }
 
-.prescience-option.selected {
+.option.selected {
     background-color: green;
     color: white;
 }

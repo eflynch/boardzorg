@@ -6,6 +6,7 @@ import update from 'immutability-helper';
 import BattlePlan, {PlanLeader, PlanNumber, PlanTreachery} from './widgets/battle-plan';
 import Integer from './widgets/integer';
 import Units from './widgets/units';
+import Card from './components/card';
 
 
 const AllFactions = ["emperor", "fremen", "guild", "bene-gesserit", "harkonnen", "atreides"];
@@ -23,7 +24,7 @@ const Prescience = ({args, setArgs}) => {
     return (
         <div style={{display:"flex", justifyContent:"space-around"}}>
             {options.map((option)=> {
-                return <div key={option} class={"prescience-option" + (option === args ? " selected": "")} onClick={()=>{
+                return <div key={option} class={"option" + (option === args ? " selected": "")} onClick={()=>{
                     setArgs(option);
                 }}>{option}</div>;
             })}
@@ -144,6 +145,36 @@ const TankUnits = ({me, state, args, setArgs}) => {
                     </div>
                 );
             })}
+        </div>
+    );
+};
+
+const DiscardTreachery = ({state, me, args, setArgs}) => {
+    let weaponSelected = false;
+    let defenseSelected = false;
+    if (args !== "") {
+        weaponSelected = args.split(" ").indexOf("weapon") !== -1;
+        defenseSelected = args.split(" ").indexOf("defense") !== -1;
+    }
+    const [attacker, defender, space, sector] = state.round_state.stage_state.battle;
+    const weapon = me === attacker ? state.round_state.stage_state.attacker_plan.weapon : state.round_state.stage_state.defender_plan.weapon;
+    const defense = me === attacker ? state.round_state.stage_state.attacker_plan.defense : state.round_state.stage_state.defender_plan.defense;
+
+    const _option = (maybeCard, selected, kind) => {
+        if (maybeCard) {
+            return <Card type="Treachery" name={maybeCard} selected={selected} width={100} onClick={()=>{
+                if (kind === "weapon"){
+                    setArgs([!weaponSelected ? "weapon" : "", defenseSelected ? "defense" : ""].join(" "))
+                } else {
+                    setArgs([weaponSelected ? "weapon" : "", !defenseSelected ? "defense" : ""].join(" "))
+                }
+            }}/>;
+        }
+    }
+    return (
+        <div style={{display:"flex"}}>
+            {_option(weapon, weaponSelected, "weapon")}
+            {_option(defense, defenseSelected, "defense")}
         </div>
     );
 };
@@ -373,6 +404,10 @@ const Widget = ({me, state, type, args, setArgs, config, interaction, setInterac
 
     if (type === "tank-units") {
         return <TankUnits state={state} me={me} args={args} setArgs={setArgs} />;
+    }
+
+    if (type === "discard-treachery") {
+        return <DiscardTreachery state={state} me={me} args={args} setArgs={setArgs} />;
     }
 
     console.log(type);

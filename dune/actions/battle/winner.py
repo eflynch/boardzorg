@@ -74,6 +74,10 @@ class DiscardTreachery(Action):
         self.defense = defense
 
     @classmethod
+    def get_arg_spec(cls, faction=None):
+        return args.DiscardTreachery()
+
+    @classmethod
     def _check(cls, game_state, faction):
         if faction != game_state.round_state.stage_state.winner:
             raise IllegalAction("You need to be the winner yo")
@@ -87,15 +91,15 @@ class DiscardTreachery(Action):
         winner_is_attacker = ss.winner == ss.battle[0]
         winner_plan = ss.attacker_plan if (ss.winner == ss.battle[0]) else ss.defender_plan
 
-        if self.weapon and winner_plan["weapon"] is not None:
-            ops.discard_treachery(new_game_state, winner_plan["weapon"])
-        elif winner_plan["weapon"] is not None:
-            fs.treachery.append(winner_plan["weapon"])
+        def _do_discard(do_it, kind):
+            if do_it:
+                if winner_plan[kind] is not None:
+                    ops.discard_treachery(new_game_state, winner_plan[kind])
+            elif winner_plan[kind] is not None:
+                fs.treachery.append(winner_plan[kind])
 
-        if self.defense and winner_plan["defense"] is not None:
-            ops.discard_treachery(new_game_state, winner_plan["defense"])
-        elif winner_plan["weapon"] is not None:
-            fs.treachery.append(winner_plan["defense"])
+        _do_discard(self.weapon, "weapon")
+        _do_discard(self.defense, "defense")
 
         ss.substage_state.discard_done = True
 

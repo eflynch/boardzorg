@@ -199,6 +199,13 @@ class TankUnits(Args):
         }
 
 
+class DiscardTreachery(Args):
+    def to_dict(self):
+        return {
+            "widget": "discard-treachery"
+        }
+
+
 class Turn(Integer):
     def __init__(self):
         super(Turn, self).__init__(min=0, max=10)
