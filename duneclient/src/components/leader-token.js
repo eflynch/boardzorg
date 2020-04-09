@@ -3,6 +3,7 @@ import React from 'react';
 class LeaderToken extends React.Component {
     render () {
         return <img className={"leader-token" +
+                               (this.props.traitor ? " traitor": "") +
                                (this.props.dead ?  " dead" : " alive") +
                                (this.props.onClick ? " active" : "") +
                                (this.props.selected ? " selected" : "")}

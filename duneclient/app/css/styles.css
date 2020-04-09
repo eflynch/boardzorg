@@ -390,6 +390,10 @@ img.alive {
     filter: brightness(2) drop-shadow(3px 3px 3px #888888);
 }
 
+.leader-token.traitor {
+    filter: hue-rotate(180deg) drop-shadow(3px 3px 3px #888888) contrast(100)!important;
+}
+
 .token-pile {
     pointer-events: none;
 }
