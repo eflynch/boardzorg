@@ -3,7 +3,7 @@ import Select from 'react-select';
 import Slider, { Range } from 'rc-slider';
 import update from 'immutability-helper';
 
-import BattlePlan from './widgets/battle-plan';
+import BattlePlan, {PlanLeader, PlanNumber, PlanTreachery} from './widgets/battle-plan';
 import Integer from './widgets/integer';
 import Units from './widgets/units';
 
@@ -31,6 +31,28 @@ const Prescience = ({args, setArgs}) => {
     );
 };
 
+const PrescienceAnswer = ({me, state, args, setArgs}) => {
+    const stageState = state.round_state.stage_state;
+    const query = stageState.prescience;
+    if (query === "leader") {
+        return <PlanLeader factionState={state.faction_state[me]} selectedLeader={args} setLeader={setArgs} active={true} />;
+    } else if (query === "number") {
+        const [space, sector] = stageState.battle.slice(2);
+        const maxUnits = state.map_state.filter(s=>s.name === space)[0].forces[me][sector].reduce((a,b)=>a+b, 0);
+        return <PlanNumber maxUnits={maxUnits} units={args} setUnits={(unitCount)=>{
+            setArgs("" +unitCount);
+        }} active={true} />;
+    } else if (query === "weapon") {
+        const meWeapons = state.faction_state[me].treachery.filter(
+            (t)=>state.treachery_reference.weapons.indexOf(t) !== -1);
+        return <PlanTreachery title="Weapon" cards={meWeapons} selectedCard={args} setSelectedCard={setArgs} active={true} />;
+    } else if (query === "defense") {
+        const meDefenses = state.faction_state[me].treachery.filter(
+            (t)=>state.treachery_reference.defenses.indexOf(t) !== -1);
+        return <PlanTreachery title="Defense" cards={meDefenses} selectedCard={args} setSelectedCard={setArgs} active={true} />;
+    }
+};
+ 
 const Choice = ({args, setArgs, config, ...props}) => {
     return (
         <div>
@@ -248,6 +270,10 @@ const Widget = ({me, state, type, args, setArgs, config, interaction, setInterac
 
     if (type === "prescience") {
         return <Prescience args={args} setArgs={setArgs} />;
+    }
+
+    if (type === "prescience-answer") {
+        return <PrescienceAnswer state={state} me={me} args={args} setArgs={setArgs} />;
     }
 
     console.log(type);

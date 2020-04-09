@@ -112,8 +112,7 @@ class AnswerPrescience(Action):
 
     @classmethod
     def get_arg_spec(cls, faction=None):
-        return args.String();
-
+        return args.PrescienceAnswer()
 
     def __init__(self, faction, part):
         self.faction = faction
@@ -141,6 +140,10 @@ class AnswerPrescience(Action):
         if prescience == "leader":
             ops.pick_leader(new_game_state, is_attacker, self.part)
         elif prescience == "number":
+            try:
+                number = int(self.part)
+            except Exception as e:
+                raise BadCommand("Not a good number")
             ops.pick_number(new_game_state, is_attacker, int(self.part))
         elif prescience == "weapon":
             ops.pick_weapon(new_game_state, is_attacker, self.part if self.part != "-" else None)

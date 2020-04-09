@@ -10,19 +10,16 @@ const Logo = ({faction, diameter, ...props}) => {
 };
 
 const Plan = ({faction, isAttacker, leader, number, weapon, defense, dead}) => {
-    const leaderToken = leader !== undefined ? <LeaderToken name={leader[0]}/> : <div>?</div>;
+    const leaderToken = leader !== undefined ? <LeaderToken name={leader[0]}/> : <span className="question-leader">?</span>;
     const numberText = number !== undefined ? number : <span>?</span>;
     const resultText = (number !== undefined && leader !== undefined) ? <span>{number + (dead ? 0 : leader[1])}</span> : <span>?</span>;
-    const weaponShow = weapon !== undefined ? <Card type="Treachery" name={weapon ? weapon : "Reverse"} width={100} /> : <span>?</span>;
-    const defenseShow = defense !== undefined ? <Card type="Treachery" name={defense ? defense : "Reverse"} width={100} /> : <span>?</span>;
+    const weaponShow = weapon !== undefined ? <Card type="Treachery" name={weapon ? weapon : "Reverse"} width={100} /> : <span className="question-card">?</span>;
+    const defenseShow = defense !== undefined ? <Card type="Treachery" name={defense ? defense : "Reverse"} width={100} /> : <span className="question-card">?</span>;
     return (
-        <div style={{display:"flex"}}>
-            <Logo faction={faction} diameter={20}/>
+        <div style={{display:"flex", alignItems: "center"}}>
             <div style={{display:"flex", alignItems: "center"}}>
-                {leaderToken}<div className="big-unit"> + {numberText} = {resultText}</div>
-            </div>
-            {weaponShow}
-            {defenseShow}
+                {leaderToken}<div className="big-unit"> + {numberText} = {resultText} : </div>
+            </div><div style={{width:5, height:1}}/>{weaponShow} {defenseShow}
         </div>
     );
 }
@@ -83,7 +80,7 @@ export default function Battle({roundstate, factionOrder, interaction, setIntera
             return (
                 <div>
                     Plans Revealed:
-                    <div style={{display:"flex"}}>
+                    <div style={{display:"flex", justifyContent:"space-around"}}>
                         <Plan faction={battle[0]} isAttacker={true} {...roundstate.stage_state.attacker_plan} />
                         <Plan faction={battle[1]} isAttacker={false} {...roundstate.stage_state.defender_plan} />
                     </div>

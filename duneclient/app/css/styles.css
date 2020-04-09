@@ -443,3 +443,25 @@ img.alive {
 .select-faction.selected {
     filter: brightness(1.0) drop-shadow(3px 3px 3px #888888);
 }
+
+.question-leader {
+    display: flex;
+    justify-content:center;
+    align-items: center;
+    border: 1px solid white;
+    border-radius: 40px;
+    background-color: black;
+    width: 80;
+    height: 80;
+}
+
+.question-card {
+    display: flex;
+    justify-content:center;
+    align-items: center;
+    border: 1px solid white;
+    border-radius: 5px;
+    background-color: black;
+    width: 80;
+    height: 120;
+}

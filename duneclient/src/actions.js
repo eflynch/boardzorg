@@ -16,10 +16,14 @@ const interactionWidgets = [
     "battle-select",
 ];
 
-const defaultArgsForAction = (actionName, argSpec) => {
+const defaultArgsForAction = (state, actionName, argSpec) => {
     if (actionName === "bribe") {
         return "emperor 2";
     }
+    if (actionName === "gift") {
+        return "fremen 2";
+    }
+
     if (actionName === "fremen-placement") {
         return ":::16:3";
     }
@@ -29,6 +33,16 @@ const defaultArgsForAction = (actionName, argSpec) => {
     if (actionName === "commit-plan") {
         return " 0 - -";
     }
+    if (actionName === "answer-prescience") {
+        const prescience_query = state.round_state.stage_state.prescience;
+        if (prescience_query === "leader") {
+            return "";
+        } else if (prescience_query === "number") {
+            return "0";
+        } else {
+            return "-";
+        }
+    }
 
     if (interactionWidgets.indexOf(argSpec.widget) !== -1) {
         return `$interaction.${argSpec.widget}`;
@@ -37,7 +51,7 @@ const defaultArgsForAction = (actionName, argSpec) => {
     if (argSpec.widget === "struct") {
         let subArgs = [];
         for (const subWidget of argSpec.args) {
-            subArgs = subArgs.concat(defaultArgsForAction(actionName, subWidget));
+            subArgs = subArgs.concat(defaultArgsForAction(state, actionName, subWidget));
         }
         return subArgs.join(" ");
     }
@@ -133,7 +147,7 @@ const Actions = (props) => {
         return (
             <li className={selectedAction === actionName ? "selected" : ""} key={i} onClick={()=>{
                 setSelectedAction(actionName);
-                setArgs(defaultArgsForAction(actionName, actions[actionName]));
+                setArgs(defaultArgsForAction(state, actionName, actions[actionName]));
                 setInteractionFlow(getFlowForWidget(actions[actionName].widget, actions[actionName].args));
             }} key={i}>
                 {actionName}

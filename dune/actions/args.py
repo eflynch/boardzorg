@@ -135,6 +135,7 @@ class SpaceSectorStart(Args):
             "args": {}
         }
 
+
 class SpaceSectorEnd(Args):
     def to_dict(self):
         return {
@@ -156,6 +157,7 @@ class Battle(Args):
             "widget": "battle-select"
         }
 
+
 class BattlePlan(Args):
     def __init__(self, faction):
         self.faction = faction
@@ -168,6 +170,7 @@ class BattlePlan(Args):
             }
         }
 
+
 class Faction(String):
     def to_dict(self):
         return {
@@ -179,7 +182,14 @@ class Prescience(Args):
     def to_dict(self):
         return {
             "widget": "prescience"
-        } 
+        }
+
+
+class PrescienceAnswer(Args):
+    def to_dict(self):
+        return {
+            "widget": "prescience-answer"
+        }
 
 
 class Turn(Integer):
