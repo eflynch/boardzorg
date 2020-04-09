@@ -442,6 +442,7 @@ img.alive {
 
 .select-faction {
     filter: brightness(0.3) drop-shadow(3px 3px 3px #888888);
+    flex-shrink: 0;
 }
 
 .select-faction.selected {

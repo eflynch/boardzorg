@@ -33,7 +33,7 @@ export default function SessionCreator({newSession}) {
             <input value={name} onChange={(e)=>{
                 setName(e.target.value);
             }}/>
-            <div style={{display:"flex", justifyContent:"space-around"}}>
+            <div style={{display:"flex", justifyContent:"space-around", flexWrap:"wrap"}}>
                 {factionSelectors}
             </div>
             <button onClick={()=>{newSession(name, Object.keys(selectedFactions).filter((f)=>selectedFactions[f]))}}>Create Session</button>
