@@ -192,7 +192,9 @@ class AutoResolveWithTraitor(Action):
             for u in units_to_tank:
                 ops.tank_unit(new_game_state, loser, space, sec, u)
 
-        new_game_state.round_state.stage = "main"
+        new_game_state.round_state.stage_state.winner = winner
+        new_game_state.round_state.stage_state.substage_state = battle.WinnerSubStage()
+        new_game_state.round_state.stage_state.substage_state.power_left_to_tank = 0 
         return new_game_state
 
 
