@@ -81,13 +81,13 @@ export default function Battle({roundstate, factionOrder, interaction, setIntera
         const revealSubStages = ["resolve", "traitors"];
         if (roundstate.stage_state !== undefined && roundstate.stage_state.battle !== undefined && !roundstate.stage_state.winner) {
             const [attacker, defender, space, sector] = roundstate.stage_state.battle;
-            const traitor_revealer = roundstate.stage_state.traitor_revealer;
+            const traitor_revealers = roundstate.stage_state.traitor_revealers;
             return (
                 <div>
                     Plans Revealed:
                     <div style={{display:"flex", justifyContent:"space-around"}}>
-                        <Plan faction={attacker} traitor={traitor_revealer === defender} isAttacker={true} {...roundstate.stage_state.attacker_plan} />
-                        <Plan faction={defender} traitor={traitor_revealer === attacker} isAttacker={false} {...roundstate.stage_state.defender_plan} />
+                        <Plan faction={attacker} traitor={traitor_revealers.indexOf(defender) !== -1} isAttacker={true} {...roundstate.stage_state.attacker_plan} />
+                        <Plan faction={defender} traitor={traitor_revealers.indexOf(attacker) !== -1} isAttacker={false} {...roundstate.stage_state.defender_plan} />
                     </div>
                 </div>
             );

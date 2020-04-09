@@ -75,7 +75,7 @@ class BattleStage(StageState):
         self.karama_kwizatz_haderach_passes = []
 
         self.traitor_passes = []
-        self.traitor_revealer = None
+        self.traitor_revealers = []
 
     def visible(self, game_state, faction):
         visible = super().visible(game_state, faction)
@@ -91,7 +91,7 @@ class BattleStage(StageState):
         visible["karama_sardaukar"] = self.karama_sardaukar
         visible["karama_fedaykin"] = self.karama_fedaykin
         visible["karama_kwizatz_haderach"] = self.karama_kwizatz_haderach
-        visible["traitor_revealer"] = self.traitor_revealer
+        visible["traitor_revealers"] = self.traitor_revealers
 
         attacker = None
         defender = None

@@ -122,8 +122,10 @@ class RevealTraitor(Action):
 
     @classmethod
     def _check(cls, game_state, faction):
-        if game_state.round_state.stage_state.traitor_revealer is not None:
-            raise IllegalAction("Traitor has been revealed")
+        if faction in game_state.round_state.stage_state.traitor_revealers:
+            raise IllegalAction("You already revealed your traitor")
+        if faction in game_state.round_state.stage_state.traitor_passes:
+            raise IllegalAction("You already passed your traitor")
         battle_id = game_state.round_state.stage_state.battle
 
         if faction == battle_id[0]:
@@ -149,7 +151,7 @@ class RevealTraitor(Action):
         stage_state = new_game_state.round_state.stage_state
         battle_id = stage_state.battle
         new_game_state.pause.extend(battle_id[:2])
-        stage_state.traitor_revealer = self.faction
+        stage_state.traitor_revealers.append(self.faction)
         return new_game_state
 
 
@@ -157,14 +159,16 @@ class AutoResolveWithTraitor(Action):
     name = "resolve-reveal-traitor"
     ck_round = "battle"
     ck_stage = "battle"
-    ck_substage = "traitors"
+    ck_substage = "resolve"
     su = True
 
     @classmethod
     def _check(cls, game_state, faction):
         battle_id = game_state.round_state.stage_state.battle
-        if game_state.round_state.stage_state.traitor_revealer is None:
-            raise IllegalAction("No traitor has been revealed")
+        if len(game_state.round_state.stage_state.traitor_passes) != 1:
+            raise IllegalAction("Still have to see if there is another traitor")
+        if len(game_state.round_state.stage_state.traitor_revealers) != 1:
+            raise IllegalAction("Not exactly one traitor has been revealed")
 
     def _execute(self, game_state):
         new_game_state = deepcopy(game_state)
@@ -194,7 +198,7 @@ class AutoResolveWithTraitor(Action):
 
         new_game_state.round_state.stage_state.winner = winner
         new_game_state.round_state.stage_state.substage_state = battle.WinnerSubStage()
-        new_game_state.round_state.stage_state.substage_state.power_left_to_tank = 0 
+        new_game_state.round_state.stage_state.substage_state.power_left_to_tank = 0
         return new_game_state
 
 
@@ -206,8 +210,6 @@ class PassRevealTraitor(Action):
 
     @classmethod
     def _check(cls, game_state, faction):
-        if game_state.round_state.stage_state.traitor_revealer is not None:
-            raise IllegalAction("Traitor has been revealed")
         battle_id = game_state.round_state.stage_state.battle
 
         if faction not in battle_id:
@@ -230,13 +232,81 @@ class SkipRevealTraitor(Action):
 
     @classmethod
     def _check(cls, game_state, faction):
-        if len(game_state.round_state.stage_state.traitor_passes) != 2:
-            raise IllegalAction("Still waiting on traitor passes")
+        if len(game_state.round_state.stage_state.traitor_passes) + len(game_state.round_state.stage_state.traitor_revealers) != 2:
+            raise IllegalAction("Still waiting on traitor passes and reveals")
 
     def _execute(self, game_state):
         new_game_state = deepcopy(game_state)
         new_game_state.round_state.stage_state.substage = "resolve"
         new_game_state.pause.extend(new_game_state.round_state.stage_state.battle[:2])
+        return new_game_state
+
+
+class AutoResolveDisaster(Action):
+    name = "auto-disaster"
+    ck_round = "battle"
+    ck_stage = "battle"
+    ck_substage = "resolve"
+    su = True
+
+    @classmethod
+    def _check(cls, game_state, faction):
+        double_traitor = game_state.round_state.stage_state.traitor_revealers == 2
+
+        battle_id = game_state.round_state.stage_state.battle
+        stage_state = game_state.round_state.stage_state
+        # Check for Lasgun-Shield Explosion
+        has_lasgun = "Lasgun" in stage_state.attacker_plan.values() or "Lasgun" in stage_state.defender_plan.values()
+        has_shield = "Shield" in stage_state.attacker_plan.values() or "Shield" in stage_state.defender_plan.values()
+
+        if not double_traitor or not (has_lasgun and has_shield):
+            raise IllegalAction("No auto resolve if we don't have a bang")
+
+    def _execute(self, game_state):
+        new_game_state = deepcopy(game_state)
+        battle_id = new_game_state.round_state.stage_state.battle
+        stage_state = new_game_state.round_state.stage_state
+
+        has_lasgun = "Lasgun" in stage_state.attacker_plan.values() or "Lasgun" in stage_state.defender_plan.values()
+        has_shield = "Shield" in stage_state.attacker_plan.values() or "Shield" in stage_state.defender_plan.values()
+
+        # Tank All units and leaders in battle
+        space = new_game_state.map_state[battle_id[2]]
+        for faction in battle_id[:2]:
+            for sec in space.forces[faction]:
+                # TODO : Check distance to sector from battle sector is 0
+                units_to_tank = space.forces[faction][sec][:]
+                for u in units_to_tank:
+                    ops.tank_unit(new_game_state, faction, space, sec, u)
+        ops.tank_leader(new_game_state, battle_id[0], stage_state.attacker_plan["leader"])
+        ops.tank_leader(new_game_state, battle_id[1], stage_state.defender_plan["leader"])
+
+        # If explosion tank all other units and leaders in the sector too
+        if has_lasgun and has_shield:
+            space = new_game_state.map_state[battle_id[2]]
+            space.coexist = False
+            for fac in space.forces:
+                for sec in space.forces[fac]:
+                    units_to_tank = space.forces[fac][sec][:]
+                    for u in units_to_tank:
+                        ops.tank_unit(new_game_state, fac, space, sec, u)
+
+            for leader_name in new_game_state.round_state.leaders_used:
+                space, sector = new_game_state.round_state.leaders_used[leader_name]["location"]
+                leader = new_game_state.round_state.leaders_used[leader_name]["leader"]
+                if space == battle_id[2]:
+                    if leader != stage_state.attacker_plan["leader"]:
+                        if leader != stage_state.defender_plan["leader"]:
+                            faction = get_leader_faction(leader)
+                            ops.tank_leader(new_game_state, faction, leader)
+
+        # Discard all treachery
+        ops.discard_treachery(new_game_state, stage_state.attacker_plan["weapon"])
+        ops.discard_treachery(new_game_state, stage_state.attacker_plan["defense"])
+        ops.discard_treachery(new_game_state, stage_state.defender_plan["weapon"])
+        ops.discard_treachery(new_game_state, stage_state.defender_plan["defense"])
+
+        new_game_state.round_state.stage = "main"
         return new_game_state
 
 
@@ -251,43 +321,10 @@ class AutoResolve(Action):
         new_game_state = deepcopy(game_state)
         battle_id = new_game_state.round_state.stage_state.battle
         stage_state = new_game_state.round_state.stage_state
-        # Check for Lasgun-Shield Explosion
-        if "Lasgun" in stage_state.attacker_plan.values() or "Lasgun" in stage_state.defender_plan.values():
-            if "Shield" in stage_state.attacker_plan.values() or "Shield" in stage_state.defender_plan.values():
-
-                space = new_game_state.map_state[battle_id[2]]
-                space.coexist = False
-                for fac in space.forces:
-                    for sec in space.forces[fac]:
-                        units_to_tank = space.forces[fac][sec][:]
-                        for u in units_to_tank:
-                            ops.tank_unit(new_game_state, fac, space, sec, u)
-
-                ops.tank_leader(new_game_state, battle_id[0], stage_state.attacker_plan["leader"])
-                ops.tank_leader(new_game_state, battle_id[1], stage_state.defender_plan["leader"])
-                for leader_name in new_game_state.round_state.leaders_used:
-
-                    space, sector = new_game_state.round_state.leaders_used[leader_name]["location"]
-                    leader = new_game_state.round_state.leaders_used[leader_name]["leader"]
-                    if space == battle_id[2]:
-                        if leader != stage_state.attacker_plan["leader"]:
-                            if leader != stage_state.defender_plan["leader"]:
-                                faction = get_leader_faction(leader)
-                                ops.tank_leader(new_game_state, faction, leader)
-
-                # Discard all treachery
-                ops.discard_treachery(new_game_state, stage_state.attacker_plan["weapon"])
-                ops.discard_treachery(new_game_state, stage_state.attacker_plan["defense"])
-                ops.discard_treachery(new_game_state, stage_state.defender_plan["weapon"])
-                ops.discard_treachery(new_game_state, stage_state.defender_plan["defense"])
-
-                new_game_state.round_state.stage = "main"
-                return new_game_state
 
         attacker_power = 0
         defender_power = 0
         dead_leaders = []
-
 
         def clash_leaders(plan_a, plan_b, faction_b, location):
             if ops.clash_weapons(plan_a["weapon"], plan_b["defense"]):
