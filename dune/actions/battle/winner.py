@@ -27,7 +27,7 @@ class TankUnits(Action):
 
     @classmethod
     def get_arg_spec(cls, faction):
-        return args.String()
+        return args.TankUnits()
 
     def __init__(self, faction, groups):
         self.faction = faction

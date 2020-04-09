@@ -192,6 +192,13 @@ class PrescienceAnswer(Args):
         }
 
 
+class TankUnits(Args):
+    def to_dict(self):
+        return {
+            "widget": "tank-units"
+        }
+
+
 class Turn(Integer):
     def __init__(self):
         super(Turn, self).__init__(min=0, max=10)

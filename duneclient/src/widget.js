@@ -52,6 +52,101 @@ const PrescienceAnswer = ({me, state, args, setArgs}) => {
         return <PlanTreachery title="Defense" cards={meDefenses} selectedCard={args} setSelectedCard={setArgs} active={true} />;
     }
 };
+
+
+const UnitSelect = ({value, selected, active, setSelected}) => {
+    return <div style={{
+        cursor:"pointer",
+        width: 20,
+        height: 20,
+        border: "1px solid black",
+        borderRadius: 10,
+        backgroundColor: selected ? "red" : "white",
+        opacity: selected || active ? 1 : 0.2,
+        color: selected? "white" : "black"
+    }} onClick={()=>{
+        if (selected) {setSelected(false);}
+        else if (active){setSelected(true);}
+    }}>{value}</div>;
+}
+
+const TankUnits = ({me, state, args, setArgs}) => {
+    const selectedUnits = {};
+    let totalSelected = 0;
+    if (args !== "") {
+        args.split(" ").forEach((a)=>{
+            const [sector, units] = a.split(":");
+            const unitsParsed = units.split(",").map((i)=>parseInt(i));
+            const numOnes = unitsParsed.filter((i)=>i===1).length;
+            const numTwos = unitsParsed.filter((i)=>i===2).length;
+            selectedUnits[sector] = {
+                ones: numOnes,
+                twos: numTwos
+            };
+            totalSelected += numOnes + (2*numTwos);
+        });
+    }
+
+
+    const [attacker, defender, space, sector] = state.round_state.stage_state.battle;
+    const forces = state.map_state.filter(s=>s.name === space)[0].forces[me];
+    const sectors = Object.keys(forces);
+
+    sectors.forEach((sector)=> {
+        if (selectedUnits[sector] === undefined) {
+            selectedUnits[sector] = {ones: 0, twos: 0};
+        }
+    });
+
+
+    const toTank = me === attacker ? state.round_state.stage_state.attacker_plan.number : state.round_state.stage_state.defender_plan.number;
+    const active = totalSelected < toTank;
+
+    const _formatArgs = (selectedUnits) => {
+        const sectors = Object.keys(selectedUnits);
+        return sectors.map((s)=>{
+            return `${s}:${Array(selectedUnits[s].ones).fill("1").join(",")}${Array(selectedUnits[s].twos).fill("2").join(",")}`;
+        }).join(" ");
+    };
+
+    return (
+        <div>
+            {sectors.map((sector)=>{
+                const availableForces = forces[sector].slice().sort();  
+                const selectedForces = selectedUnits[sector];
+                let oneCount = 0;
+                let twoCount = 0;
+                return (
+                    <div key={"sector" + sector} style={{display:"flex", alignItems:"center", justifyContent:"space-between"}}>
+                        <span>Sector {sector}:</span>
+                        <div style={{display:"flex", alignItems:"center", flexWrap:"wrap"}}>
+                            {availableForces.map((v) => {
+                                if (v === 1) {
+                                    oneCount += 1;
+                                    return <UnitSelect key={"one" + oneCount} value={1} active={active} selected={oneCount <= selectedForces.ones} setSelected={(s)=>{
+                                        const newSelectedUnits = update(selectedUnits, {
+                                            [sector]: {ones: {$set: selectedForces.ones + (s ? 1 : -1)}}
+                                        });
+                                        setArgs(_formatArgs(newSelectedUnits));
+                                    }}/>
+                                }
+                                if (v === 2){
+                                    twoCount += 1;
+                                    return <UnitSelect key={"two" + twoCount} value={2} active={active} selected={twoCount <= selectedForces.twos} setSelected={(s)=>{
+                                        const newSelectedUnits = update(selectedUnits, {
+                                            [sector]: {twos: {$set: selectedForces.twos + (s ? 2 : -2)}}
+                                        });
+                                        setArgs(_formatArgs(newSelectedUnits));
+                                    }}/>
+                                }
+                            })}
+                        </div>
+                    </div>
+                );
+            })}
+        </div>
+    );
+};
  
 const Choice = ({args, setArgs, config, ...props}) => {
     return (
@@ -274,6 +369,10 @@ const Widget = ({me, state, type, args, setArgs, config, interaction, setInterac
 
     if (type === "prescience-answer") {
         return <PrescienceAnswer state={state} me={me} args={args} setArgs={setArgs} />;
+    }
+
+    if (type === "tank-units") {
+        return <TankUnits state={state} me={me} args={args} setArgs={setArgs} />;
     }
 
     console.log(type);
