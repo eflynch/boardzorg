@@ -43,20 +43,20 @@ export function PlanLeader({factionState, selectedLeader, active, setLeader}) {
     );
 };
 
-export function PlanNumber({maxUnits, units, setUnits, active}) {
+export function PlanNumber({maxNumber, number, setNumber, active}) {
     let unitSetArgs = undefined;
     if (active) {
         unitSetArgs = (units)=>{
             const unitCount = units === "" ? 0 : units.split(",").length;
-            setUnits(unitCount);
+            setNumber(unitCount);
         };
     }
-    const unitCount = units ? parseInt(units) : 0;
+    const numberParsed = number ? parseInt(number) : 0;
     return (
         <div style={{margin: 10}}>
             <Units
-                maxOnes={maxUnits}
-                args={Array(unitCount).fill("1").join(",")}
+                maxOnes={maxNumber}
+                args={Array(numberParsed).fill("1").join(",")}
                 setArgs={unitSetArgs} />
         </div>
     );
@@ -88,16 +88,16 @@ export default function BattlePlan({me, state, args, setArgs}) {
     const stageState = state.round_state.stage_state;
     const meFactionState = state.faction_state[me];
     const [attacker, defender, space, sector] = stageState.battle;
-    const meMaxUnits = state.map_state.filter(s=>s.name === space)[0].forces[me][sector].reduce((a,b)=>a+b, 0);
+    const meMaxNumber = state.map_state.filter(s=>s.name === space)[0].forces[me][sector].reduce((a,b)=>a+b, 0);
     const iAmAttacker = me === attacker;
 
     const mePlan = iAmAttacker ? stageState.attacker_plan : stageState.defender_plan;
 
-    const [selectedLeader, selectedUnits, selectedWeapon, selectedDefense] = args.split(" ");
+    const [selectedLeader, selectedNumber, selectedWeapon, selectedDefense] = args.split(" ");
 
     const selected = {
         leader: mePlan.leader === undefined ? selectedLeader : mePlan.leader[0],
-        units: mePlan.units === undefined ? selectedUnits : mePlan.units,
+        number: mePlan.number === undefined ? selectedNumber : mePlan.number,
         weapon: mePlan.weapon === undefined ? (selectedWeapon === "-" ? null : selectedWeapon) : mePlan.weapon,
         defense: mePlan.defense === undefined ? (selectedDefense === "-" ? null : selectedDefense) : mePlan.defense 
     };
@@ -118,26 +118,26 @@ export default function BattlePlan({me, state, args, setArgs}) {
 
 
     const weapons = <PlanTreachery title="Weapon" cards={meWeapons} active={mePlan.weapon === undefined} selectedCard={selected.weapon} setSelectedCard={(selectedCard)=>{
-        const newArgs = [selected.leader, selected.units, selectedCard, selected.defense ? selected.defense : "-"].join(" ");
+        const newArgs = [selected.leader, selected.number, selectedCard, selected.defense ? selected.defense : "-"].join(" ");
         setArgs(newArgs);
     }} />;
 
     const defenses = <PlanTreachery title="Defenses" cards={meDefenses} active={mePlan.defense === undefined} selectedCard={selected.defense} setSelectedCard={(selectedCard)=>{
-        const newArgs = [selected.leader, selected.units, selected.weapon ? selected.weapon : "-", selectedCard].join(" ");
+        const newArgs = [selected.leader, selected.number, selected.weapon ? selected.weapon : "-", selectedCard].join(" ");
         setArgs(newArgs);
     }} />;
 
     return (
         <div className="battle-plan">
             <PlanLeader factionState={meFactionState} selectedLeader={selected.leader} active={mePlan.leader === undefined} setLeader={(leader)=>{
-                const newArgs = [leader, selected.units, selected.weapon ? selected.weapon : "-", selected.defense ? selected.defense : "-"].join(" ");
+                const newArgs = [leader, selected.number, selected.weapon ? selected.weapon : "-", selected.defense ? selected.defense : "-"].join(" ");
                 setArgs(newArgs); 
             }} />
-            <PlanNumber units={selected.units} active={mePlan.units === undefined} maxUnits={meMaxUnits} setUnits={(units)=>{
-                const newArgs = [selected.leader, units, selected.weapon ? selected.weapon : "-", selected.defense ? selected.defense : "-"].join(" ");
+            <PlanNumber number={selected.number} active={mePlan.number === undefined} maxNumber={meMaxNumber} setNumber={(number)=>{
+                const newArgs = [selected.leader, number, selected.weapon ? selected.weapon : "-", selected.defense ? selected.defense : "-"].join(" ");
                 setArgs(newArgs);
             }}/>
-            Total Power: {selectedLeaderPower + parseInt(selectedUnits)}
+            Total Power: {selectedLeaderPower + parseInt(selectedNumber)}
             <div style={{display:"flex", justifyContent:"space-around"}}>
                 {weapons}
                 {defenses}

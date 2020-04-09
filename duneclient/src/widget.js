@@ -39,9 +39,9 @@ const PrescienceAnswer = ({me, state, args, setArgs}) => {
         return <PlanLeader factionState={state.faction_state[me]} selectedLeader={args} setLeader={setArgs} active={true} />;
     } else if (query === "number") {
         const [space, sector] = stageState.battle.slice(2);
-        const maxUnits = state.map_state.filter(s=>s.name === space)[0].forces[me][sector].reduce((a,b)=>a+b, 0);
-        return <PlanNumber maxUnits={maxUnits} units={args} setUnits={(unitCount)=>{
-            setArgs("" +unitCount);
+        const maxNumber = state.map_state.filter(s=>s.name === space)[0].forces[me][sector].reduce((a,b)=>a+b, 0);
+        return <PlanNumber maxNumber={maxNumber} number={parseInt(args)} setNumber={(number)=>{
+            setArgs("" +number);
         }} active={true} />;
     } else if (query === "weapon") {
         const meWeapons = state.faction_state[me].treachery.filter(

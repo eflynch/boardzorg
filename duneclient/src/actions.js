@@ -16,7 +16,7 @@ const interactionWidgets = [
     "battle-select",
 ];
 
-const defaultArgsForAction = (state, actionName, argSpec) => {
+const defaultArgsForAction = (state, me, actionName, argSpec) => {
     if (actionName === "bribe") {
         return "emperor 2";
     }
@@ -31,7 +31,14 @@ const defaultArgsForAction = (state, actionName, argSpec) => {
         return "   ";
     }
     if (actionName === "commit-plan") {
-        return " 0 - -";
+        const stageState = state.round_state.stage_state;
+        const [attacker, defender, space, sector] = stageState.battle;
+        const iAmAttacker = me === attacker;
+        const mePlan = iAmAttacker ? stageState.attacker_plan : stageState.defender_plan;
+
+        const defaultArg =`${mePlan.leader ? mePlan.leader : ""} ${mePlan.number ? mePlan.number : "0"} ${mePlan.weapon ? mePlan.weapon : "-"} ${mePlan.defense ? mePlan.defense : "-"}`;
+        console.log(defaultArg);
+        return defaultArg;
     }
     if (actionName === "answer-prescience") {
         const prescience_query = state.round_state.stage_state.prescience;
@@ -51,7 +58,7 @@ const defaultArgsForAction = (state, actionName, argSpec) => {
     if (argSpec.widget === "struct") {
         let subArgs = [];
         for (const subWidget of argSpec.args) {
-            subArgs = subArgs.concat(defaultArgsForAction(state, actionName, subWidget));
+            subArgs = subArgs.concat(defaultArgsForAction(state, me, actionName, subWidget));
         }
         return subArgs.join(" ");
     }
@@ -147,7 +154,7 @@ const Actions = (props) => {
         return (
             <li className={selectedAction === actionName ? "selected" : ""} key={i} onClick={()=>{
                 setSelectedAction(actionName);
-                setArgs(defaultArgsForAction(state, actionName, actions[actionName]));
+                setArgs(defaultArgsForAction(state, me, actionName, actions[actionName]));
                 setInteractionFlow(getFlowForWidget(actions[actionName].widget, actions[actionName].args));
             }} key={i}>
                 {actionName}
