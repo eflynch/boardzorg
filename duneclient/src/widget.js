@@ -24,7 +24,7 @@ const Prescience = ({args, setArgs}) => {
     return (
         <div style={{display:"flex", justifyContent:"space-around"}}>
             {options.map((option)=> {
-                return <div key={option} class={"option" + (option === args ? " selected": "")} onClick={()=>{
+                return <div key={option} className={"option" + (option === args ? " selected": "")} onClick={()=>{
                     setArgs(option);
                 }}>{option}</div>;
             })}
