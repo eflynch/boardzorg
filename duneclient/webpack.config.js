@@ -12,27 +12,12 @@ var config = {
         filename: 'main.js'
     },
     module: {
-        loaders: [
+        rules: [
             {
                 test: /\.jsx?/,
                 include: APP_DIR,
-                loader: 'babel-loader',
-                query: {
-                    presets: ['env', 'react', 'stage-2']
-                }
+                loader: 'babel-loader'
             },
-            {
-                test: /\.css$/,
-                loader: 'style-loader'
-            },
-            {
-                test: /\.css$/,
-                loader: 'css-loader',
-                query: {
-                    modules: true,
-                    localIdentName: '[name]__[local]___[hash:base64:5]'
-                }
-            }
         ]
     },
     plugins: [
