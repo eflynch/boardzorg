@@ -150,13 +150,17 @@ export default function Session({state, actions, history, me, error, sendCommand
     if (state.storm_deck.next !== undefined) {
         futureStorm = (state.storm_deck.next + state.storm_position) % 18;
     }
+    let futureSpice = undefined;
+    if (state.spice_deck.next !== undefined) {
+        futureSpice = state.spice_deck.next;
+    }
     const logoPositions = GetLogoPositions(state.faction_state);
     return (
         <div className="session">
             <div>
                 <div style={{display:"flex", alignItems:"flex-start"}}>
                     <Board me={me} interaction={interaction} setInteraction={setInteraction} logoPositions={logoPositions}
-                           stormSector={state.storm_position} futureStorm={futureStorm} state={state} />
+                           stormSector={state.storm_position} futureStorm={futureStorm} futureSpice={futureSpice} state={state} />
                     <Decks state={state} />
                 </div>
                 <RoundState interaction={interaction} setInteraction={setInteraction} roundState={state.round_state} logoPositions={logoPositions} stormPosition={state.storm_position} />

@@ -8,21 +8,8 @@ import Spice from './components/spice';
 import TokenPile from './components/token-pile';
 import {spacePaths, spaceSectorPaths, sectorPaths} from './paths';
 
+const TRANSFORM=`translate(0.000000,1.000000) scale(${0.100000/848},${-0.100000/848})`;
 
-const Storm = ({sector, color}) => {
-    let transform=`translate(0.000000,1.000000) scale(${0.100000/848},${-0.100000/848})`;
-    return <g className="storm"
-        style={{
-            fill: color
-        }}
-        onClick={()=>{
-            onClick(territory);
-        }}
-        transform={transform}>
-            {sectorPaths[sector].map((p, i)=><path key={i} d={p}/>)}
-        }}
-    </g>
-};
 
 const Logo = ({faction, diameter, x, y}) => {
     return <image xlinkHref={`/static/app/png/${faction}_logo.png`} x={x} y={y} width={diameter} height={diameter}/>;
@@ -31,6 +18,30 @@ const Logo = ({faction, diameter, x, y}) => {
 const BlankLogo = ({diameter, x, y, ...props}) => {
     return <circle className="blank-logo" r={diameter/2} cx={x+diameter/2} cy={y+diameter/2} {...props}/>;
 }
+
+const MapPart = ({className, selected, onClick, paths, ...props}) => {
+    return (
+        <g {...props} className={className + (selected ? " selected" : "") + (onClick? " active" : "")}
+            onClick={()=>{
+                if (onClick) {
+                    onClick(territory);
+                }
+            }}
+            transform={TRANSFORM}>
+            {paths.map((p, i)=><path key={i} d={p}/>)}
+        }}
+        </g>
+    );
+}
+
+const Storm = ({sector, color}) => {
+    return <MapPart className="storm"
+        style={{
+            fill: color
+        }}
+        paths={sectorPaths[sector]}
+    />
+};
 
 
 class Board extends React.Component {
@@ -169,19 +180,9 @@ class Board extends React.Component {
     }
 
     _getMapParts(paths, className, onClick, selected) {
-        let transform=`translate(0.000000,1.000000) scale(${0.100000/848},${-0.100000/848})`;
         let spaces = Object.keys(paths).map((territory) => {
             const isSelected = (selected !== undefined && selected !== null) && (territory == selected.replace(" ", "-"));
-            return <g className={className + (isSelected ? " selected" : "") + (onClick? " active" : "")}
-                onClick={()=>{
-                    if (onClick) {
-                        onClick(territory);
-                    }
-                }}
-                key={territory +"path"} transform={transform}>
-                {paths[territory].map((p, i)=><path key={i} d={p}/>)}
-            }}
-            </g>
+            return <MapPart key={territory +"path"} className={className} onClick={()=>{onClick(territory);}} selected={isSelected} paths={paths[territory]} />;
         });
         return spaces;
     }
@@ -260,12 +261,21 @@ class Board extends React.Component {
         if (this.props.futureStorm !== undefined) {
             futureStorm = <Storm sector={this.props.futureStorm} color="rgba(0, 0, 255, 0.2)"/>;
         }
+        let futureSpice = <g/>;
+        if (this.props.futureSpice !== undefined) {
+            const spiceSector = map_state.filter((s)=>s.name === this.props.futureSpice)[0].spice_sector;
+            futureSpice = <MapPart style={{
+                fill: "green",
+                opacity: 0.4
+            }} paths={spaceSectorPaths[[this.props.futureSpice, spiceSector].join("-")]}/>;
+        }
         return (
             <div className="board">
                 <svg width={this.state.size} height={this.state.size} viewBox={`0 0 1 1`}>
                     <text x={0.04} y={0.04} style={{fill: "white", font: "normal 0.02px Optima"}}>Turn {turn} / 10</text>
                     <image xlinkHref="/static/app/png/board.png" x="0" y="0" width="1" height="1"/>
                     {futureStorm}
+                    {futureSpice}
                     {this.getSpaces()}
                     {this.getSpaceSectors()}
                     {this.getLogos()}
