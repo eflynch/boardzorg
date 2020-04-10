@@ -50,22 +50,18 @@ const defaultArgsForAction = (state, me, actionName, argSpec) => {
         }
     }
 
-    if (interactionWidgets.indexOf(argSpec.widget) !== -1) {
-        return `$interaction.${argSpec.widget}`;
-    }
-
     if (argSpec.widget === "struct") {
         let subArgs = [];
         for (const subWidget of argSpec.args) {
             subArgs = subArgs.concat(defaultArgsForAction(state, me, actionName, subWidget));
         }
-        return subArgs.join(" ");
+        return subArgs;
     }
 
     return "";
 };
 
-const ActionArgs = ({me, state, args, setArgs, sendCommand, actionName, argSpec, interaction, setInteraction}) => {
+const ActionArgs = ({me, state, args, setArgs, sendCommand, actionName, argSpec, interaction, setInteraction, selection, setSelection}) => {
     return (
         <div>
             <Widget
@@ -74,24 +70,21 @@ const ActionArgs = ({me, state, args, setArgs, sendCommand, actionName, argSpec,
                 interaction={interaction}
                 setInteraction={setInteraction}
                 setArgs={setArgs}
+                selection={selection}
+                setSelection={setSelection}
                 args={args}
                 type={argSpec.widget}
                 config={argSpec.args} />
             <br/>
             <br/>
             <button disabled={interaction.mode != null} onClick={()=>{
-                const fixedArgs = args.split(" ").map((arg) => {
-                    if (arg.startsWith("$")) {
-                        return interaction[arg.slice(13)];
-                    }
-                    return arg;
-                }).join(" ");
-                sendCommand(`${actionName} ${fixedArgs}`);
-                setInteraction({mode: null});
+                sendCommand(`${actionName} ${[args].flat(Infinity).join(" ")}`);
+                setSelection({});
+                setInteraction({});
             }}>Submit Command</button>
         </div>
     );
-} 
+}
 
 
 const getFlowForWidget = (type, config) => {
@@ -134,7 +127,7 @@ const Actions = (props) => {
     const [args, setArgs] = useState("");
     const [selectedAction, setSelectedAction] = useState(null);
 
-    let {me, state, error, actions, sendCommand, setInteraction, setInteractionFlow, interaction} = props;
+    let {me, state, error, actions, sendCommand, setInteraction, setInteractionFlow, interaction, selection, setSelection} = props;
     let errordiv = <div/>;
     if (error !== null && error !== undefined){
         if (error.BadCommand !== undefined){
@@ -152,8 +145,9 @@ const Actions = (props) => {
         return (
             <li className={selectedAction === actionName ? "selected" : ""} key={i} onClick={()=>{
                 setSelectedAction(actionName);
+                setSelection=({});
                 setArgs(defaultArgsForAction(state, me, actionName, actions[actionName]));
-                setInteractionFlow(getFlowForWidget(actions[actionName].widget, actions[actionName].args));
+//JRMTODO                setInteractionFlow(getFlowForWidget(actions[actionName].widget, actions[actionName].args));
             }} key={i}>
                 {actionName}
             </li>
@@ -161,7 +155,7 @@ const Actions = (props) => {
     });
     let actionArgs = <span/>;
     if (actionNames.indexOf(selectedAction) != -1) {
-        actionArgs = <ActionArgs me={me} state={state} args={args} setArgs={setArgs} interaction={interaction} setInteraction={setInteraction} sendCommand={sendCommand} actionName={selectedAction} argSpec={actions[selectedAction]}/>
+        actionArgs = <ActionArgs me={me} state={state} args={args} setArgs={setArgs} interaction={interaction} setInteraction={setInteraction} sendCommand={sendCommand} actionName={selectedAction} argSpec={actions[selectedAction]} selection={selection} setSelection={setSelection}/>
     }
     return (
         <div className="actions-wrapper">

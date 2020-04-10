@@ -91,13 +91,11 @@ const Decks = ({state}) => {
     );
 };
 
-const maybeFlowInteraction = (interaction, flow) => {
-    if (!interaction.mode) {
-        for (const mode of flow) {
-            if (interaction[mode] == null) {
-                return update(interaction, {
-                    mode: {$set: mode}
-                });
+const maybeFlowInteraction = (interaction, selection, flows) => {
+    if (interaction.mode == null) {
+        for (const flow of flows) {
+            if (selection[flow.mode] == null) {
+                return flow;
             }
         }
     }
@@ -106,24 +104,35 @@ const maybeFlowInteraction = (interaction, flow) => {
 
 export default function Session({state, actions, history, me, error, sendCommand}) {
     const [interaction, setInteractionRaw] = useState({
+        // Type of selection
         mode: null,
-        "treachery-select-weapon": "-",
-        "treachery-select-defense": "-"
+        // Function to call with the selection
+        action: null,
     });
-    const [errorState, setErrorState] = useState(error);
+    // An object of globally-selected objects, tagged with the interaction mode that selected them
+    const [selection, setSelection] = useState({});
+    // An list of objects containing interaction modes and actions to perform.
+    // This is used to reduce extra clicking on "SelectOnMap" buttons
     const [interactionFlow, setInteractionFlowRaw] = useState([]);
 
+    const [errorState, setErrorState] = useState(error);
+
     const setInteraction = (interaction) => {
-        setInteractionRaw(maybeFlowInteraction(interaction, interactionFlow));
+        interaction = maybeFlowInteraction(interaction, selection, interactionFlow);
+        const clientAction = interaction.action;
+        setInteractionRaw(
+            update(interaction,
+                   {action: {$set: (...args) => {
+                       if (clientAction) {
+                           clientAction(...args);
+                       }
+                       setInteraction({});
+                   }}}));
     };
 
     const setInteractionFlow = (flow) => {
         setInteractionRaw(
-            maybeFlowInteraction(
-                update(
-                    interaction,
-                    {mode: {$set: null}}),
-                flow));
+            maybeFlowInteraction({}, selection, flow));
         setInteractionFlowRaw(flow);
     };
 
@@ -143,7 +152,7 @@ export default function Session({state, actions, history, me, error, sendCommand
     const fs = Object.keys(state.faction_state).sort((x,y)=>{ return x == me ? -1 : y == me ? 1 : 0; });;
 
     const factions = fs.map((faction)=> {
-        return <Faction key={faction} me={me} faction={faction} factionstate={state.faction_state[faction]} interaction={interaction} setInteraction={setInteraction}/>;
+        return <Faction key={faction} me={me} faction={faction} factionstate={state.faction_state[faction]} selection={selection}/>;
     });
 
     let futureStorm = undefined;
@@ -159,13 +168,13 @@ export default function Session({state, actions, history, me, error, sendCommand
         <div className="session">
             <div>
                 <div style={{display:"flex", alignItems:"flex-start"}}>
-                    <Board me={me} interaction={interaction} setInteraction={setInteraction} logoPositions={logoPositions}
+                    <Board me={me} interaction={interaction} selection={selection} logoPositions={logoPositions}
                            stormSector={state.storm_position} futureStorm={futureStorm} futureSpice={futureSpice} state={state} />
                     <Decks state={state} />
                 </div>
-                <RoundState interaction={interaction} setInteraction={setInteraction} roundState={state.round_state} logoPositions={logoPositions} stormPosition={state.storm_position} />
+                <RoundState interaction={interaction} selection={selection} roundState={state.round_state} logoPositions={logoPositions} stormPosition={state.storm_position} />
             </div>
-            <History state={state} me={me} interaction={interaction} setInteraction={setInteraction} error={errorState} actions={actions} sendCommand={sendCommand} commandLog={history} setInteractionFlow={setInteractionFlow}/>
+            <History state={state} me={me} interaction={interaction} setInteraction={setInteraction} error={errorState} actions={actions} sendCommand={sendCommand} commandLog={history} setInteractionFlow={setInteractionFlow} selection={selection} setSelection={setSelection}/>
             <div className="factions">
                 {factions}
             </div>
