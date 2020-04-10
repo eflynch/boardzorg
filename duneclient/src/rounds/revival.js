@@ -8,7 +8,6 @@ import FactionOrder from '../components/faction-order';
 class Revival extends React.Component {
     render () {
         let {roundState, factionOrder} = this.props;
-        console.log(roundState);
         let turnOrder = <FactionOrder factions={factionOrder.map((faction)=>{
             return {
                 faction: faction,

@@ -20,15 +20,19 @@ def leader_revivable(game_state, faction):
     return False
 
 
-class StartRevival(Action):
-    name = "start-revival"
+class ProgressRevival(Action):
+    name = "progress-revival"
     ck_round = "revival"
     su = True
 
     @classmethod
     def _check(cls, game_state, faction):
         if game_state.round_state.faction_turn is not None:
-            raise IllegalAction("Revival already begun")
+            if leader_revivable(game_state, game_state.round_state.faction_turn):
+                raise IllegalAction("They might want to revive that leader")
+
+            if game_state.faction_state[game_state.round_state.faction_turn].tank_units:
+                raise IllegalAction("They might want to revive those units")
 
     def _execute(self, game_state):
         new_game_state = deepcopy(game_state)
@@ -50,6 +54,8 @@ class Revive(Action):
 
     @classmethod
     def parse_args(cls, faction, args):
+        if not args:
+            return Revive(faction, [], None)
         units = []
         leader = None
         for i in args.split(","):
@@ -72,6 +78,8 @@ class Revive(Action):
 
     @classmethod
     def _check(cls, game_state, faction):
+        if (not game_state.faction_state[faction].tank_units) and not (leader_revivable(game_state, faction)):
+            raise IllegalAction("You don't have anything to revive")
         cls.check_turn(game_state, faction)
 
     def _execute(self, game_state):

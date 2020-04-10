@@ -82,10 +82,5 @@ class DoControl(Action):
             new_game_state.round = "end"
             return new_game_state
 
-        for s in new_game_state.map_state.values():
-            if s.coexist:
-                s.was_coexist = True
-                s.coexist = False
-
         new_game_state.round = "storm"
         return new_game_state

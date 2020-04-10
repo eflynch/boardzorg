@@ -17,6 +17,7 @@ const humanReadable = {
     "space-sector-select-end": "To",
     "traitor-select": "Traitor",
     "leader-input": "Leader",
+    "space-select": "Space",
 };
 
 const Options = ({args, setArgs, options}) => {
