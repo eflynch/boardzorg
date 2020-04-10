@@ -2,6 +2,7 @@ from copy import deepcopy
 from logging import getLogger
 
 from dune.actions.action import Action
+from dune.actions import args
 from dune.exceptions import IllegalAction, BadCommand
 from dune.actions.karama import discard_karama
 
@@ -35,6 +36,10 @@ class Voice(Action):
             raise BadCommand("Must specify either weapon or defense")
 
         return Voice(faction, no, projectile_poison, weapon_defense)
+
+    @classmethod
+    def get_arg_spec(clas, faction=None, game_state=None):
+        return args.Voice()
 
     @classmethod
     def _check(cls, game_state, faction):
@@ -75,7 +80,7 @@ class PassVoice(Action):
 
     def _execute(self, game_state):
         new_game_state = deepcopy(game_state)
-        new_game_state.round_state.stage_state.substage = "karama-voice"
+        new_game_state.round_state.stage_state.substage = "karama-sardaukar"
         return new_game_state
 
 

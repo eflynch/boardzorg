@@ -19,10 +19,9 @@ const humanReadable = {
     "leader-input": "Leader",
 };
 
-const Prescience = ({args, setArgs}) => {
-    const options = ["leader", "number", "weapon", "defense"];
+const Options = ({args, setArgs, options}) => {
     return (
-        <div style={{display:"flex", justifyContent:"space-around"}}>
+        <div style={{display:"flex", justifyContent:"space-evenly", flexWrap: "wrap", maxWidth:400}}>
             {options.map((option)=> {
                 return <div key={option} className={"option" + (option === args ? " selected": "")} onClick={()=>{
                     setArgs(option);
@@ -31,6 +30,7 @@ const Prescience = ({args, setArgs}) => {
         </div>
     );
 };
+
 
 const PrescienceAnswer = ({me, state, args, setArgs, maxPower}) => {
     const stageState = state.round_state.stage_state;
@@ -394,7 +394,7 @@ const Widget = ({me, state, type, args, setArgs, config, interaction, setInterac
     }
 
     if (type === "prescience") {
-        return <Prescience args={args} setArgs={setArgs} />;
+        return <Options options={["leader", "number", "weapon", "defense"]} args={args} setArgs={setArgs} />;
     }
 
     if (type === "prescience-answer") {
@@ -407,6 +407,14 @@ const Widget = ({me, state, type, args, setArgs, config, interaction, setInterac
 
     if (type === "discard-treachery") {
         return <DiscardTreachery state={state} me={me} args={args} setArgs={setArgs} />;
+    }
+
+    if (type === "voice") {
+        return <Options options={[
+            "poison weapon", "poison defense", "projectile weapon", "projectile defense",
+            "no poison weapon", "no poison defense", "no projectile weapon", "no projectile defense",
+            "lasgun", "no lasgun"
+        ]} args={args} setArgs={setArgs} />;
     }
 
     console.log(type);

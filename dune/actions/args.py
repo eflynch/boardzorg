@@ -200,6 +200,13 @@ class PrescienceAnswer(Args):
         }
 
 
+class Voice(Args):
+    def to_dict(self):
+        return {
+            "widget": "voice"
+        }
+
+
 class TankUnits(Args):
     def to_dict(self):
         return {
