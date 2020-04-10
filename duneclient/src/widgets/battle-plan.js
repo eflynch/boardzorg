@@ -5,7 +5,7 @@ import Card from '../components/card';
 import Units from './units';
 
 
-export function PlanLeader({factionState, selectedLeader, active, setLeader}) {
+export function PlanLeader({leaders, treachery, selectedLeader, active, setLeader}) {
     const handleLeader = (name, power) => {
         let onClick = undefined;
         if (active) {
@@ -18,7 +18,7 @@ export function PlanLeader({factionState, selectedLeader, active, setLeader}) {
             isSelected: selectedLeader === name,
         };
     }
-    let meLeaders = factionState.leaders.map((leader) => {
+    let meLeaders = leaders.map((leader) => {
         const [name, power] = leader;
         const {onClick, isSelected} = handleLeader(name, power);
         return <LeaderToken
@@ -27,7 +27,7 @@ export function PlanLeader({factionState, selectedLeader, active, setLeader}) {
                     selected={isSelected}
                     dead={false} onClick={onClick}/>;
     });
-    if (factionState.treachery.indexOf("Cheap-Hero/Heroine") !== -1) {
+    if (treachery.indexOf("Cheap-Hero/Heroine") !== -1) {
         const {onClick, isSelected} = handleLeader("Cheap-Here/Heroine", 0);
         meLeaders.push(
             <Card key="Cheap-Hero/Heroine"
@@ -129,7 +129,7 @@ export default function BattlePlan({me, state, args, setArgs, maxPower}) {
 
     return (
         <div className="battle-plan">
-            <PlanLeader factionState={meFactionState} selectedLeader={selected.leader} active={mePlan.leader === undefined} setLeader={(leader)=>{
+            <PlanLeader leaders={meFactionState.leaders} treachery={meFacitonState.treachery} selectedLeader={selected.leader} active={mePlan.leader === undefined} setLeader={(leader)=>{
                 const newArgs = [leader, selected.number, selected.weapon ? selected.weapon : "-", selected.defense ? selected.defense : "-"].join(" ");
                 setArgs(newArgs); 
             }} />

@@ -96,12 +96,28 @@ class Units(Args):
     def __init__(self, faction=None):
         self.fedaykin = faction == "fremen"
         self.sardaukar = faction == "emperor"
+
     def to_dict(self):
         return {
             "widget": "units",
             "args": {
                 "fedaykin": self.fedaykin,
                 "sardaukar": self.sardaukar
+            }
+        }
+
+
+class Revival(Args):
+    def __init__(self, leaders, units):
+        self.leaders = leaders
+        self.units = units
+
+    def to_dict(self):
+        return {
+            "widget": "revival",
+            "args": {
+                "leaders": self.leaders,
+                "units": self.units
             }
         }
 

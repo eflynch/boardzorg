@@ -37,7 +37,8 @@ const PrescienceAnswer = ({me, state, args, setArgs, maxPower}) => {
     const stageState = state.round_state.stage_state;
     const query = stageState.prescience;
     if (query === "leader") {
-        return <PlanLeader factionState={state.faction_state[me]} selectedLeader={args} setLeader={setArgs} active={true} />;
+        const fs = state.faction_state[me];
+        return <PlanLeader leaders={fs.leaders} treachery={fs.treachery} selectedLeader={args} setLeader={setArgs} active={true} />;
     } else if (query === "number") {
         const [space, sector] = stageState.battle.slice(2);
         return <PlanNumber maxNumber={maxPower} number={parseInt(args)} setNumber={(number)=>{
@@ -321,6 +322,51 @@ const FremenPlacementSelect = ({args, setArgs, config}) => {
 };
 
 
+const Revival = ({me, args, setArgs, leaders, units}) => {
+    const hasUnitsSelected = (args.indexOf("1") !== -1) || (args.indexOf("2") !== -1);
+    const hasLeaderSelected = !hasLeaderSelected && args;
+    const unitsSelected = hasUnitsSelected ? args.split(",").map((u)=>parseInt(u)) : [];
+    const onesSelected = unitsSelected.filter((u)=>u==1).length;
+    const twoSelected = unitsSelected.filter((u)=>u==2).indexOf(2) !== -1;
+
+    const twoAvailable = units.indexOf(2) !== -1;
+    const numOnesAvailable = Math.min(units.filter((u)=>u==1).length, 3);
+
+    const active = unitsSelected.length < 3;
+
+    let oneSelectors = [];
+    for (let i=0; i< numOnesAvailable; i++){
+        oneSelectors.push(<UnitSelect key={i} value={1} active={active} selected={i < onesSelected} setSelected={(s)=>{
+            const newSelected = Array(onesSelected + (s ? 1 : -1)).fill("1");
+            if (twoAvailable) { newSelected.push("2"); }
+            setArgs(newSelected.join(","));
+        }}/>);
+    }
+    const unitSelectors = (
+        <div style={{display:"flex"}}>
+            {twoAvailable ? <UnitSelect value={2} active={active} selected={twoSelected} setSelected={(s)=>{
+                const newSelected = Array(onesSelected).fill("1");
+                if (s) { newSelected.push("2"); }
+                setArgs(newSelected.join(","));
+            }} /> : ""}
+            {oneSelectors}
+        </div>
+    );
+
+
+    const leaderSelectors = <PlanLeader leaders={leaders} treachery={[]} selectedLeader={hasLeaderSelected ? args : null} setLeader={(leader)=>{
+        setArgs(leader);
+    }} active={true} />;
+
+    return (
+        <div >
+            {unitSelectors}
+            {leaderSelectors}
+        </div>
+    );
+};
+
+
 const Widget = ({me, state, type, args, setArgs, config, interaction, setInteraction}) => {
     if (type === "null") {
         return "";
@@ -416,6 +462,10 @@ const Widget = ({me, state, type, args, setArgs, config, interaction, setInterac
             "no poison weapon", "no poison defense", "no projectile weapon", "no projectile defense",
             "lasgun", "no lasgun"
         ]} args={args} setArgs={setArgs} />;
+    }
+
+    if (type === "revival") {
+        return <Revival args={args} setArgs={setArgs} leaders={config.leaders} units={config.units} />;
     }
 
     console.log(type);

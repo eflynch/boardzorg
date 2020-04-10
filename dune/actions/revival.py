@@ -69,7 +69,11 @@ class Revive(Action):
 
     @classmethod
     def get_arg_spec(cls, faction=None, game_state=None):
-        return args.Union(args.Leader(), args.Units())
+        leaders = []
+        if leader_revivable(game_state, faction):
+            leaders = game_state.faction_state[faction].tank_leader
+        units = game_state.faction_state[faction].tank_units
+        return args.Revival(leaders=leaders, units=units)
 
     def __init__(self, faction, units, leader):
         self.faction = faction
