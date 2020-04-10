@@ -7,29 +7,28 @@
 * Support Special Treachery Cards
 * Support ANY TIME Karama powers
 * Show battle round state
-  * What leaders have been used
-  * What battle powers have been "karamed"
-  * What has been voiced
-  * What has been prescienced
-* Improve widgets for battle round
-  * Battle Plan Selection
-  * Voice Selection
-  * Prescience Selection
-  * Tank Units
-  * Discard
+  * What leaders have been used already
+* Redo Traitor selection widget
+* Test that leader revival works
+* Support no-fremen storm movement rules
+* Support voice for lasgun
+* Support voice for cheap hero/heroine
+* Support voice for worthless cards
+* Interface for victory condition
+
+* Ponder new emperor alliance power and rules for bribes and allies
+    * Support new Emperor alliance rule
+    * Support allies paying for things for eachother...
+    * Maybe disable bribes for allies
+    * Maybe allow bribes to pay immediately since the emperor has a different alliance power now
+
+* Support spice-based combat
+* Support extra spice flow from strongholds
+
+
 
 ## In Progress
 
-
-## Done
-* Show the discard piles on the board
-* Switch to using websockets instead of polling
-* Re-do BG coexist in a reasonable way
-  * There shouldn't be any union arg specs with "coexist" constants, rather a ¿coexist? check command should happen before the movement resolves
-    * This check happens when you move from a coexist into an occupied territory where you do not already have fighthers
-    * This check happens when someone else moves into a territory you were the sole occupier of
-  * There shouldn't be a coexist persist option but rather the option to flip at any time before shipments occur
-* Break up the Unions
 
 # Notes
 
@@ -37,7 +36,7 @@
 
   * ANY TIME:
     * H KARAMA take treachery cards
-    * E KARAMA revive 3 or leaders
+    * E KARAMA revive 3 or leader
     * block B worthless Karama
     * F KARAMA make worm show up (Restricted to SPICE and MOVEMENT)
 
