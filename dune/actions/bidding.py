@@ -297,10 +297,12 @@ class KaramaStopExtra(Action):
     ck_round = "bidding"
     ck_stage = "auction"
     ck_substage = "collect"
-    ck_karam = True
+    ck_karama = True
 
     @classmethod
     def _check(cls, game_state, faction):
+        if faction == "harkonnen":
+            raise IllegalAction("Can't karam your own deal")
         if game_state.round_state.stage_state.winner != "harkonnen":
             raise IllegalAction("This only matters to the harkonnen")
         if not game_state.treachery_deck:
@@ -326,6 +328,8 @@ class KaramaPassStopExtra(Action):
 
     @classmethod
     def _check(cls, game_state, faction):
+        if faction == "harkonnen":
+            raise IllegalAction("Can't karam your own deal")
         if game_state.round_state.stage_state.winner != "harkonnen":
             raise IllegalAction("This only matters to the harkonnen")
         if not game_state.treachery_deck:

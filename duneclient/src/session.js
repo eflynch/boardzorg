@@ -8,6 +8,7 @@ import History from './history';
 import Bidding from './rounds/bidding';
 import Battle from './rounds/battle';
 import Movement from './rounds/movement';
+import Revival from './rounds/revival';
 import Deck from './components/deck';
 import update from 'immutability-helper';
 
@@ -41,7 +42,7 @@ const GetLogoPositions = (faction_state) => {
 
 
 const RoundState = ({roundState, stormPosition, logoPositions, interaction, setInteraction}) => {
-    let text = roundState.round + " round";
+    let text = roundState.round === undefined ? roundState + " round" : roundState.round + " round";
     if (roundState.stage !== undefined) {
         text += "» " + roundState.stage;
     }
@@ -55,6 +56,9 @@ const RoundState = ({roundState, stormPosition, logoPositions, interaction, setI
     }
     if (roundState && roundState.round == "battle"){
         stateDiv = <Battle factionOrder={factionOrder} roundstate={roundState} interaction={interaction} setInteraction={setInteraction} />;
+    }
+    if (roundState && roundState.round == "revival") {
+        stateDiv = <Revival factionOrder={factionOrder} roundState={roundState} />;
     }
     if (stateDiv === null){
         return (
