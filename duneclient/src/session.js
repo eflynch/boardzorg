@@ -119,7 +119,6 @@ export default function Session({state, actions, history, me, error, sendCommand
     };
 
     const updateSelection = (mode, value) => {
-        console.log("updating selection", mode, value);
         if (value && value != "-") {
             setCombinedState((combinedState) => {
                 return update(combinedState, {
@@ -139,32 +138,35 @@ export default function Session({state, actions, history, me, error, sendCommand
         }
     };
 
+    const wrapInteraction = (interaction, combinedState) => {
+        let newInteraction = maybeFlowInteraction(
+            interaction,
+            combinedState.selection,
+            combinedState.interactionFlow);
+        const clientAction = newInteraction.action;
+        return update(
+            newInteraction,
+            {action: {$set: (...args) => {
+                if (clientAction) {
+                    clientAction(...args);
+                }
+                setInteraction({});
+            }}});
+    };
+
     const setInteraction = (interaction) => {
         setCombinedState((combinedState) => {
-            interaction = maybeFlowInteraction(interaction,
-                                               combinedState.selection,
-                                               combinedState.interactionFlow);
-            const clientAction = interaction.action;
-            interaction = update(
-                interaction,
-                {action: {$set: (...args) => {
-                    if (clientAction) {
-                        clientAction(...args);
-                    }
-                    setInteraction({});
-                }}});
             return update(combinedState,
-                          {interaction: {$set: interaction}});
+                          {interaction: {$set: wrapInteraction(interaction, combinedState)}});
         });
     };
 
 
     const setInteractionFlow = (flow) => {
         setCombinedState((combinedState) => {
-            const interaction = maybeFlowInteraction({}, combinedState.selection, flow);
             return update(combinedState,
-                          {interaction: {$set: interaction},
-                           interactionFlow: flow});
+                          {interaction: {$set:wrapInteraction({}, combinedState)},
+                           interactionFlow: {$set: flow}});
         });
     };
 

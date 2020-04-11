@@ -87,15 +87,26 @@ const ActionArgs = ({me, state, args, setArgs, sendCommand, actionName, argSpec,
 }
 
 
-const getFlowForWidget = (type, config) => {
+const getFlowForWidget = (type, config, setArgs, updateSelection) => {
     if (interactionWidgets.indexOf(type) !== -1) {
-        return [type];
+        return [{
+            mode: type,
+            action: (val) => {
+                updateSelection(type, val);
+                setArgs(val);
+            },
+        }];
     }
 
     if (type === "struct") {
         let ret = [];
-        for (const subWidget of config) {
-            ret = ret.concat(getFlowForWidget(subWidget.widget, subWidget.args));
+        for (const [i, subWidget] of config.entries()) {
+            const setSubArgs = (newSubArgs) => {
+                setArgs((args) => {
+                    return update(args, {[i]: {$set: newSubArgs}});
+                });
+            };
+            ret = ret.concat(getFlowForWidget(subWidget.widget, subWidget.args, setSubArgs, updateSelection));
         }
         return ret;
     }
@@ -147,7 +158,7 @@ const Actions = (props) => {
                 setSelectedAction(actionName);
                 clearSelection();
                 setArgs(defaultArgsForAction(state, me, actionName, actions[actionName]));
-//JRMTODO                setInteractionFlow(getFlowForWidget(actions[actionName].widget, actions[actionName].args));
+                setInteractionFlow(getFlowForWidget(actions[actionName].widget, actions[actionName].args, setArgs, updateSelection));
             }} key={i}>
                 {actionName}
             </li>
