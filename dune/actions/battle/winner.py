@@ -26,7 +26,7 @@ class TankUnits(Action):
         return TankUnits(faction, groups)
 
     @classmethod
-    def get_arg_spec(cls, faction):
+    def get_arg_spec(cls, faction, game_state=None):
         return args.TankUnits()
 
     def __init__(self, faction, groups):
