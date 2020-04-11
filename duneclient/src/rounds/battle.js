@@ -119,11 +119,51 @@ export default function Battle({roundstate, factionOrder, interaction, selection
         })} />;
     };
 
+    const factors = () => {
+        if (roundstate.stage !== "battle") {
+            return;
+        }
+        const stage_state = roundstate.stage_state;
+
+        const LogoMarker = ({faction, name}) => {
+            return (
+               <div style={{
+                    position:"relative", height:80, width:150, backgroundColor:"black",
+                    border:"1px white solid", borderRadius:5, marginLeft:5, marginRight:5
+                }}>
+                    <Logo style={{position:"absolute", top:0, left: 35}} faction={faction} diameter={80}/>
+                    <div style={{
+                        position:"absolute", top: 20, left: 0, width:150, height: 40, display:"flex",
+                        justifyContent:"center", alignItems:"center", backgroundColor:"rgba(0, 0, 0, 0.7)"
+                    }}>
+                        <span>{name}</span>
+                    </div>
+                </div>
+            );
+        }
+
+        let voiceText = "";
+        if (stage_state.voice) {
+            const [no, proj_pois, weap_def] = stage_state.voice;
+            voiceText = [no ? "no" : "yes", proj_pois, weap_def].join(" ")
+        }
+        
+        return (
+            <div style={{display:"flex", flexWrap:"wrap", alignItems:"center", justifyContent:"center"}}>
+                {stage_state.voice ? <LogoMarker faction="bene-gesserit" name={voiceText}/> : ""}
+                {stage_state.karama_sardaukar ? <LogoMarker faction="emperor" name={"No Sardaukar"}/> : ""}
+                {stage_state.karama_fedakin ? <LogoMarker faction="fremen" name={"No Fedaykin"}/> : ""}
+                {stage_state.karama_kwizatz_haderach ? <LogoMarker faction="atreides" name={"No Kwizatz Haderach"}/> : ""}
+            </div>
+        );
+    };
+
     return (
         <div style={{display:"flex", flexDirection:"column", justifyContent:"space-between", alignItems:"stretch"}}>
             <div style={{display:"flex", justifyContent: "space-around", alignItems:"center"}}>
                 {attackerOrder()} <span style={{fontSize:30, fontWeight:"bold"}}>vs</span> {battlesToPick()}
             </div>
+            {factors()}
             {plansRevealed()}
             {winner()}
             {/*JSON.stringify(roundstate).replace(",", ", ").replace(":", ": ")*/}

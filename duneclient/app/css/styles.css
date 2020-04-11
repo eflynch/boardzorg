@@ -332,6 +332,12 @@ img.alive {
 }
 
 .card {
+    user-select: none;
+    user-drag: none;
+    -moz-user-select: none;
+    -webkit-user-select: none;
+    -webkit-user-drag: none;
+    -ms-user-select: none;
     border-radius:3px;
     filter: drop-shadow(3px 3px 3px #888888);
 }

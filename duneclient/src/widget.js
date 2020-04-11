@@ -18,12 +18,12 @@ const humanReadable = {
     "space-sector-select-end": "To",
     "traitor-select": "Traitor",
     "leader-input": "Leader",
+    "space-select": "Space",
 };
 
-const Prescience = ({args, setArgs}) => {
-    const options = ["leader", "number", "weapon", "defense"];
+const Options = ({args, setArgs, options}) => {
     return (
-        <div style={{display:"flex", justifyContent:"space-around"}}>
+        <div style={{display:"flex", justifyContent:"space-evenly", flexWrap: "wrap", maxWidth:400}}>
             {options.map((option)=> {
                 return <div key={option} className={"option" + (option === args ? " selected": "")} onClick={()=>{
                     setArgs(option);
@@ -33,11 +33,13 @@ const Prescience = ({args, setArgs}) => {
     );
 };
 
+
 const PrescienceAnswer = ({me, state, args, setArgs, maxPower}) => {
     const stageState = state.round_state.stage_state;
     const query = stageState.prescience;
     if (query === "leader") {
-        return <PlanLeader factionState={state.faction_state[me]} selectedLeader={args} setLeader={setArgs} active={true} />;
+        const fs = state.faction_state[me];
+        return <PlanLeader leaders={fs.leaders} treachery={fs.treachery} selectedLeader={args} setLeader={setArgs} active={true} />;
     } else if (query === "number") {
         const [space, sector] = stageState.battle.slice(2);
         return <PlanNumber maxNumber={maxPower} number={parseInt(args)} setNumber={(number)=>{
@@ -310,6 +312,51 @@ const FremenPlacementSelect = ({args, setArgs, config}) => {
 };
 
 
+const Revival = ({me, args, setArgs, leaders, units}) => {
+    const hasUnitsSelected = (args.indexOf("1") !== -1) || (args.indexOf("2") !== -1);
+    const hasLeaderSelected = !hasLeaderSelected && args;
+    const unitsSelected = hasUnitsSelected ? args.split(",").map((u)=>parseInt(u)) : [];
+    const onesSelected = unitsSelected.filter((u)=>u==1).length;
+    const twoSelected = unitsSelected.filter((u)=>u==2).indexOf(2) !== -1;
+
+    const twoAvailable = units.indexOf(2) !== -1;
+    const numOnesAvailable = Math.min(units.filter((u)=>u==1).length, 3);
+
+    const active = unitsSelected.length < 3;
+
+    let oneSelectors = [];
+    for (let i=0; i< numOnesAvailable; i++){
+        oneSelectors.push(<UnitSelect key={i} value={1} active={active} selected={i < onesSelected} setSelected={(s)=>{
+            const newSelected = Array(onesSelected + (s ? 1 : -1)).fill("1");
+            if (twoAvailable) { newSelected.push("2"); }
+            setArgs(newSelected.join(","));
+        }}/>);
+    }
+    const unitSelectors = (
+        <div style={{display:"flex"}}>
+            {twoAvailable ? <UnitSelect value={2} active={active} selected={twoSelected} setSelected={(s)=>{
+                const newSelected = Array(onesSelected).fill("1");
+                if (s) { newSelected.push("2"); }
+                setArgs(newSelected.join(","));
+            }} /> : ""}
+            {oneSelectors}
+        </div>
+    );
+
+
+    const leaderSelectors = <PlanLeader leaders={leaders} treachery={[]} selectedLeader={hasLeaderSelected ? args : null} setLeader={(leader)=>{
+        setArgs(leader);
+    }} active={true} />;
+
+    return (
+        <div >
+            {unitSelectors}
+            {leaderSelectors}
+        </div>
+    );
+};
+
+
 const Widget = (props) => {
     const {me, state, type, args, config, interaction, setInteraction, clearSelection, updateSelection, setArgs} = props;
 
@@ -382,7 +429,7 @@ const Widget = (props) => {
     }
 
     if (type === "prescience") {
-        return <Prescience args={args} setArgs={setArgs} />;
+        return <Options options={["leader", "number", "weapon", "defense"]} args={args} setArgs={setArgs} />;
     }
 
     if (type === "prescience-answer") {
@@ -397,7 +444,20 @@ const Widget = (props) => {
         return <DiscardTreachery state={state} me={me} args={args} setArgs={setArgs} />;
     }
 
+    if (type === "voice") {
+        return <Options options={[
+            "poison weapon", "poison defense", "projectile weapon", "projectile defense",
+            "no poison weapon", "no poison defense", "no projectile weapon", "no projectile defense",
+            "lasgun", "no lasgun"
+        ]} args={args} setArgs={setArgs} />;
+    }
+
+    if (type === "revival") {
+        return <Revival args={args} setArgs={setArgs} leaders={config.leaders} units={config.units} />;
+    }
+
     console.warn(type);
+
     return <span>
         <span>{(type in humanReadable) ? humanReadable[type] : type}:</span>
         <Input args={args} setArgs={setArgs} config={config} />

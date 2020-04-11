@@ -32,7 +32,7 @@ class Bidding extends React.Component {
             return (
                 <div style={{display:"flex", flexDirection:"column"}}>
                     {turnOrder}
-                    <div>
+                    <div style={{display:"flex", flexWrap:"wrap"}}>
                         {this.getCards()}
                     </div>
                 </div>
