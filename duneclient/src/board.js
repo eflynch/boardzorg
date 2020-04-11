@@ -175,10 +175,10 @@ class Board extends React.Component {
         return logos;
     }
 
-    _getMapParts(paths, className, onClick, selected) {
+    _getMapParts(paths, className, onClick, selectedParts) {
         let spaces = Object.keys(paths).map((territory) => {
             let thisOnClick = onClick ? ()=>{onClick(territory);} : undefined;
-            const isSelected = (selected !== undefined && selected !== null) && (territory == selected.replace(" ", "-"));
+            const isSelected = selectedParts.indexOf(territory) !== -1;
             return <MapPart key={territory +"path"} className={className} onClick={thisOnClick} selected={isSelected} paths={paths[territory]} />;
         });
         return spaces;
@@ -187,9 +187,9 @@ class Board extends React.Component {
     getSpaces () {
         const {interaction, selection} = this.props;
         const inInteraction = interaction.mode === "space-select";
-        const selected = selection["space-select"];
+        const selectedParts = [selection["space-select"]];
 
-        if (!inInteraction && !selected) {
+        if (!inInteraction && !selectedParts.length) {
             return <g/>;
         }
 
@@ -197,7 +197,7 @@ class Board extends React.Component {
             interaction.action(space);
         } : null;
 
-        return this._getMapParts(spacePaths, "space", onClick, selected);
+        return this._getMapParts(spacePaths, "space", onClick, selectedParts);
     }
 
     getSpaceSectors () {
@@ -207,9 +207,10 @@ class Board extends React.Component {
               interaction.mode === "space-sector-select-start" ||
               interaction.mode === "space-sector-select-end";
 
-        let selected =
-              selection["space-sector-select-end"] || selection["space-sector-select-start"];
-        if (!inInteraction && !selected) {
+        const selectedParts = [selection["space-sector-select-end"], selection["space-sector-select-start"]].map((part)=>{
+            return part !== undefined ? part.replace(" ", "-") : part;
+        });
+        if (!inInteraction && !selectedParts.length) {
             return <g/>;
         }
 
@@ -217,18 +218,32 @@ class Board extends React.Component {
             let split = spaceSector.split("-");
             const sector = split.pop();
             const space = split.join("-");
-            interaction.action(`${space} ${sector}`);
+            interaction.action(`${space} ${sector !== "" ? sector : -1}`);
         } : null;
 
-        return  this._getMapParts(spaceSectorPaths, "spaceSector", onClick, selected);
+        return  this._getMapParts(spaceSectorPaths, "spaceSector", onClick, selectedParts);
+    }
+
+    getMovementArrows () {
+        const {interaction, selection} = this.props;
+        if (selection["space-sector-select-start"] === undefined || selection["space-sector-select-end"] === undefined) {
+            return;
+        }
+        const [aSpace, aSector] = selection["space-sector-select-start"].split(" ");
+        const [bSpace, bSector] = selection["space-sector-select-end"].split(" ");
+        return (
+            <line stroke="black" strokeWidth={0.005}
+                x1={TokenLocations[aSpace][aSector][1].left} y1={TokenLocations[aSpace][aSector][1].top}
+                x2={TokenLocations[bSpace][bSector][1].left} y2={TokenLocations[bSpace][bSector][1].top} />
+        );
     }
 
     getSectors () {
         const {interaction, selection} = this.props;
         const inInteraction = interaction.mode === "sector-select";
-        const selected = selection["sector-select"];
+        const selectedParts = [selection["sector-select"]];
 
-        if (!inInteraction && !selected) {
+        if (!inInteraction && !selectedParts.length) {
             return <g/>;
         }
 
@@ -236,7 +251,7 @@ class Board extends React.Component {
             interaction.action(space);
         } : null;
 
-        return this._getMapParts(sectorPaths, "sector", onClick, selected);
+        return this._getMapParts(sectorPaths, "sector", onClick, selectedParts);
     }
 
     render () {
@@ -273,6 +288,7 @@ class Board extends React.Component {
                     {futureSpice}
                     {this.getSpaces()}
                     {this.getSpaceSectors()}
+                    {this.getMovementArrows()}
                     {this.getLogos()}
                     {this.getSpice()}
                     {this.getTokenPiles()}

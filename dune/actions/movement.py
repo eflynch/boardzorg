@@ -612,6 +612,8 @@ class Move(Action):
         else:
             raise BadCommand("wrong number of args")
 
+        if units == "":
+            raise BadCommand("No units selected")
         units = [int(u) for u in units.split(",")]
         sector_a = int(sector_a)
         sector_b = int(sector_b)

@@ -16,6 +16,14 @@ export const SpiceLocations = {
 }
 
 export const TokenLocations = {
+  "Polar-Sink": {
+    "-1": {
+      "1": {
+        "top": 0.5,
+        "left": 0.5
+      }
+    }
+  },
   "The-Greater-Flat": {
     "15": {
       "1": {
