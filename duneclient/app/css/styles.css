@@ -316,15 +316,15 @@ img.alive {
 }
 
 .space.selected {
-    fill: rgba(0, 255, 0, 0.7);
+    fill: rgba(255, 255, 255, 0.6);
 }
 
 .spaceSector.selected {
-    fill: rgba(0, 255, 0, 0.7);
+    fill: rgba(255, 255, 255, 0.6);
 }
 
 .sector.selected {
-    fill: rgba(0, 255, 0, 0.7);
+    fill: rgba(255, 255, 255, 0.6);
 }
 
 .sector.active:hover {

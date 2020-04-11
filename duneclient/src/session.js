@@ -41,7 +41,7 @@ const GetLogoPositions = (faction_state) => {
 }
 
 
-const RoundState = ({roundState, stormPosition, logoPositions, interaction, setInteraction}) => {
+const RoundState = ({roundState, stormPosition, logoPositions, interaction, selection}) => {
     let text = roundState.round === undefined ? roundState + " round" : roundState.round + " round";
     if (roundState.stage !== undefined) {
         text += "» " + roundState.stage;
@@ -55,7 +55,7 @@ const RoundState = ({roundState, stormPosition, logoPositions, interaction, setI
         stateDiv = <Movement roundstate={roundState} />;
     }
     if (roundState && roundState.round == "battle"){
-        stateDiv = <Battle factionOrder={factionOrder} roundstate={roundState} interaction={interaction} setInteraction={setInteraction} />;
+        stateDiv = <Battle factionOrder={factionOrder} roundstate={roundState} interaction={interaction} selection={selection}/>;
     }
     if (roundState && roundState.round == "revival") {
         stateDiv = <Revival factionOrder={factionOrder} roundState={roundState} />;
@@ -95,13 +95,11 @@ const Decks = ({state}) => {
     );
 };
 
-const maybeFlowInteraction = (interaction, flow) => {
-    if (!interaction.mode) {
-        for (const mode of flow) {
-            if (interaction[mode] == null) {
-                return update(interaction, {
-                    mode: {$set: mode}
-                });
+const maybeFlowInteraction = (interaction, selection, flows) => {
+    if (interaction.mode == null) {
+        for (const flow of flows) {
+            if (selection[flow.mode] == null) {
+                return flow;
             }
         }
     }
@@ -109,27 +107,74 @@ const maybeFlowInteraction = (interaction, flow) => {
 };
 
 export default function Session({state, actions, history, me, error, sendCommand}) {
-    const [interaction, setInteractionRaw] = useState({
-        mode: null,
-        "treachery-select-weapon": "-",
-        "treachery-select-defense": "-"
+    const [combinedState, setCombinedState] = useState({
+        interaction: {},
+        selection: {},
+        interactionFlow: [],
     });
-    const [errorState, setErrorState] = useState(error);
-    const [interactionFlow, setInteractionFlowRaw] = useState([]);
+
+    const interaction = combinedState.interaction;
+    const selection = combinedState.selection;
+
+    const clearSelection = () => {
+        setCombinedState((combinedState) => {
+            return update(combinedState, {selection: {$set: {}}});
+        });
+    };
+
+    const updateSelection = (mode, value) => {
+        if (value && value != "-") {
+            setCombinedState((combinedState) => {
+                return update(combinedState, {
+                    selection: {
+                        [mode]: {$set: value}
+                    }
+                });
+            });
+        } else {
+            setCombinedState((combinedState) => {
+                return update(combinedState, {
+                    selection: {
+                        $unset: [mode]
+                    }
+                });
+            });
+        }
+    };
+
+    const wrapInteraction = (interaction, combinedState) => {
+        let newInteraction = maybeFlowInteraction(
+            interaction,
+            combinedState.selection,
+            combinedState.interactionFlow);
+        const clientAction = newInteraction.action;
+        return update(
+            newInteraction,
+            {action: {$set: (...args) => {
+                if (clientAction) {
+                    clientAction(...args);
+                }
+                setInteraction({});
+            }}});
+    };
 
     const setInteraction = (interaction) => {
-        setInteractionRaw(maybeFlowInteraction(interaction, interactionFlow));
+        setCombinedState((combinedState) => {
+            return update(combinedState,
+                          {interaction: {$set: wrapInteraction(interaction, combinedState)}});
+        });
     };
 
+
     const setInteractionFlow = (flow) => {
-        setInteractionRaw(
-            maybeFlowInteraction(
-                update(
-                    interaction,
-                    {mode: {$set: null}}),
-                flow));
-        setInteractionFlowRaw(flow);
+        setCombinedState((combinedState) => {
+            return update(combinedState,
+                          {interaction: {$set:wrapInteraction({}, combinedState)},
+                           interactionFlow: {$set: flow}});
+        });
     };
+
+    const [errorState, setErrorState] = useState(error);
 
     useEffect(()=>{
         if (error !== undefined) {
@@ -147,7 +192,7 @@ export default function Session({state, actions, history, me, error, sendCommand
     const fs = Object.keys(state.faction_state).sort((x,y)=>{ return x == me ? -1 : y == me ? 1 : 0; });;
 
     const factions = fs.map((faction)=> {
-        return <Faction key={faction} me={me} faction={faction} factionstate={state.faction_state[faction]} interaction={interaction} setInteraction={setInteraction}/>;
+        return <Faction key={faction} me={me} faction={faction} factionstate={state.faction_state[faction]} selection={selection}/>;
     });
 
     let futureStorm = undefined;
@@ -163,13 +208,13 @@ export default function Session({state, actions, history, me, error, sendCommand
         <div className="session">
             <div>
                 <div style={{display:"flex", alignItems:"flex-start"}}>
-                    <Board me={me} interaction={interaction} setInteraction={setInteraction} logoPositions={logoPositions}
+                    <Board me={me} interaction={interaction} selection={selection} logoPositions={logoPositions}
                            stormSector={state.storm_position} futureStorm={futureStorm} futureSpice={futureSpice} state={state} />
                     <Decks state={state} />
                 </div>
-                <RoundState interaction={interaction} setInteraction={setInteraction} roundState={state.round_state} logoPositions={logoPositions} stormPosition={state.storm_position} />
+                <RoundState interaction={interaction} selection={selection} roundState={state.round_state} logoPositions={logoPositions} stormPosition={state.storm_position} />
             </div>
-            <History state={state} me={me} interaction={interaction} setInteraction={setInteraction} error={errorState} actions={actions} sendCommand={sendCommand} commandLog={history} setInteractionFlow={setInteractionFlow}/>
+            <History state={state} me={me} interaction={interaction} setInteraction={setInteraction} error={errorState} actions={actions} sendCommand={sendCommand} commandLog={history} setInteractionFlow={setInteractionFlow} selection={selection} updateSelection={updateSelection} clearSelection={clearSelection}/>
             <div className="factions">
                 {factions}
             </div>

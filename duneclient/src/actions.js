@@ -50,22 +50,18 @@ const defaultArgsForAction = (state, me, actionName, argSpec) => {
         }
     }
 
-    if (interactionWidgets.indexOf(argSpec.widget) !== -1) {
-        return `$interaction.${argSpec.widget}`;
-    }
-
     if (argSpec.widget === "struct") {
         let subArgs = [];
         for (const subWidget of argSpec.args) {
             subArgs = subArgs.concat(defaultArgsForAction(state, me, actionName, subWidget));
         }
-        return subArgs.join(" ");
+        return subArgs;
     }
 
     return "";
 };
 
-const ActionArgs = ({me, state, args, setArgs, sendCommand, actionName, argSpec, interaction, setInteraction}) => {
+const ActionArgs = ({me, state, args, setArgs, sendCommand, actionName, argSpec, interaction, setInteraction, updateSelection, clearSelection}) => {
     return (
         <div>
             <Widget
@@ -74,35 +70,43 @@ const ActionArgs = ({me, state, args, setArgs, sendCommand, actionName, argSpec,
                 interaction={interaction}
                 setInteraction={setInteraction}
                 setArgs={setArgs}
+                clearSelection={clearSelection}
+                updateSelection={updateSelection}
                 args={args}
                 type={argSpec.widget}
                 config={argSpec.args} />
             <br/>
             <br/>
             <button disabled={interaction.mode != null} onClick={()=>{
-                const fixedArgs = args.split(" ").map((arg) => {
-                    if (arg.startsWith("$")) {
-                        return interaction[arg.slice(13)];
-                    }
-                    return arg;
-                }).join(" ");
-                sendCommand(`${actionName} ${fixedArgs}`);
-                setInteraction({mode: null});
+                sendCommand(`${actionName} ${[args].flat(Infinity).join(" ")}`);
+                clearSelection();
+                setInteraction({});
             }}>Submit Command</button>
         </div>
     );
-} 
+}
 
 
-const getFlowForWidget = (type, config) => {
+const getFlowForWidget = (type, config, setArgs, updateSelection) => {
     if (interactionWidgets.indexOf(type) !== -1) {
-        return [type];
+        return [{
+            mode: type,
+            action: (val) => {
+                updateSelection(type, val);
+                setArgs(val);
+            },
+        }];
     }
 
     if (type === "struct") {
         let ret = [];
-        for (const subWidget of config) {
-            ret = ret.concat(getFlowForWidget(subWidget.widget, subWidget.args));
+        for (const [i, subWidget] of config.entries()) {
+            const setSubArgs = (newSubArgs) => {
+                setArgs((args) => {
+                    return update(args, {[i]: {$set: newSubArgs}});
+                });
+            };
+            ret = ret.concat(getFlowForWidget(subWidget.widget, subWidget.args, setSubArgs, updateSelection));
         }
         return ret;
     }
@@ -134,7 +138,7 @@ const Actions = (props) => {
     const [args, setArgs] = useState("");
     const [selectedAction, setSelectedAction] = useState(null);
 
-    let {me, state, error, actions, sendCommand, setInteraction, setInteractionFlow, interaction} = props;
+    let {me, state, error, actions, sendCommand, setInteraction, setInteractionFlow, interaction, updateSelection, clearSelection} = props;
     let errordiv = <div/>;
     if (error !== null && error !== undefined){
         if (error.BadCommand !== undefined){
@@ -152,8 +156,9 @@ const Actions = (props) => {
         return (
             <li className={selectedAction === actionName ? "selected" : ""} key={i} onClick={()=>{
                 setSelectedAction(actionName);
+                clearSelection();
                 setArgs(defaultArgsForAction(state, me, actionName, actions[actionName]));
-                setInteractionFlow(getFlowForWidget(actions[actionName].widget, actions[actionName].args));
+                setInteractionFlow(getFlowForWidget(actions[actionName].widget, actions[actionName].args, setArgs, updateSelection));
             }} key={i}>
                 {actionName}
             </li>
@@ -161,7 +166,7 @@ const Actions = (props) => {
     });
     let actionArgs = <span/>;
     if (actionNames.indexOf(selectedAction) != -1) {
-        actionArgs = <ActionArgs me={me} state={state} args={args} setArgs={setArgs} interaction={interaction} setInteraction={setInteraction} sendCommand={sendCommand} actionName={selectedAction} argSpec={actions[selectedAction]}/>
+        actionArgs = <ActionArgs me={me} state={state} args={args} setArgs={setArgs} interaction={interaction} setInteraction={setInteraction} sendCommand={sendCommand} actionName={selectedAction} argSpec={actions[selectedAction]} updateSelection={updateSelection} clearSelection={clearSelection}/>
     }
     return (
         <div className="actions-wrapper">

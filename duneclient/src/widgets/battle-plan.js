@@ -129,7 +129,7 @@ export default function BattlePlan({me, state, args, setArgs, maxPower}) {
 
     return (
         <div className="battle-plan">
-            <PlanLeader leaders={meFactionState.leaders} treachery={meFacitonState.treachery} selectedLeader={selected.leader} active={mePlan.leader === undefined} setLeader={(leader)=>{
+            <PlanLeader leaders={meFactionState.leaders} treachery={meFactionState.treachery} selectedLeader={selected.leader} active={mePlan.leader === undefined} setLeader={(leader)=>{
                 const newArgs = [leader, selected.number, selected.weapon ? selected.weapon : "-", selected.defense ? selected.defense : "-"].join(" ");
                 setArgs(newArgs); 
             }} />

@@ -28,7 +28,7 @@ const Plan = ({faction, traitor, isAttacker, leader, number, weapon, defense, de
     );
 }
 
-export default function Battle({roundstate, factionOrder, interaction, setInteraction}) {
+export default function Battle({roundstate, factionOrder, interaction, selection}) {
     const battlesToPick = () => {
         const pickable = roundstate.battles.filter((battle)=>{
             return battle[0] == roundstate.faction_turn;
@@ -42,7 +42,7 @@ export default function Battle({roundstate, factionOrder, interaction, setIntera
 
         const pickers = pickable.map((battle)=> {
             let selected = false;
-            if (interaction["battle-select"] === battle.slice(1).join(" ")){
+            if (selection["battle-select"] === battle.slice(1).join(" ")){
                 selected = true;
             }
             if (roundstate.stage === "battle") {
@@ -54,11 +54,8 @@ export default function Battle({roundstate, factionOrder, interaction, setIntera
             return (
                 <div className={"picker" + (active ? " active" : "") + (selected ? " selected": "")} 
                      key={battle.join("-")} onClick={()=>{
-                    if (interaction.mode === "battle-select") {
-                        setInteraction(update(interaction, {
-                            [interaction.mode]: {$set: battle.slice(1).join(" ")},
-                            mode: {$set: null},
-                        }));
+                     if (interaction.mode === "battle-select") {
+                         interaction.action(battle.slice(1).join(" "));
                     }
                 }}>
                     <Logo faction={battle[1]} diameter={80}/>

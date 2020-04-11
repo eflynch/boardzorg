@@ -15,8 +15,8 @@ const Logo = ({faction, diameter, x, y}) => {
     return <image xlinkHref={`/static/app/png/${faction}_logo.png`} x={x} y={y} width={diameter} height={diameter}/>;
 }
 
-const BlankLogo = ({diameter, x, y, ...props}) => {
-    return <circle className="blank-logo" r={diameter/2} cx={x+diameter/2} cy={y+diameter/2} {...props}/>;
+const BlankLogo = ({diameter, className, x, y, ...props}) => {
+    return <circle className={"blank-logo " + className} r={diameter/2} cx={x+diameter/2} cy={y+diameter/2} {...props}/>;
 }
 
 const MapPart = ({className, selected, onClick, paths, ...props}) => {
@@ -139,7 +139,7 @@ class Board extends React.Component {
     }
 
     getLogos () {
-        const {me, interaction, setInteraction} = this.props;
+        const {me, interaction, selection} = this.props;
         const allLogoPositions = Object.keys(LogoLocations).map((i)=>parseInt(i));
         const emptyPositions = allLogoPositions.filter((position)=>{
             const matches = this.props.logoPositions.filter(([faction, pos]) => {
@@ -154,24 +154,20 @@ class Board extends React.Component {
                 return <Logo key={faction} diameter={0.05} faction={faction} x={left} y={top}/>;
             });
 
-        const mode = interaction.mode;
-        if (mode === "token-select" || interaction["token-select"]) {
+        if (interaction.mode === "token-select" || selection["token-select"]) {
             logos = logos.concat(emptyPositions.map((position)=>{
                 const {top, left} = LogoLocations[position];
-                const onClick = mode === "token-select" ? () => {
-                    setInteraction(update(interaction, {
-                        [mode]: {$set: position},
-                        mode: {$set: null},
-                    }));
+                const onClick = interaction.mode === "token-select" ? () => {
+                    interaction.action(position);
                 } : null;
-                if (interaction["token-select"] === null) {
+                if (selection["token-select"] == null) {
                     return <BlankLogo
                             key={position}
                             diameter={0.05}
                             x={left} y={top}
                             onClick={onClick}
                             className={onClick ? "active" : ""}/>;
-                } else if (interaction["token-select"] === position) {
+                } else if (selection["token-select"] === position) {
                     return <Logo key={"me"} diameter={0.05} faction={me} x={left} y={top}/>;
                 }
             }));
@@ -179,41 +175,42 @@ class Board extends React.Component {
         return logos;
     }
 
-    _getMapParts(paths, className, onClick, selected) {
+    _getMapParts(paths, className, onClick, selectedParts) {
         let spaces = Object.keys(paths).map((territory) => {
             let thisOnClick = onClick ? ()=>{onClick(territory);} : undefined;
-            const isSelected = (selected !== undefined && selected !== null) && (territory == selected.replace(" ", "-"));
+            const isSelected = selectedParts.indexOf(territory) !== -1;
             return <MapPart key={territory +"path"} className={className} onClick={thisOnClick} selected={isSelected} paths={paths[territory]} />;
         });
         return spaces;
     }
 
     getSpaces () {
-        const {interaction, setInteraction} = this.props;
+        const {interaction, selection} = this.props;
         const inInteraction = interaction.mode === "space-select";
-        const selected = interaction["space-select"];
+        const selectedParts = [selection["space-select"]];
 
-        if (!inInteraction && !selected) {
+        if (!inInteraction && !selectedParts.length) {
             return <g/>;
         }
 
         const onClick = inInteraction ? (space) => {
-            setInteraction(update(interaction, {[interaction.mode]: {$set: space}, mode: {$set: null}}));
+            interaction.action(space);
         } : null;
 
-        return this._getMapParts(spacePaths, "space", onClick, selected);
+        return this._getMapParts(spacePaths, "space", onClick, selectedParts);
     }
 
     getSpaceSectors () {
-        const {interaction, setInteraction} = this.props;
+        const {interaction, selection} = this.props;
 
         const inInteraction =
               interaction.mode === "space-sector-select-start" ||
               interaction.mode === "space-sector-select-end";
 
-        const selected =
-              interaction["space-sector-select-end"] || interaction["space-sector-select-start"];
-        if (!inInteraction && !selected) {
+        const selectedParts = [selection["space-sector-select-end"], selection["space-sector-select-start"]].map((part)=>{
+            return part !== undefined ? part.replace(" ", "-") : part;
+        });
+        if (!inInteraction && !selectedParts.length) {
             return <g/>;
         }
 
@@ -221,28 +218,40 @@ class Board extends React.Component {
             let split = spaceSector.split("-");
             const sector = split.pop();
             const space = split.join("-");
-            setInteraction(update(interaction, {
-                [interaction.mode]: {$set: [space, sector].join(" ")},
-                mode: {$set: null}}));
+            interaction.action(`${space} ${sector !== "" ? sector : -1}`);
         } : null;
 
-        return  this._getMapParts(spaceSectorPaths, "spaceSector", onClick, selected);
+        return  this._getMapParts(spaceSectorPaths, "spaceSector", onClick, selectedParts);
+    }
+
+    getMovementArrows () {
+        const {interaction, selection} = this.props;
+        if (selection["space-sector-select-start"] === undefined || selection["space-sector-select-end"] === undefined) {
+            return;
+        }
+        const [aSpace, aSector] = selection["space-sector-select-start"].split(" ");
+        const [bSpace, bSector] = selection["space-sector-select-end"].split(" ");
+        return (
+            <line stroke="black" strokeWidth={0.005}
+                x1={TokenLocations[aSpace][aSector][1].left} y1={TokenLocations[aSpace][aSector][1].top}
+                x2={TokenLocations[bSpace][bSector][1].left} y2={TokenLocations[bSpace][bSector][1].top} />
+        );
     }
 
     getSectors () {
-        const {interaction, setInteraction} = this.props;
+        const {interaction, selection} = this.props;
         const inInteraction = interaction.mode === "sector-select";
-        const selected = interaction["sector-select"];
+        const selectedParts = [selection["sector-select"]];
 
-        if (!inInteraction && !selected) {
+        if (!inInteraction && !selectedParts.length) {
             return <g/>;
         }
 
         const onClick = inInteraction ? (space) => {
-            setInteraction(update(interaction, {[interaction.mode]: {$set: sector}, mode: {$set: null}}));
+            interaction.action(space);
         } : null;
 
-        return this._getMapParts(sectorPaths, "sector", onClick, selected);
+        return this._getMapParts(sectorPaths, "sector", onClick, selectedParts);
     }
 
     render () {
@@ -279,6 +288,7 @@ class Board extends React.Component {
                     {futureSpice}
                     {this.getSpaces()}
                     {this.getSpaceSectors()}
+                    {this.getMovementArrows()}
                     {this.getLogos()}
                     {this.getSpice()}
                     {this.getTokenPiles()}

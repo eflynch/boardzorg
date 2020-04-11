@@ -144,7 +144,8 @@ class AnswerPrescience(Action):
                 number = int(self.part)
             except Exception as e:
                 raise BadCommand("Not a good number")
-            ops.pick_number(new_game_state, is_attacker, int(self.part))
+            max_power = ops.compute_max_power_faction(game_state, self.faction)
+            ops.pick_number(new_game_state, max_power, is_attacker, number)
         elif prescience == "weapon":
             ops.pick_weapon(new_game_state, is_attacker, self.part if self.part != "-" else None)
         elif prescience == "defense":
