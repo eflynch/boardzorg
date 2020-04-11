@@ -40,7 +40,7 @@ const GetLogoPositions = (faction_state) => {
 }
 
 
-const RoundState = ({roundState, stormPosition, logoPositions, interaction, setInteraction}) => {
+const RoundState = ({roundState, stormPosition, logoPositions, interaction, selection}) => {
     let text = roundState.round + " round";
     if (roundState.stage !== undefined) {
         text += "» " + roundState.stage;
@@ -54,7 +54,7 @@ const RoundState = ({roundState, stormPosition, logoPositions, interaction, setI
         stateDiv = <Movement roundstate={roundState} />;
     }
     if (roundState && roundState.round == "battle"){
-        stateDiv = <Battle factionOrder={factionOrder} roundstate={roundState} interaction={interaction} setInteraction={setInteraction} />;
+        stateDiv = <Battle factionOrder={factionOrder} roundstate={roundState} interaction={interaction} selection={selection}/>;
     }
     if (stateDiv === null){
         return (
