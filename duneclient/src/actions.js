@@ -61,7 +61,7 @@ const defaultArgsForAction = (state, me, actionName, argSpec) => {
     return "";
 };
 
-const ActionArgs = ({me, state, args, setArgs, sendCommand, actionName, argSpec, interaction, setInteraction, selection, setSelection}) => {
+const ActionArgs = ({me, state, args, setArgs, sendCommand, actionName, argSpec, interaction, setInteraction, updateSelection, clearSelection}) => {
     return (
         <div>
             <Widget
@@ -70,8 +70,8 @@ const ActionArgs = ({me, state, args, setArgs, sendCommand, actionName, argSpec,
                 interaction={interaction}
                 setInteraction={setInteraction}
                 setArgs={setArgs}
-                selection={selection}
-                setSelection={setSelection}
+                clearSelection={clearSelection}
+                updateSelection={updateSelection}
                 args={args}
                 type={argSpec.widget}
                 config={argSpec.args} />
@@ -79,7 +79,7 @@ const ActionArgs = ({me, state, args, setArgs, sendCommand, actionName, argSpec,
             <br/>
             <button disabled={interaction.mode != null} onClick={()=>{
                 sendCommand(`${actionName} ${[args].flat(Infinity).join(" ")}`);
-                setSelection({});
+                clearSelection();
                 setInteraction({});
             }}>Submit Command</button>
         </div>
@@ -127,7 +127,7 @@ const Actions = (props) => {
     const [args, setArgs] = useState("");
     const [selectedAction, setSelectedAction] = useState(null);
 
-    let {me, state, error, actions, sendCommand, setInteraction, setInteractionFlow, interaction, selection, setSelection} = props;
+    let {me, state, error, actions, sendCommand, setInteraction, setInteractionFlow, interaction, updateSelection, clearSelection} = props;
     let errordiv = <div/>;
     if (error !== null && error !== undefined){
         if (error.BadCommand !== undefined){
@@ -145,7 +145,7 @@ const Actions = (props) => {
         return (
             <li className={selectedAction === actionName ? "selected" : ""} key={i} onClick={()=>{
                 setSelectedAction(actionName);
-                setSelection=({});
+                clearSelection();
                 setArgs(defaultArgsForAction(state, me, actionName, actions[actionName]));
 //JRMTODO                setInteractionFlow(getFlowForWidget(actions[actionName].widget, actions[actionName].args));
             }} key={i}>
@@ -155,7 +155,7 @@ const Actions = (props) => {
     });
     let actionArgs = <span/>;
     if (actionNames.indexOf(selectedAction) != -1) {
-        actionArgs = <ActionArgs me={me} state={state} args={args} setArgs={setArgs} interaction={interaction} setInteraction={setInteraction} sendCommand={sendCommand} actionName={selectedAction} argSpec={actions[selectedAction]} selection={selection} setSelection={setSelection}/>
+        actionArgs = <ActionArgs me={me} state={state} args={args} setArgs={setArgs} interaction={interaction} setInteraction={setInteraction} sendCommand={sendCommand} actionName={selectedAction} argSpec={actions[selectedAction]} updateSelection={updateSelection} clearSelection={clearSelection}/>
     }
     return (
         <div className="actions-wrapper">

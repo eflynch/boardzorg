@@ -179,13 +179,16 @@ const DiscardTreachery = ({state, me, args, setArgs}) => {
     );
 };
  
-const Choice = ({args, setArgs, config, ...props}) => {
+const Choice = ({args, setArgs, clearSelection, config, ...props}) => {
     return (
         <div>
             {config.map((subWidget, i) => {
                 return (
                     <div key={i}>
-                        <Widget {...props} key={i} type={subWidget.widget} config={subWidget.args} args={args} setArgs={setArgs}/>
+                        <Widget {...props} key={i} type={subWidget.widget} config={subWidget.args} args={args} setArgs={(args) => {
+                            clearSelection();
+                            setArgs(args);
+                        }}/>
                     </div>
                 );
             })}
@@ -198,18 +201,19 @@ const Struct = ({args, setArgs, config, ...props}) => {
         <div>
             {config.map((subWidget, i) => {
                 return <Widget {...props} key={i} type={subWidget.widget} config={subWidget.args} setArgs={(subArgs)=> {
-                    const newArgs = update(args, {[i]: {$set: subArgs}});
-                    setArgs(newArgs);
+                    setArgs((args) => {
+                        return update(args, {[i]: {$set: subArgs}});
+                    });
                 }} args={args[i]} />
             })}
         </div>
     );
 };
 
-const ArrayWidget = ({args, setArgs, config}) => {
+const ArrayWidget = ({args, setArgs, config, ...props}) => {
     const subArgs = args.split(":");
     let widgets = subArgs.map((arg, i) => {
-        return <Widget key={i} type={config.widget} config={config.args} args={arg} setArgs={(args)=> {
+        return <Widget {...props} key={i} type={config.widget} config={config.args} args={arg} setArgs={(args)=> {
             setArgs(update(subArgs, {[i]: {$set: args}}).join(":"));
         }} args={subArgs[i]} />;
     });
@@ -234,14 +238,19 @@ const Constant = ({value, setArgs}) => {
 }
 
 
-const SelectOnMap = ({args, setArgs, interaction, setInteraction, mode, nullable}) => {
+const SelectOnMap = ({args, setArgs, interaction, setInteraction, mode, nullable, updateSelection}) => {
+    const setAndSelectArgs = (newArgs) => {
+        updateSelection(mode, newArgs);
+        setArgs(newArgs);
+    };
+
     let pieces = [
             <div key="select" className={"select-on-map" + (mode === interaction.mode ? " on" : " off")} onClick={(e)=>{
-                setArgs("");
+                setAndSelectArgs("");
                 setInteraction({
                         mode,
                         action: (val) => {
-                            setArgs(val);
+                            setAndSelectArgs(val);
                         },
                 });
             }}>Select on Board</div>,
@@ -302,34 +311,22 @@ const FremenPlacementSelect = ({args, setArgs, config}) => {
 
 
 const Widget = (props) => {
-    const {me, state, type, args, config, interaction, setInteraction, selection, setSelection} = props;
-    const setArgs = (args) => {
-        if (!args || args === "-") {
-            setSelection(update(selection, {
-                $unset: [type]
-            }));
-        } else {
-            setSelection(update(selection, {
-                [type]: {$set: args}
-            }));
-        }
-        props.setArgs(args);
-    };
+    const {me, state, type, args, config, interaction, setInteraction, clearSelection, updateSelection, setArgs} = props;
 
     if (type === "null") {
         return "";
     }
 
     if (type === "choice") {
-        return <Choice args={args} setArgs={setArgs} config={config} interaction={interaction} setInteraction={setInteraction} selection={selection} setSelection={setSelection}/>; 
+        return <Choice args={args} setArgs={setArgs} config={config} interaction={interaction} setInteraction={setInteraction} updateSelection={updateSelection}/>; 
     }
 
     if (type === "struct") {
-        return <Struct args={args} setArgs={setArgs} config={config} interaction={interaction} setInteraction={setInteraction} selection={selection} setSelection={setSelection}/>; 
+        return <Struct args={args} setArgs={setArgs} config={config} interaction={interaction} setInteraction={setInteraction} updateSelection={updateSelection}/>; 
     }
 
     if (type === "input") {
-        return <Input args={args} setArgs={setArgs} config={config}/>; 
+        return <Input args={args} setArgs={setArgs} config={config} updateSelection/>; 
     }
 
     if (type === "faction-select") {
@@ -345,11 +342,11 @@ const Widget = (props) => {
     }
 
     if (type === "token-select") {
-        return <SelectOnMap mode="token-select" interaction={interaction} setInteraction={setInteraction} setArgs={setArgs} args={args}/>;
+        return <SelectOnMap mode="token-select" setInteraction={setInteraction} setArgs={setArgs} updateSelection={updateSelection} args={args} />;
     }
 
     if (type === "array") {
-        return <ArrayWidget args={args} setArgs={setArgs} config={config} selection={selection} setSelection={setSelection}/>;
+        return <ArrayWidget args={args} setArgs={setArgs} config={config}/>;
     }
 
     if (type === "fremen-placement-select") {
@@ -361,15 +358,15 @@ const Widget = (props) => {
     }
 
     if (type === "space-select") {
-        return <SelectOnMap mode="space-select" args={args} setArgs={setArgs} config={config} interaction={interaction} />;
+        return <SelectOnMap mode="space-select" args={args} setArgs={setArgs} config={config} interaction={interaction} setInteraction={setInteraction} updateSelection={updateSelection}/>;
     }
 
     if (type === "space-sector-select-start") {
-        return <SelectOnMap mode="space-sector-select-start" args={args} setArgs={setArgs} config={config} interaction={interaction} setInteraction={setInteraction}/>;
+        return <SelectOnMap mode="space-sector-select-start" args={args} setArgs={setArgs} config={config} interaction={interaction}  setInteraction={setInteraction} updateSelection={updateSelection}/>;
     }
 
     if (type === "space-sector-select-end") {
-        return <SelectOnMap mode="space-sector-select-end" args={args} setArgs={setArgs} config={config} interaction={interaction} setInteraction={setInteraction}/>;
+        return <SelectOnMap mode="space-sector-select-end" args={args} setArgs={setArgs} config={config} interaction={interaction}  setInteraction={setInteraction} updateSelection={updateSelection}/>;
     }
 
     if (type === "traitor-select") {
@@ -377,11 +374,7 @@ const Widget = (props) => {
     }
 
     if (type === "battle-select") {
-        return <SelectOnMap mode="battle-select" interaction={interaction} setInteraction={setInteraction} setArgs={setArgs}/>;
-    }
-
-    if (type === "leader-input") {
-        return <SelectOnMap mode="leader-input" interaction={interaction} setInteraction={setInteraction} setArgs={setArgs}/>;
+        return <SelectOnMap mode="battle-select" setInteraction={setInteraction} setArgs={setArgs} interaction={interaction}  updateSelection={updateSelection}/>;
     }
 
     if (type === "battle-plan") {

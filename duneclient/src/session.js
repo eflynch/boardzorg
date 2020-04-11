@@ -103,38 +103,72 @@ const maybeFlowInteraction = (interaction, selection, flows) => {
 };
 
 export default function Session({state, actions, history, me, error, sendCommand}) {
-    const [interaction, setInteractionRaw] = useState({
-        // Type of selection
-        mode: null,
-        // Function to call with the selection
-        action: null,
+    const [combinedState, setCombinedState] = useState({
+        interaction: {},
+        selection: {},
+        interactionFlow: [],
     });
-    // An object of globally-selected objects, tagged with the interaction mode that selected them
-    const [selection, setSelection] = useState({});
-    // An list of objects containing interaction modes and actions to perform.
-    // This is used to reduce extra clicking on "SelectOnMap" buttons
-    const [interactionFlow, setInteractionFlowRaw] = useState([]);
 
-    const [errorState, setErrorState] = useState(error);
+    const interaction = combinedState.interaction;
+    const selection = combinedState.selection;
+
+    const clearSelection = () => {
+        setCombinedState((combinedState) => {
+            return update(combinedState, {selection: {$set: {}}});
+        });
+    };
+
+    const updateSelection = (mode, value) => {
+        console.log("updating selection", mode, value);
+        if (value && value != "-") {
+            setCombinedState((combinedState) => {
+                return update(combinedState, {
+                    selection: {
+                        [mode]: {$set: value}
+                    }
+                });
+            });
+        } else {
+            setCombinedState((combinedState) => {
+                return update(combinedState, {
+                    selection: {
+                        $unset: [mode]
+                    }
+                });
+            });
+        }
+    };
 
     const setInteraction = (interaction) => {
-        interaction = maybeFlowInteraction(interaction, selection, interactionFlow);
-        const clientAction = interaction.action;
-        setInteractionRaw(
-            update(interaction,
-                   {action: {$set: (...args) => {
-                       if (clientAction) {
-                           clientAction(...args);
-                       }
-                       setInteraction({});
-                   }}}));
+        setCombinedState((combinedState) => {
+            interaction = maybeFlowInteraction(interaction,
+                                               combinedState.selection,
+                                               combinedState.interactionFlow);
+            const clientAction = interaction.action;
+            interaction = update(
+                interaction,
+                {action: {$set: (...args) => {
+                    if (clientAction) {
+                        clientAction(...args);
+                    }
+                    setInteraction({});
+                }}});
+            return update(combinedState,
+                          {interaction: {$set: interaction}});
+        });
     };
 
+
     const setInteractionFlow = (flow) => {
-        setInteractionRaw(
-            maybeFlowInteraction({}, selection, flow));
-        setInteractionFlowRaw(flow);
+        setCombinedState((combinedState) => {
+            const interaction = maybeFlowInteraction({}, combinedState.selection, flow);
+            return update(combinedState,
+                          {interaction: {$set: interaction},
+                           interactionFlow: flow});
+        });
     };
+
+    const [errorState, setErrorState] = useState(error);
 
     useEffect(()=>{
         if (error !== undefined) {
@@ -174,7 +208,7 @@ export default function Session({state, actions, history, me, error, sendCommand
                 </div>
                 <RoundState interaction={interaction} selection={selection} roundState={state.round_state} logoPositions={logoPositions} stormPosition={state.storm_position} />
             </div>
-            <History state={state} me={me} interaction={interaction} setInteraction={setInteraction} error={errorState} actions={actions} sendCommand={sendCommand} commandLog={history} setInteractionFlow={setInteractionFlow} selection={selection} setSelection={setSelection}/>
+            <History state={state} me={me} interaction={interaction} setInteraction={setInteraction} error={errorState} actions={actions} sendCommand={sendCommand} commandLog={history} setInteractionFlow={setInteractionFlow} selection={selection} updateSelection={updateSelection} clearSelection={clearSelection}/>
             <div className="factions">
                 {factions}
             </div>
