@@ -7,6 +7,7 @@ from dune.state.rounds import battle
 from dune.exceptions import IllegalAction, BadCommand
 from dune.state.leaders import get_leader_faction
 from dune.actions.battle import ops
+from dune.actions.battle.winner import DiscardTreachery, TankUnits
 
 logger = getLogger(__name__)
 
@@ -199,7 +200,7 @@ class AutoResolveWithTraitor(Action):
                 ops.tank_unit(new_game_state, loser, space, sec, u)
 
         new_game_state.round_state.stage_state.winner = winner
-        new_game_state.pause.extend(battle_id[:2])
+        new_game_state.pause.append(loser)
         new_game_state.round_state.stage_state.substage_state = battle.WinnerSubStage()
         new_game_state.round_state.stage_state.substage_state.power_left_to_tank = 0
         return new_game_state
@@ -384,7 +385,7 @@ class AutoResolve(Action):
         # Winner Must Tank Units (increase KH count if atreides)
         # Winner Must decide whether to discard treachery (return remaining ones to winner)
 
-        new_game_state.pause.extend(battle_id[:2])
+        new_game_state.pause.append(loser)
         new_game_state.round_state.stage_state.winner = winner
         new_game_state.round_state.stage_state.substage_state = battle.WinnerSubStage()
         new_game_state.round_state.stage_state.substage_state.power_left_to_tank = power_left_to_tank
