@@ -338,17 +338,19 @@ class AutoResolve(Action):
         dead_leaders = []
 
         def clash_leaders(plan_a, plan_b, faction_b, location):
+            if plan_b["leader"] == "Cheap-Hero/Heroine":
+                return 0
+
             if ops.clash_weapons(plan_a["weapon"], plan_b["defense"]):
                 ops.tank_leader(new_game_state, faction_b, plan_b["leader"])
                 dead_leaders.append(plan_b["leader"])
                 return 0
-            if plan_b["leader"] != "Cheap-Hero/Heroine":
-                new_game_state.round_state.leaders_used[plan_b["leader"][0]] = {
-                    "location": location,
-                    "leader": plan_b["leader"]
-                }
-                return plan_b["leader"][1]
-            return 0
+
+            new_game_state.round_state.leaders_used[plan_b["leader"][0]] = {
+                "location": location,
+                "leader": plan_b["leader"]
+            }
+            return plan_b["leader"][1]
 
         attacker_power += clash_leaders(stage_state.defender_plan, stage_state.attacker_plan, battle_id[0], (battle_id[2], battle_id[3]))
         defender_power += clash_leaders(stage_state.attacker_plan, stage_state.defender_plan, battle_id[1], (battle_id[2], battle_id[3]))
