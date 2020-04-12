@@ -3,7 +3,6 @@
 ## Ready For Dev
 
 * Support Leader Capture mechanic
-* Support Kwizatz Haderach
 * Support Special Treachery Cards
 * Support ANY TIME Karama powers
 * Show battle round state
@@ -29,6 +28,7 @@
 
 ## In Progress
 
+* Support Kwizatz Haderach
 
 # Notes
 
