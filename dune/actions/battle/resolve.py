@@ -203,6 +203,10 @@ class AutoResolveWithTraitor(Action):
         new_game_state.pause.append(loser)
         new_game_state.round_state.stage_state.substage_state = battle.WinnerSubStage()
         new_game_state.round_state.stage_state.substage_state.power_left_to_tank = 0
+        if not (stage_state.attacker_plan["weapon"] or stage_state.attacker_plan["defense"]):
+            new_game_state.round_state.stage_state.substage_state.discard_done = True
+            new_game_state.pause.append(winner)
+
         return new_game_state
 
 
@@ -391,4 +395,10 @@ class AutoResolve(Action):
         new_game_state.round_state.stage_state.winner = winner
         new_game_state.round_state.stage_state.substage_state = battle.WinnerSubStage()
         new_game_state.round_state.stage_state.substage_state.power_left_to_tank = power_left_to_tank
+
+        if not (stage_state.attacker_plan["weapon"] or stage_state.attacker_plan["defense"]):
+            new_game_state.round_state.stage_state.substage_state.discard_done = True
+            if power_left_to_tank == 0:
+                new_game_state.pause.append(winner)
+
         return new_game_state
