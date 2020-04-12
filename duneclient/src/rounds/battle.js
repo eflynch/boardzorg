@@ -10,11 +10,18 @@ const Logo = ({faction, diameter, ...props}) => {
 };
 
 const Plan = ({faction, traitor, isAttacker, leader, number, weapon, defense, dead}) => {
-    const leaderToken = leader !== undefined ? <LeaderToken traitor={traitor} name={leader[0]}/> : <span className="question-leader">?</span>;
+    let leaderToken = leader !== undefined ? <LeaderToken traitor={traitor} name={leader[0]}/> : <span className="question-leader">?</span>;
+    const cardWidth = 100;
+    if (leader === "Cheap-Hero/Heroine") {
+         leaderToken = <Card key="Cheap-Hero/Heroine"
+                        type="Treachery"
+                        name="Cheap-Hero/Heroine"
+                        width={cardWidth}/>;
+    }
     const numberText = number !== undefined ? number : <span>?</span>;
     const resultText = (number !== undefined && leader !== undefined) ? <span>{number + (dead ? 0 : leader[1])}</span> : <span>?</span>;
-    const weaponShow = weapon !== undefined ? <Card type="Treachery" name={weapon ? weapon : "Reverse"} width={100} /> : <span className="question-card">?</span>;
-    const defenseShow = defense !== undefined ? <Card type="Treachery" name={defense ? defense : "Reverse"} width={100} /> : <span className="question-card">?</span>;
+    const weaponShow = weapon !== undefined ? <Card type="Treachery" name={weapon ? weapon : "Reverse"} width={cardWidth} /> : <span className="question-card">?</span>;
+    const defenseShow = defense !== undefined ? <Card type="Treachery" name={defense ? defense : "Reverse"} width={cardWidth} /> : <span className="question-card">?</span>;
     return (
         <div style={{display:"flex", alignItems: "center"}}>
             <div style={{display:"flex", alignItems: "center"}}>
