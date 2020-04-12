@@ -28,7 +28,7 @@ export function PlanLeader({leaders, treachery, selectedLeader, active, setLeade
                     dead={false} onClick={onClick}/>;
     });
     if (treachery.indexOf("Cheap-Hero/Heroine") !== -1) {
-        const {onClick, isSelected} = handleLeader("Cheap-Here/Heroine", 0);
+        const {onClick, isSelected} = handleLeader("Cheap-Hero/Heroine", 0);
         meLeaders.push(
             <Card key="Cheap-Hero/Heroine"
                 type="Treachery" name="Cheap-Hero/Heroine"
