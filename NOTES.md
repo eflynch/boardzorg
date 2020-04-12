@@ -2,6 +2,7 @@
 
 ## Ready For Dev
 
+* Support situation where all leaders are tanked and you have to play without leader
 * Support Leader Capture mechanic
 * Support Special Treachery Cards
 * Support ANY TIME Karama powers
@@ -28,7 +29,7 @@
 
 ## In Progress
 
-* Support Kwizatz Haderach
+* Support Kwisatz Haderach [russell]
 
 # Notes
 
@@ -64,7 +65,7 @@
     * block A prescience
     * block B voice
     * Block H leader capture
-    * Block A kwizatz haderach
+    * Block A kwisatz haderach
     * Weaken F 2's
     * Weak E 2's
     * A KARAMA look at b entire plan

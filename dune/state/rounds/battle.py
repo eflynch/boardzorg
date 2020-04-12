@@ -24,7 +24,7 @@ from dune.state.rounds import RoundState, StageState, SubStageState
 #   karama-prescience : KARAMA_CAncel_Presecience / Answer Prescience question
 #   karama-entire : KARMA_Entire Battle plan / Pass / skip
 #   reveal-entire : Reveal entire plan
-#   karama-kwizatz-harderach : KARAMA_cancel_kh / pass / skip
+#   karama-kwisatz-harderach : KARAMA_cancel_kh / pass / skip
 #   commit-battle-plans : commit-plan / auto-commit-plan
 #   traitors : reveal-traitor / pass-reveal-traitor / skip
 #   resolve-battle : auto-resolve
@@ -71,8 +71,8 @@ class BattleStage(StageState):
         self.karama_fedaykin = False
         self.karama_fedaykin_passes = []
 
-        self.karama_kwizatz_haderach = False
-        self.karama_kwizatz_haderach_passes = []
+        self.karama_kwisatz_haderach = False
+        self.karama_kwisatz_haderach_passes = []
 
         self.traitor_passes = []
         self.traitor_revealers = []
@@ -90,7 +90,7 @@ class BattleStage(StageState):
         visible["voice_is_attacker"] = self.voice_is_attacker
         visible["karama_sardaukar"] = self.karama_sardaukar
         visible["karama_fedaykin"] = self.karama_fedaykin
-        visible["karama_kwizatz_haderach"] = self.karama_kwizatz_haderach
+        visible["karama_kwisatz_haderach"] = self.karama_kwisatz_haderach
         visible["traitor_revealers"] = self.traitor_revealers
 
         attacker = None
@@ -126,6 +126,10 @@ class BattleRound(RoundState):
     def __init__(self):
         self.faction_turn = None
         self.leaders_used = {}
+
+        self.kwisatz_haderach_leader = None
+        self.kwisatz_haderach_leader_revealed = False
+
         self.battles = None
         self.stage = "setup"
 
@@ -137,4 +141,6 @@ class BattleRound(RoundState):
         visible["stage"] = self.stage
         if self.stage == "battle":
             visible["stage_state"] = self.stage_state.visible(game_state, faction)
+        if self.kwisatz_haderach_leader_revealed or faction == "atreides":
+            visible["kwisatz_haderach_leader"] = self.kwisatz_haderach_leader
         return visible

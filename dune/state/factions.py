@@ -58,14 +58,20 @@ class AtreidesState(FactionState):
         self.reserve_units = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
         self.spice = 10
         self.units_lost = 0
-        self.kwizatz_haderach_available = False
-        self.kwizatz_haderach_tanks = False
+        self.kwisatz_haderach_available = False
+
+        # Note that the Kwisatz Haderach interacts somewhat strangely with the other tank leaders
+        # If kwisatz_haderach_tanks is "None", the Kwisatz Haderach is not in the tanks.
+        # If this is a number, that is the death count all other leaders must exceed before
+        # the Kwisatz Haderach can be revived.
+        self.kwisatz_haderach_tanks = None
+
 
     def visible(self, game_state, faction):
         visible = super().visible(game_state, faction)
         visible["units_lost"] = self.units_lost
-        visible["kwizatz_haderach_available"] = self.kwizatz_haderach_available
-        visible["kwizatz_haderach_tanks"] = self.kwizatz_haderach_tanks
+        visible["kwisatz_haderach_available"] = self.kwisatz_haderach_available
+        visible["kwisatz_haderach_tanks"] = self.kwisatz_haderach_tanks
         return visible
 
 

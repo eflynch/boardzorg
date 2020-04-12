@@ -9,10 +9,10 @@ const Logo = ({faction, diameter, ...props}) => {
     return <img {...props} src={`/static/app/png/${faction}_logo.png`} width={diameter} height={diameter}/>;
 };
 
-const Plan = ({faction, traitor, isAttacker, leader, number, weapon, defense, dead}) => {
-    const leaderToken = leader !== undefined ? <LeaderToken traitor={traitor} name={leader[0]}/> : <span className="question-leader">?</span>;
+const Plan = ({faction, traitor, isAttacker, leader, number, weapon, defense, dead, kwisatz_haderach}) => {
+    const leaderToken = leader !== undefined ? <LeaderToken traitor={traitor && !kwisatz_haderach} name={leader[0]}/> : <span className="question-leader">?</span>;
     const numberText = number !== undefined ? number : <span>?</span>;
-    const resultText = (number !== undefined && leader !== undefined) ? <span>{number + (dead ? 0 : leader[1])}</span> : <span>?</span>;
+    const resultText = (number !== undefined && leader !== undefined) ? <span>{number + (dead ? 0 : leader[1] + (kwisatz_haderach ? 2 : 0))}</span> : <span>?</span>;
     const weaponShow = weapon !== undefined ? <Card type="Treachery" name={weapon ? weapon : "Reverse"} width={100} /> : <span className="question-card">?</span>;
     const defenseShow = defense !== undefined ? <Card type="Treachery" name={defense ? defense : "Reverse"} width={100} /> : <span className="question-card">?</span>;
     return (
@@ -20,7 +20,7 @@ const Plan = ({faction, traitor, isAttacker, leader, number, weapon, defense, de
             <div style={{display:"flex", alignItems: "center"}}>
                 <div style={{display:"flex", flexDirection:"column", alignItems:"center"}}>
                     {leaderToken}
-                    {traitor ? "TRAITOR" : ""}
+                    {kwisatz_haderach ? <LeaderToken name="Kwisatz-Haderach"/> : null}
                 </div>
                     <div className="big-unit"> + {numberText} = {resultText} : </div>
             </div><div style={{width:5, height:1}}/>{weaponShow} {defenseShow}
@@ -83,8 +83,8 @@ export default function Battle({roundstate, factionOrder, interaction, selection
                 <div>
                     Plans Revealed:
                     <div style={{display:"flex", justifyContent:"space-around"}}>
-                        <Plan faction={attacker} traitor={traitor_revealers.indexOf(defender) !== -1} isAttacker={true} {...roundstate.stage_state.attacker_plan} />
-                        <Plan faction={defender} traitor={traitor_revealers.indexOf(attacker) !== -1} isAttacker={false} {...roundstate.stage_state.defender_plan} />
+                        <Plan faction={attacker} traitor={traitor_revealers.indexOf(defender) !== -1} isAttacker={true} {...roundstate.stage_state.attacker_plan}/>
+                        <Plan faction={defender} traitor={traitor_revealers.indexOf(attacker) !== -1} isAttacker={false} {...roundstate.stage_state.defender_plan}/>
                     </div>
                 </div>
             );
@@ -153,7 +153,7 @@ export default function Battle({roundstate, factionOrder, interaction, selection
                 {stage_state.voice ? <LogoMarker faction="bene-gesserit" name={voiceText}/> : ""}
                 {stage_state.karama_sardaukar ? <LogoMarker faction="emperor" name={"No Sardaukar"}/> : ""}
                 {stage_state.karama_fedakin ? <LogoMarker faction="fremen" name={"No Fedaykin"}/> : ""}
-                {stage_state.karama_kwizatz_haderach ? <LogoMarker faction="atreides" name={"No Kwizatz Haderach"}/> : ""}
+                {stage_state.karama_kwisatz_haderach ? <LogoMarker faction="atreides" name={"No Kwisatz Haderach"}/> : ""}
             </div>
         );
     };
