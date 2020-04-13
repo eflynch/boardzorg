@@ -117,12 +117,12 @@ def pick_leader(game_state, is_attacker, leader):
             if "leader" in game_state.round_state.stage_state.attacker_plan:
                 if game_state.round_state.stage_state.attacker_plan["leader"] != leader:
                     raise BadCommand("You cannot change the leader in your plan")
-            game_state.round_state.stage_state.attacker_plan["leader"] = leader
+            game_state.round_state.stage_state.attacker_plan["leader"] = (leader, 0)
         else:
             if "leader" in game_state.round_state.stage_state.defender_plan:
                 if game_state.round_state.stage_state.defender_plan["leader"] != leader:
                     raise BadCommand("You cannot change the leader in your plan")
-            game_state.round_state.stage_state.defender_plan["leader"] = leader
+            game_state.round_state.stage_state.defender_plan["leader"] = (leader, 0)
         game_state.faction_state[faction].treachery.remove(leader)
         return
 
@@ -134,7 +134,7 @@ def pick_leader(game_state, is_attacker, leader):
     m.remove_sector(game_state.storm_position)
 
     if leader[0] in game_state.round_state.leaders_used:
-        space, sector = game_state.round_state.leaders_used[leader[0]]
+        space, sector = game_state.round_state.leaders_used[leader[0]]["location"]
         if m.distance(space, sector, battle_id[2], battle_id[3]) != 0:
             raise BadCommand("That leader was already used in a battle somewhere else")
 
@@ -329,8 +329,7 @@ def tank_leader(game_state, faction, leader, kill_attached_kwisatz_haderach=Fals
 
         faction_state.kwisatz_haderach_tanks = min(faction_state.leader_death_count.values()) + 1
 
-    if leader == "Cheap-Hero/Heroine":
-        game_state.treachery_discard.insert(0, "Cheap-Hero/Heroine")
+    if leader[0] == "Cheap-Hero/Heroine":
         return
 
     if leader not in faction_state.leaders:
