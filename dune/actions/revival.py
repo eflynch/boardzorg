@@ -7,17 +7,23 @@ from dune.state.rounds.movement import MovementRound
 from dune.state.leaders import parse_leader
 
 
-def leader_revivable(game_state, faction):
+def get_revivable_leaders(game_state, faction):
     leader_death_count = game_state.faction_state[faction].leader_death_count
     if len(leader_death_count) != 5:
-        return False
+        return []
 
-    if not game_state.faction_state[faction].tank_leaders:
-        return False
+    all_revivable_leaders = []
+
+    if faction == "atreides":
+        kwisatz_haderach_tanks = game_state.faction_state[faction].kwisatz_haderach_tanks
+        if kwisatz_haderach_tanks is not None and kwisatz_haderach_tanks <= min(leader_death_count.values()):
+            all_revivable_leaders.append(("Kwisatz-Haderach", 2))
+
     for leader in game_state.faction_state[faction].tank_leaders:
         if all([leader_death_count[leader[0]] <= leader_death_count[ldr] for ldr in leader_death_count]):
-            return True
-    return False
+            return all_revivable_leaders.append(leader)
+
+    return all_revivable_leaders
 
 
 class ProgressRevival(Action):
@@ -28,7 +34,7 @@ class ProgressRevival(Action):
     @classmethod
     def _check(cls, game_state, faction):
         if game_state.round_state.faction_turn is not None:
-            if leader_revivable(game_state, game_state.round_state.faction_turn):
+            if len(get_revivable_leaders(game_state, game_state.round_state.faction_turn)) > 0:
                 raise IllegalAction("They might want to revive that leader")
 
             if game_state.faction_state[game_state.round_state.faction_turn].tank_units:
@@ -40,7 +46,7 @@ class ProgressRevival(Action):
             if game_state.faction_state[faction].tank_units:
                 new_game_state.round_state.faction_turn = faction
                 return new_game_state
-            if leader_revivable(game_state, faction):
+            if len(get_revivable_leaders(game_state, faction)) > 0:
                 new_game_state.round_state.faction_turn = faction
                 return new_game_state
 
@@ -62,16 +68,19 @@ class Revive(Action):
             if i in ["1", "2"]:
                 units.append(int(i))
             else:
+                if leader is not None:
+                    raise BadCommand("Only one leader can be revived per turn")
                 leader = i
         if leader is not None:
-            leader = parse_leader(leader)
+            if leader == "Kwisatz-Haderach":
+                leader = ("Kwisatz-Haderach", 2)
+            else:
+                leader = parse_leader(leader)
         return Revive(faction, units, leader)
 
     @classmethod
     def get_arg_spec(cls, faction=None, game_state=None):
-        leaders = []
-        if leader_revivable(game_state, faction):
-            leaders = game_state.faction_state[faction].tank_leader
+        leaders = get_revivable_leaders(game_state, faction)
         units = game_state.faction_state[faction].tank_units
         return args.Revival(leaders=leaders, units=units)
 
@@ -82,7 +91,8 @@ class Revive(Action):
 
     @classmethod
     def _check(cls, game_state, faction):
-        if (not game_state.faction_state[faction].tank_units) and not (leader_revivable(game_state, faction)):
+        if (not game_state.faction_state[faction].tank_units) and \
+           len(get_revivable_leaders(game_state, faction)) == 0:
             raise IllegalAction("You don't have anything to revive")
         cls.check_turn(game_state, faction)
 
@@ -106,23 +116,22 @@ class Revive(Action):
         if self.faction == "fremen":
             cost = 0
 
+        if self.leader:
+            cost += self.leader[1]
+
         if cost > new_game_state.faction_state[self.faction].spice:
-            raise BadCommand("You do not have the spice to revive those units")
+            raise BadCommand("You do not have the spice to perform this revival")
         new_game_state.faction_state[self.faction].spice -= cost
 
         if self.leader is not None:
-            if self.leader not in new_game_state.faction_state[self.faction].tank_leaders:
-                raise BadCommand("That leader is not in the tanks")
-            leader_death_count = new_game_state.faction_state[self.faction].leader_death_count
-            if len(leader_death_count) != 5:
-                raise BadCommand("You cannot revive leaders until they all die")
+            if self.leader not in get_revivable_leaders(game_state, self.faction):
+                raise BadCommand("That leader is not revivable")
 
-            for ldr in leader_death_count:
-                if leader_death_count[self.leader[0]] > leader_death_count[ldr]:
-                    raise BadCommand("You cannot revive a leader again until all others have died")
-
-            new_game_state.faction_state[self.faction].tank_leaders.remove(self.leader)
-            new_game_state.faction_state[self.faction].leaders.append(self.leader)
+            if self.leader[0] == "Kwisatz-Haderach":
+                new_game_state.faction_state[self.faction].kwisatz_haderach_tanks = None
+            else:
+                new_game_state.faction_state[self.faction].tank_leaders.remove(self.leader)
+                new_game_state.faction_state[self.faction].leaders.append(self.leader)
 
         faction_order = storm.get_faction_order(game_state)
         index = faction_order.index(self.faction) + 1

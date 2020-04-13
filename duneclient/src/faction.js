@@ -26,12 +26,19 @@ class Faction extends React.Component {
         }
     }
     getLeaders () {
-        const allLeaders = this.props.factionstate.leaders.concat(this.props.factionstate.tank_leaders); 
+        const allLeaders = this.props.factionstate.leaders.concat(this.props.factionstate.tank_leaders);
+        if (this.props.faction == "atreides" &&
+            this.props.factionstate.kwisatz_haderach_available) {
+            allLeaders.push(["Kwisatz-Haderach", 2]);
+        }
         return (
             <div style={{display:"flex", flexWrap:"wrap"}}>
                 {allLeaders.map((leader) => {
                     let dead = false;
                     if (this.props.factionstate.tank_leaders.indexOf(leader) !== -1){
+                        dead = true;
+                    }
+                    if (leader[0] == "Kwisatz-Haderach" && this.props.factionstate.kwisatz_haderach_tanks != null) {
                         dead = true;
                     }
                     const leaderName = leader[0];

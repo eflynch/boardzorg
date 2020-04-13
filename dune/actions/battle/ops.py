@@ -117,12 +117,12 @@ def pick_leader(game_state, is_attacker, leader):
             if "leader" in game_state.round_state.stage_state.attacker_plan:
                 if game_state.round_state.stage_state.attacker_plan["leader"] != leader:
                     raise BadCommand("You cannot change the leader in your plan")
-            game_state.round_state.stage_state.attacker_plan["leader"] = leader
+            game_state.round_state.stage_state.attacker_plan["leader"] = (leader, 0)
         else:
             if "leader" in game_state.round_state.stage_state.defender_plan:
                 if game_state.round_state.stage_state.defender_plan["leader"] != leader:
                     raise BadCommand("You cannot change the leader in your plan")
-            game_state.round_state.stage_state.defender_plan["leader"] = leader
+            game_state.round_state.stage_state.defender_plan["leader"] = (leader, 0)
         game_state.faction_state[faction].treachery.remove(leader)
         return
 
@@ -133,8 +133,8 @@ def pick_leader(game_state, is_attacker, leader):
     m = MapGraph()
     m.remove_sector(game_state.storm_position)
 
-    if leader in game_state.round_state.leaders_used:
-        space, sector = game_state.round_state.leaders_used[leader]
+    if leader[0] in game_state.round_state.leaders_used:
+        space, sector = game_state.round_state.leaders_used[leader[0]]["location"]
         if m.distance(space, sector, battle_id[2], battle_id[3]) != 0:
             raise BadCommand("That leader was already used in a battle somewhere else")
 
@@ -148,6 +148,48 @@ def pick_leader(game_state, is_attacker, leader):
             if game_state.round_state.stage_state.defender_plan["leader"] != leader:
                 raise BadCommand("You cannot change the leader in your plan")
         game_state.round_state.stage_state.defender_plan["leader"] = leader
+
+
+def pick_kwisatz_haderach(game_state, is_attacker, kwisatz_haderach, leader):
+    battle_id = game_state.round_state.stage_state.battle
+    if is_attacker:
+        faction = battle_id[0]
+        plan = game_state.round_state.stage_state.attacker_plan
+    else:
+        faction = battle_id[1]
+        plan = game_state.round_state.stage_state.defender_plan
+
+    if "kwisatz_haderach" in plan and plan["kwisatz_haderach"] != kwisatz_haderach:
+        raise BadCommand("No messiah flip-flopping waffles.")
+
+    if not kwisatz_haderach:
+        # You're always allowed to _not_ take the messiah with you....
+        plan["kwisatz_haderach"] = False
+        return
+
+    if faction != "atreides":
+        raise BadCommand("Only House Atreides can use the Kwisatz Haderach")
+
+    faction_state = game_state.faction_state[faction]
+
+    if not faction_state.kwisatz_haderach_available:
+        raise BadCommand("The Kwisatz Haderach is not available yet")
+
+    if faction_state.kwisatz_haderach_tanks is not None:
+        raise BadCommand("Your messiah is in the tanks, and thus cannot be used!")
+
+    kwisatz_haderach_existing_leader = game_state.round_state.kwisatz_haderach_leader
+    if kwisatz_haderach_existing_leader and kwisatz_haderach_existing_leader != leader:
+        raise BadCommand("The Kwisatz Haderach can only accompany one leader per round")
+
+    if kwisatz_haderach_existing_leader == "Cheap-Hero/Heroine":
+        raise BadCommand("The Kwisatz Haderach accompanied a previous cheap hero/heroine so can't accompany a new one")
+
+    if game_state.round_state.stage_state.karama_kwisatz_haderach:
+        raise BadCommand("The Kwisatz Haderach was Karama'd, so can't be used!")
+
+    game_state.round_state.kwisatz_haderach_leader = leader
+    plan["kwisatz_haderach"] = True
 
 
 def pick_weapon(game_state, is_attacker, weapon):
@@ -260,7 +302,7 @@ def tank_unit(game_state, faction, space, sector, unit):
     faction_state = game_state.faction_state[faction]
     if faction == "atreides":
         faction_state.units_lost += 1
-        faction_state.kwizatz_haderach_available = faction_state.units_lost >= 7
+        faction_state.kwisatz_haderach_available = faction_state.units_lost >= 7
 
     if faction not in space.forces:
         raise BadCommand("No {} units in {}".format(faction, space.name))
@@ -277,10 +319,17 @@ def tank_unit(game_state, faction, space, sector, unit):
     faction_state.tank_units.append(unit)
 
 
-def tank_leader(game_state, faction, leader):
+def tank_leader(game_state, faction, leader, kill_attached_kwisatz_haderach=False):
     faction_state = game_state.faction_state[faction]
-    if leader == "Cheap-Hero/Heroine":
-        game_state.treachery_discard.insert(0, "Cheap-Hero/Heroine")
+
+    if kill_attached_kwisatz_haderach and game_state.round_state.kwisatz_haderach_leader == leader:
+        # Calculate when we can revive the kwisatz haderach
+        if len(faction_state.leader_death_count) < 5:
+            faction_state.kwisatz_haderach_tanks = 1
+
+        faction_state.kwisatz_haderach_tanks = min(faction_state.leader_death_count.values()) + 1
+
+    if leader[0] == "Cheap-Hero/Heroine":
         return
 
     if leader not in faction_state.leaders:

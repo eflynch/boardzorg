@@ -8,11 +8,11 @@ from dune.actions.karama import discard_karama
 logger = getLogger(__name__)
 
 
-class KaramaKwizatzHaderach(Action):
-    name = "karama-kwizatz-haderach"
+class KaramaKwisatzHaderach(Action):
+    name = "karama-kwisatz-haderach"
     ck_round = "battle"
     ck_stage = "battle"
-    ck_substage = "karama-kwizatz-haderach"
+    ck_substage = "karama-kwisatz-haderach"
     ck_karama = True
 
     @classmethod
@@ -20,49 +20,49 @@ class KaramaKwizatzHaderach(Action):
         if faction == "atreides":
             raise IllegalAction("You cannot karama your own messiah")
         if "atreides" not in game_state.round_state.stage_state.battle:
-            raise IllegalAction("No Kwizatz to Haderach")
+            raise IllegalAction("No Kwisatz to Haderach")
 
     def _execute(self, game_state):
         new_game_state = deepcopy(game_state)
-        new_game_state.round_state.stage_state.karama_kwizatz_haderach = True
+        new_game_state.round_state.stage_state.karama_kwisatz_haderach = True
         new_game_state.round_state.stage_state.substage = "finalize"
         discard_karama(game_state, self.faction)
         return new_game_state
 
 
-class KaramaPassKwizatzHaderach(Action):
-    name = "karama-pass-kwizatz-haderach"
+class KaramaPassKwisatzHaderach(Action):
+    name = "karama-pass-kwisatz-haderach"
     ck_round = "battle"
     ck_stage = "battle"
-    ck_substage = "karama-kwizatz-haderach"
+    ck_substage = "karama-kwisatz-haderach"
 
     @classmethod
     def _check(cls, game_state, faction):
         if faction == "atreides":
             raise IllegalAction("You cannot karama your own messiah")
         if "atreides" not in game_state.round_state.stage_state.battle:
-            raise IllegalAction("No Kwizatz to Haderach")
-        if faction in game_state.round_state.stage_state.karama_kwizatz_haderach_passes:
+            raise IllegalAction("No Kwisatz to Haderach")
+        if faction in game_state.round_state.stage_state.karama_kwisatz_haderach_passes:
             raise IllegalAction("You have already passed")
 
     def _execute(self, game_state):
         new_game_state = deepcopy(game_state)
-        new_game_state.round_state.stage_state.karama_kwizatz_haderach_passes.append(self.faction)
+        new_game_state.round_state.stage_state.karama_kwisatz_haderach_passes.append(self.faction)
         return new_game_state
 
 
-class SkipKaramaKwizatzHaderach(Action):
-    name = "skip-karama-kwizatz-haderach"
+class SkipKaramaKwisatzHaderach(Action):
+    name = "skip-karama-kwisatz-haderach"
     ck_round = "battle"
     ck_stage = "battle"
-    ck_substage = "karama-kwizatz-haderach"
+    ck_substage = "karama-kwisatz-haderach"
     su = True
 
     @classmethod
     def _check(cls, game_state, faction):
         if "atreides" in game_state.faction_state:
             if "atreides" in game_state.round_state.stage_state.battle:
-                passes = len(game_state.round_state.stage_state.karama_kwizatz_haderach_passes)
+                passes = len(game_state.round_state.stage_state.karama_kwisatz_haderach_passes)
                 if passes != len(game_state.faction_state) - 1:
                     raise IllegalAction("Waiting for karama passes")
 

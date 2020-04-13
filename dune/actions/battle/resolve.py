@@ -7,6 +7,7 @@ from dune.state.rounds import battle
 from dune.exceptions import IllegalAction, BadCommand
 from dune.state.leaders import get_leader_faction
 from dune.actions.battle import ops
+from dune.actions.battle.winner import DiscardTreachery, TankUnits
 
 logger = getLogger(__name__)
 
@@ -20,19 +21,25 @@ class CommitPlan(Action):
     @classmethod
     def parse_args(cls, faction, args):
         parts = args.split(" ")
-        if len(parts) != 4:
-            raise BadCommand("Need four values")
-        leader, number, weapon, defense = parts
+        if len(parts) != 5:
+            raise BadCommand("Need five values")
+        leader, number, weapon, defense, kwisatz_haderach = parts
+
+        if kwisatz_haderach not in ["Kwisatz-Haderach", "-"]:
+            raise BadCommand("The only kwisatz haderach is 'Kwisatz-Haderach'")
+        kwisatz_haderach = kwisatz_haderach == "Kwisatz-Haderach"
+
         if weapon == "-":
             weapon = None
         if defense == "-":
             defense = None
         number = int(number)
-        return CommitPlan(faction, leader, number, weapon, defense)
+        return CommitPlan(faction, leader, number, weapon, defense, kwisatz_haderach)
 
-    def __init__(self, faction, leader, number, weapon, defense):
+    def __init__(self, faction, leader, number, weapon, defense, kwisatz_haderach):
         self.faction = faction
         self.leader = leader
+        self.kwisatz_haderach = kwisatz_haderach
         self.number = number
         self.weapon = weapon
         self.defense = defense
@@ -46,10 +53,10 @@ class CommitPlan(Action):
         if faction not in game_state.round_state.stage_state.battle:
             raise IllegalAction("You are not in this battle")
         if faction == game_state.round_state.stage_state.battle[0]:
-            if len(game_state.round_state.stage_state.attacker_plan) == 4:
+            if len(game_state.round_state.stage_state.attacker_plan) == 5:
                 raise IllegalAction("You are already committed in this battle")
         else:
-            if len(game_state.round_state.stage_state.defender_plan) == 4:
+            if len(game_state.round_state.stage_state.defender_plan) == 5:
                 raise IllegalAction("You are already committed in this battle")
 
     def _execute(self, game_state):
@@ -64,6 +71,7 @@ class CommitPlan(Action):
         ops.pick_number(new_game_state, max_power, is_attacker, self.number)
         ops.pick_weapon(new_game_state, is_attacker, self.weapon)
         ops.pick_defense(new_game_state, is_attacker, self.defense)
+        ops.pick_kwisatz_haderach(new_game_state, is_attacker, self.kwisatz_haderach, self.leader)
 
         return new_game_state
 
@@ -78,8 +86,8 @@ class RevealEntire(CommitPlan):
         if self.faction == new_game_state.round_state.stage_state.battle[0]:
             is_attacker = True
         new_game_state.round_state.stage_state.reveal_entire = True
-        new_game_state.round_state.stage_state.reval_entire_is_attacker = is_attacker
-        new_game_state.round_state.stage_state.substage = "karama-kwizatz-haderach"
+        new_game_state.round_state.stage_state.reveal_entire_is_attacker = is_attacker
+        new_game_state.round_state.stage_state.substage = "karama-kwisatz-haderach"
         return new_game_state
 
 
@@ -92,9 +100,9 @@ class RevealPlans(Action):
 
     @classmethod
     def _check(cls, game_state, faction):
-        if len(game_state.round_state.stage_state.attacker_plan) != 4:
+        if len(game_state.round_state.stage_state.attacker_plan) != 5:
             raise IllegalAction("Waiting for the attacker to define their plan")
-        if len(game_state.round_state.stage_state.defender_plan) != 4:
+        if len(game_state.round_state.stage_state.defender_plan) != 5:
             raise IllegalAction("Waiting for the defender to define their plan")
 
     def _execute(self, game_state):
@@ -105,6 +113,10 @@ class RevealPlans(Action):
         def _maybe_remove_item(game_state, plan, faction, kind):
             if plan[kind] is not None:
                 game_state.faction_state[faction].treachery.remove(plan[kind])
+
+        if (new_game_state.round_state.stage_state.attacker_plan["kwisatz_haderach"] or
+            new_game_state.round_state.stage_state.defender_plan["kwisatz_haderach"]):
+            game_state.round_state.kwisatz_haderach_leader_revealed = True
 
         _maybe_remove_item(new_game_state, new_game_state.round_state.stage_state.attacker_plan,
                            attacker, "weapon")
@@ -146,6 +158,9 @@ class RevealTraitor(Action):
             else:
                 raise IllegalAction("You are not allies with the embattled")
 
+        if game_state.round_state.kwisatz_haderach_leader == leader[0]:
+            raise IllegalAction("No tratorin' in front of the messiah!")
+
         if leader not in game_state.faction_state[faction].traitors:
             raise IllegalAction("That leader is not in your pay!")
 
@@ -185,6 +200,11 @@ class AutoResolveWithTraitor(Action):
             ops.discard_treachery(new_game_state, stage_state.defender_plan["defense"])
             ops.tank_leader(new_game_state, loser, stage_state.defender_plan["leader"])
             new_game_state.faction_state[winner].spice += stage_state.defender_plan["leader"][1]
+            if stage_state.attacker_plan["leader"][0] != "Cheap-Hero/Heroine":
+                new_game_state.round_state.leaders_used[stage_state.attacker_plan["leader"][0]] = {
+                    "location": (battle_id[2], battle_id[3]),
+                    "leader": stage_state.attacker_plan["leader"][0]
+                }
         else:
             winner = battle_id[1]
             loser = battle_id[0]
@@ -192,6 +212,11 @@ class AutoResolveWithTraitor(Action):
             ops.discard_treachery(new_game_state, stage_state.attacker_plan["defense"])
             ops.tank_leader(new_game_state, loser, stage_state.attacker_plan["leader"])
             new_game_state.faction_state[winner].spice += stage_state.attacker_plan["leader"][1]
+            if stage_state.defender_plan["leader"][0] != "Cheap-Hero/Heroine":
+                new_game_state.round_state.leaders_used[stage_state.defender_plan["leader"][0]] = {
+                    "location": (battle_id[2], battle_id[3]),
+                    "leader": stage_state.defender_plan["leader"][0]
+                }
 
         for sec in space.forces[loser]:
             units_to_tank = space.forces[loser][sec][:]
@@ -199,9 +224,13 @@ class AutoResolveWithTraitor(Action):
                 ops.tank_unit(new_game_state, loser, space, sec, u)
 
         new_game_state.round_state.stage_state.winner = winner
-        new_game_state.pause.extend(battle_id[:2])
+        new_game_state.pause.append(loser)
         new_game_state.round_state.stage_state.substage_state = battle.WinnerSubStage()
         new_game_state.round_state.stage_state.substage_state.power_left_to_tank = 0
+        if not (stage_state.attacker_plan["weapon"] or stage_state.attacker_plan["defense"]):
+            new_game_state.round_state.stage_state.substage_state.discard_done = True
+            new_game_state.pause.append(winner)
+
         return new_game_state
 
 
@@ -273,6 +302,7 @@ class AutoResolveDisaster(Action):
 
         has_lasgun = "Lasgun" in stage_state.attacker_plan.values() or "Lasgun" in stage_state.defender_plan.values()
         has_shield = "Shield" in stage_state.attacker_plan.values() or "Shield" in stage_state.defender_plan.values()
+        was_explosion = has_lasgun and has_shield
 
         # Tank All units and leaders in battle
         space = new_game_state.map_state[battle_id[2]]
@@ -282,11 +312,17 @@ class AutoResolveDisaster(Action):
                 units_to_tank = space.forces[faction][sec][:]
                 for u in units_to_tank:
                     ops.tank_unit(new_game_state, faction, space, sec, u)
-        ops.tank_leader(new_game_state, battle_id[0], stage_state.attacker_plan["leader"])
-        ops.tank_leader(new_game_state, battle_id[1], stage_state.defender_plan["leader"])
+        ops.tank_leader(new_game_state,
+                        battle_id[0],
+                        stage_state.attacker_plan["leader"],
+                        kill_attached_kwisatz_haderach=was_explosion)
+        ops.tank_leader(new_game_state,
+                        battle_id[1],
+                        stage_state.defender_plan["leader"],
+                        kill_attached_kwisatz_haderach=was_explosion)
 
         # If explosion tank all other units and leaders in the sector too
-        if has_lasgun and has_shield:
+        if was_explosion:
             space = new_game_state.map_state[battle_id[2]]
             space.coexist = False
             for fac in space.forces:
@@ -302,7 +338,7 @@ class AutoResolveDisaster(Action):
                     if leader != stage_state.attacker_plan["leader"]:
                         if leader != stage_state.defender_plan["leader"]:
                             faction = get_leader_faction(leader)
-                            ops.tank_leader(new_game_state, faction, leader)
+                            ops.tank_leader(new_game_state, faction, leader, kill_attached_kwisatz_haderach=True)
 
         # Discard all treachery
         ops.discard_treachery(new_game_state, stage_state.attacker_plan["weapon"])
@@ -341,13 +377,14 @@ class AutoResolve(Action):
                 ops.tank_leader(new_game_state, faction_b, plan_b["leader"])
                 dead_leaders.append(plan_b["leader"])
                 return 0
-            if plan_b["leader"] != "Cheap-Hero/Heroine":
+
+            if plan_b["leader"][0] != "Cheap-Hero/Heroine":
                 new_game_state.round_state.leaders_used[plan_b["leader"][0]] = {
                     "location": location,
                     "leader": plan_b["leader"]
                 }
-                return plan_b["leader"][1]
-            return 0
+
+            return plan_b["leader"][1] + (2 if plan_b["kwisatz_haderach"] else 0)
 
         attacker_power += clash_leaders(stage_state.defender_plan, stage_state.attacker_plan, battle_id[0], (battle_id[2], battle_id[3]))
         defender_power += clash_leaders(stage_state.attacker_plan, stage_state.defender_plan, battle_id[1], (battle_id[2], battle_id[3]))
@@ -384,8 +421,14 @@ class AutoResolve(Action):
         # Winner Must Tank Units (increase KH count if atreides)
         # Winner Must decide whether to discard treachery (return remaining ones to winner)
 
-        new_game_state.pause.extend(battle_id[:2])
+        new_game_state.pause.append(loser)
         new_game_state.round_state.stage_state.winner = winner
         new_game_state.round_state.stage_state.substage_state = battle.WinnerSubStage()
         new_game_state.round_state.stage_state.substage_state.power_left_to_tank = power_left_to_tank
+
+        if not (stage_state.attacker_plan["weapon"] or stage_state.attacker_plan["defense"]):
+            new_game_state.round_state.stage_state.substage_state.discard_done = True
+            if power_left_to_tank == 0:
+                new_game_state.pause.append(winner)
+
         return new_game_state

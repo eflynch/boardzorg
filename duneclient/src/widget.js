@@ -190,7 +190,7 @@ const Choice = ({args, setArgs, clearSelection, config, ...props}) => {
                         <Widget {...props} key={i} type={subWidget.widget} config={subWidget.args} args={args} setArgs={(args) => {
                             clearSelection();
                             setArgs(args);
-                        }}/>
+                        }} clearSelection={clearSelection}/>
                     </div>
                 );
             })}
@@ -314,7 +314,9 @@ const FremenPlacementSelect = ({args, setArgs, config}) => {
 
 const Revival = ({me, args, setArgs, leaders, units}) => {
     const hasUnitsSelected = (args.indexOf("1") !== -1) || (args.indexOf("2") !== -1);
-    const hasLeaderSelected = !hasLeaderSelected && args;
+    const selectedLeader = args.split(",").filter((u) => {
+        return u !== "1" && u !== "2";
+    })[0];
     const unitsSelected = hasUnitsSelected ? args.split(",").map((u)=>parseInt(u)) : [];
     const onesSelected = unitsSelected.filter((u)=>u==1).length;
     const twoSelected = unitsSelected.filter((u)=>u==2).indexOf(2) !== -1;
@@ -329,6 +331,7 @@ const Revival = ({me, args, setArgs, leaders, units}) => {
         oneSelectors.push(<UnitSelect key={i} value={1} active={active} selected={i < onesSelected} setSelected={(s)=>{
             const newSelected = Array(onesSelected + (s ? 1 : -1)).fill("1");
             if (twoAvailable) { newSelected.push("2"); }
+            if (selectedLeader) { newSelected.push(selectedLeader); }
             setArgs(newSelected.join(","));
         }}/>);
     }
@@ -337,6 +340,7 @@ const Revival = ({me, args, setArgs, leaders, units}) => {
             {twoAvailable ? <UnitSelect value={2} active={active} selected={twoSelected} setSelected={(s)=>{
                 const newSelected = Array(onesSelected).fill("1");
                 if (s) { newSelected.push("2"); }
+                if (selectedLeader) { newSelected.push(selectedLeader.push()); }
                 setArgs(newSelected.join(","));
             }} /> : ""}
             {oneSelectors}
@@ -344,9 +348,12 @@ const Revival = ({me, args, setArgs, leaders, units}) => {
     );
 
 
-    const leaderSelectors = <PlanLeader leaders={leaders} treachery={[]} selectedLeader={hasLeaderSelected ? args : null} setLeader={(leader)=>{
-        setArgs(leader);
-    }} active={true} />;
+    const leaderSelectors = <PlanLeader leaders={leaders} treachery={[]} selectedLeader={selectedLeader} setLeader={(leader)=>{
+        const newSelected = Array(onesSelected).fill("1");
+        if (twoSelected) { newSelected.push("2"); }
+        if (leader) { newSelected.push(leader); }
+        setArgs(newSelected.join(","));
+    }} active={true} canDeselect={true}/>;
 
     return (
         <div >
@@ -365,11 +372,11 @@ const Widget = (props) => {
     }
 
     if (type === "choice") {
-        return <Choice args={args} setArgs={setArgs} config={config} interaction={interaction} setInteraction={setInteraction} updateSelection={updateSelection}/>; 
+        return <Choice args={args} setArgs={setArgs} config={config} interaction={interaction} setInteraction={setInteraction} updateSelection={updateSelection} clearSelection={clearSelection}/>; 
     }
 
     if (type === "struct") {
-        return <Struct args={args} setArgs={setArgs} config={config} interaction={interaction} setInteraction={setInteraction} updateSelection={updateSelection}/>; 
+        return <Struct args={args} setArgs={setArgs} config={config} interaction={interaction} setInteraction={setInteraction} updateSelection={updateSelection} clearSelection={clearSelection}/>; 
     }
 
     if (type === "input") {

@@ -213,7 +213,7 @@ class KaramaPassEntirePlan(Action):
 
     def _execute(self, game_state):
         new_game_state = deepcopy(game_state)
-        new_game_state.round_state.stage_state.substage = "karama-kwizatz-haderach"
+        new_game_state.round_state.stage_state.substage = "karama-kwisatz-haderach"
         return new_game_state
 
 
@@ -237,5 +237,5 @@ class SkipKaramaEntirePlan(Action):
 
     def _execute(self, game_state):
         new_game_state = deepcopy(game_state)
-        new_game_state.round_state.stage_state.substage = "karama-kwizatz-haderach"
+        new_game_state.round_state.stage_state.substage = "karama-kwisatz-haderach"
         return new_game_state

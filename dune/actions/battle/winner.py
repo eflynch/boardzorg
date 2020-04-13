@@ -131,6 +131,12 @@ class ConcludeWinner(Action):
         if "bene-gesserit" not in space.forces or len(space.forces) == 1:
             space.coexist = False
 
+        # If either player used a cheap hero, discard it now!
+        if game_state.round_state.stage_state.attacker_plan["leader"][0] == "Cheap-Hero/Heroine":
+            new_game_state.treachery_discard.insert(0, "Cheap-Hero/Heroine")
+        if game_state.round_state.stage_state.defender_plan["leader"][0] == "Cheap-Hero/Heroine":
+            new_game_state.treachery_discard.insert(0, "Cheap-Hero/Heroine")
+
         new_game_state.round_state.battles.remove(new_game_state.round_state.stage_state.battle)
         new_game_state.round_state.stage = "main"
         return new_game_state
