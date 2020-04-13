@@ -2,6 +2,7 @@
 
 ## Ready For Dev
 
+* Fix choam charity to not be claimable after auction has begun
 * Support situation where all leaders are tanked and you have to play without leader
 * Support Leader Capture mechanic
 * Support Special Treachery Cards
@@ -28,8 +29,6 @@
 
 
 ## In Progress
-
-* Support Kwisatz Haderach [russell]
 
 # Notes
 
