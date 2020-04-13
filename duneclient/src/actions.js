@@ -61,7 +61,7 @@ const defaultArgsForAction = (state, me, actionName, argSpec) => {
     return "";
 };
 
-const ActionArgs = ({me, state, args, setArgs, sendCommand, actionName, argSpec, interaction, setInteraction, updateSelection, clearSelection}) => {
+const ActionArgs = ({me, state, args, setArgs, sendCommand, actionName, argSpec, interaction, setInteraction, updateSelection, clearSelection, setSelectedAction}) => {
     return (
         <div>
             <Widget
@@ -81,6 +81,7 @@ const ActionArgs = ({me, state, args, setArgs, sendCommand, actionName, argSpec,
                 sendCommand(`${actionName} ${[args].flat(Infinity).join(" ")}`);
                 clearSelection();
                 setInteraction({});
+                setSelectedAction(null);
             }}>Submit Command</button>
         </div>
     );
@@ -89,13 +90,15 @@ const ActionArgs = ({me, state, args, setArgs, sendCommand, actionName, argSpec,
 
 const getFlowForWidget = (type, config, setArgs, updateSelection) => {
     if (interactionWidgets.indexOf(type) !== -1) {
-        return [{
+        const flow = [{
             mode: type,
             action: (val) => {
                 updateSelection(type, val);
                 setArgs(val);
             },
         }];
+        console.log("solo flow:", flow);
+        return flow;
     }
 
     if (type === "struct") {
@@ -108,6 +111,7 @@ const getFlowForWidget = (type, config, setArgs, updateSelection) => {
             };
             ret = ret.concat(getFlowForWidget(subWidget.widget, subWidget.args, setSubArgs, updateSelection));
         }
+        console.log("struct flow - ", ret);
         return ret;
     }
     return [];
@@ -166,7 +170,7 @@ const Actions = (props) => {
     });
     let actionArgs = <span/>;
     if (actionNames.indexOf(selectedAction) != -1) {
-        actionArgs = <ActionArgs me={me} state={state} args={args} setArgs={setArgs} interaction={interaction} setInteraction={setInteraction} sendCommand={sendCommand} actionName={selectedAction} argSpec={actions[selectedAction]} updateSelection={updateSelection} clearSelection={clearSelection}/>
+        actionArgs = <ActionArgs me={me} state={state} args={args} setArgs={setArgs} interaction={interaction} setInteraction={setInteraction} sendCommand={sendCommand} actionName={selectedAction} argSpec={actions[selectedAction]} updateSelection={updateSelection} clearSelection={clearSelection} setSelectedAction={setSelectedAction}/>
     }
     return (
         <div className="actions-wrapper">

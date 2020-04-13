@@ -99,6 +99,7 @@ const maybeFlowInteraction = (interaction, selection, flows) => {
     if (interaction.mode == null) {
         for (const flow of flows) {
             if (selection[flow.mode] == null) {
+                console.log("reflowed to", flow);
                 return flow;
             }
         }
@@ -143,6 +144,7 @@ export default function Session({state, actions, history, me, error, sendCommand
     };
 
     const wrapInteraction = (interaction, combinedState) => {
+        console.log("wrapping interaction", interaction, combinedState);
         let newInteraction = maybeFlowInteraction(
             interaction,
             combinedState.selection,
@@ -168,9 +170,9 @@ export default function Session({state, actions, history, me, error, sendCommand
 
     const setInteractionFlow = (flow) => {
         setCombinedState((combinedState) => {
-            return update(combinedState,
-                          {interaction: {$set:wrapInteraction({}, combinedState)},
-                           interactionFlow: {$set: flow}});
+            const updatedState = update(combinedState, {interactionFlow: {$set: flow}});
+            return update(updatedState,
+                          {interaction: {$set:wrapInteraction({}, updatedState)}});
         });
     };
 
