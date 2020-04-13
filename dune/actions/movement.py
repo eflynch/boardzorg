@@ -14,7 +14,10 @@ def ship_units(game_state, faction, units, space, sector):
     if "stronghold" in space.type:
         if len(space.forces) > 1:
             if faction not in space.forces:
-                raise BadCommand("Cannot ship into stronghold with 2 enemy factions")
+                if not ("bene-gesserit" in space.forces and space.coexist):
+                    raise BadCommand("Cannot ship into stronghold with 2 enemy factions")
+            elif faction == "bene-gesserit" and space.coexist:
+                raise BadCommand("The bene-gesserit cannot ship in here because of occupation constraints")
     if sector not in space.sectors:
         raise BadCommand("You ain't going nowhere")
 
@@ -34,7 +37,6 @@ def ship_units(game_state, faction, units, space, sector):
         if sector not in space.forces[faction]:
             space.forces[faction][sector] = []
         space.forces[faction][sector].append(u)
-
 
     if faction != "bene-gesserit":
         # Intrusion allows bene-gesserit to flip to advisors if they wish

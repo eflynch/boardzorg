@@ -136,6 +136,8 @@ class KaramaPassVoice(Action):
 
     @classmethod
     def _check(cls, game_state, faction):
+        if faction == "bene-gesserit":
+            raise IllegalAction("You cannot karam your own voice!")
         if faction in game_state.round_state.stage_state.voice_karama_passes:
             raise IllegalAction("You have already passed")
 

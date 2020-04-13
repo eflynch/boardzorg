@@ -124,5 +124,6 @@ class GameState(State):
             visible["storm_deck"]["next"] = self.storm_deck[0]
 
         visible["map_state"] = [self.map_state[s].visible(self, faction) for s in self.map_state]
+        visible["winner"] = self.winner
 
         return visible

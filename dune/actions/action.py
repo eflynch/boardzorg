@@ -84,6 +84,8 @@ class Action(object, metaclass=ActionMeta):
 
     @classmethod
     def check(cls, game_state, faction):
+        if game_state.round == "end":
+            raise IllegalAction("There are no actions left")
         if hasattr(cls, "ck_round"):
             if game_state.round != cls.ck_round:
                 raise IllegalAction("Cannot do that in this round")

@@ -43,6 +43,8 @@ class ProgressRevival(Action):
     def _execute(self, game_state):
         new_game_state = deepcopy(game_state)
         for faction in storm.get_faction_order(game_state):
+            if faction in game_state.round_state.factions_done:
+                continue
             if game_state.faction_state[faction].tank_units:
                 new_game_state.round_state.faction_turn = faction
                 return new_game_state
@@ -136,6 +138,7 @@ class Revive(Action):
         faction_order = storm.get_faction_order(game_state)
         index = faction_order.index(self.faction) + 1
         if index < len(faction_order):
+            new_game_state.round_state.factions_done.append(self.faction)
             new_game_state.round_state.faction_turn = faction_order[index]
         else:
             new_game_state.round_state = MovementRound()

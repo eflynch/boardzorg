@@ -41,7 +41,7 @@ const GetLogoPositions = (faction_state) => {
 }
 
 
-const RoundState = ({roundState, stormPosition, logoPositions, interaction, selection}) => {
+const RoundState = ({roundState, stormPosition, logoPositions, interaction, selection, winner}) => {
     let text = roundState.round === undefined ? roundState + " round" : roundState.round + " round";
     if (roundState.stage !== undefined) {
         text += "» " + roundState.stage;
@@ -59,6 +59,9 @@ const RoundState = ({roundState, stormPosition, logoPositions, interaction, sele
     }
     if (roundState && roundState.round == "revival") {
         stateDiv = <Revival factionOrder={factionOrder} roundState={roundState} />;
+    }
+    if (roundState == "end") {
+        stateDiv = <div className="winner">{winner} Wins!!</div>;
     }
     if (stateDiv === null){
         return (
@@ -214,7 +217,7 @@ export default function Session({state, actions, history, me, error, sendCommand
                            stormSector={state.storm_position} futureStorm={futureStorm} futureSpice={futureSpice} state={state} />
                     <Decks state={state} />
                 </div>
-                <RoundState interaction={interaction} selection={selection} roundState={state.round_state} logoPositions={logoPositions} stormPosition={state.storm_position} />
+                <RoundState interaction={interaction} selection={selection} roundState={state.round_state} logoPositions={logoPositions} stormPosition={state.storm_position} winner={state.winner} />
             </div>
             <History state={state} me={me} interaction={interaction} setInteraction={setInteraction} error={errorState} actions={actions} sendCommand={sendCommand} commandLog={history} setInteractionFlow={setInteractionFlow} selection={selection} updateSelection={updateSelection} clearSelection={clearSelection}/>
             <div className="factions">
