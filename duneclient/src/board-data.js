@@ -12,7 +12,8 @@ export const SpiceLocations = {
     "Habbanya-Erg": {top: 0.56, left: 0.08},
     "Great-Flat": {top: 0.435, left: 0.07},
     "Wind-Pass-North": {top: 0.505, left: 0.37},
-    "Rock-Outcroppings": {top: 0.215, left: 0.13}
+    "Rock-Outcroppings": {top: 0.215, left: 0.13},
+    "Funeral-Plain": {top: 0.355, left: 0.10}
 }
 
 export const TokenLocations = {

@@ -30,6 +30,7 @@ class Session:
         self.command_log = []
         self.su_commands = {}
         self._next_command_index = 0
+        self.execute_supervisor()
 
     def execute_supervisor(self):
         supervisor_actions = Action.get_valid_actions(self.game_log[-1], None)

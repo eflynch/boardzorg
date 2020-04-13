@@ -18,6 +18,13 @@ def insert():
     return jsonify({"id": session_id})
 
 
+@api.errorhandler(ValueError)
+def handle_value_error(error):
+    response = jsonify({"BadCommand": "You did something bad related to a number"})
+    response.status_code = 400
+    return response
+
+
 @api.errorhandler(IllegalAction)
 def handle_illegal_action(error):
     response = jsonify({"IllegalAction": str(error)})
@@ -52,11 +59,11 @@ def assign_role(session_id):
     role = pay_load["role"]
 
     if role not in ('host', 'fremen', 'bene-gesserit', 'guild', 'harkonnen', 'emperor', 'atreides'):
-        raise RoleException("{} is not a valid role".format(role))
+        raise rolewrapper.RoleException("{} is not a valid role".format(role))
 
     with SessionWrapper(session_id) as (session, roles):
-        if role not in session.get_factions_in_play():
-            raise RoleException("{} is not a valid role".format(role))
+        if role != 'host' and role not in session.get_factions_in_play():
+            raise rolewrapper.RoleException("{} is not a valid role".format(role))
         role_id = rolewrapper.assign(roles, role)
         ret = {
             "role": role,

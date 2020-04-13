@@ -11,7 +11,6 @@ const interactionWidgets = [
     "space-sector-select-end",
     "sector-select",
     "space-select",
-    "traitor-select",
     "leader-input",
     "battle-select",
 ];

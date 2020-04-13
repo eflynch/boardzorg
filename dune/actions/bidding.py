@@ -25,7 +25,7 @@ def next_bidder(game_state):
 def next_first_bidder(game_state):
     faction_order = storm.get_faction_order(game_state)
     faction_index = game_state.round_state.total_for_auction - len(game_state.round_state.up_for_auction)
-    return faction_order[faction_index]
+    return faction_order[faction_index % len(faction_order)]
 
 
 def do_payment(game_state):

@@ -396,7 +396,7 @@ const Widget = (props) => {
     }
 
     if (type === "token-select") {
-        return <SelectOnMap mode="token-select" setInteraction={setInteraction} setArgs={setArgs} updateSelection={updateSelection} args={args} />;
+        return <SelectOnMap mode="token-select" interaction={interaction} setInteraction={setInteraction} setArgs={setArgs} updateSelection={updateSelection} args={args} />;
     }
 
     if (type === "array") {

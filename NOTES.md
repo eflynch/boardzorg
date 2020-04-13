@@ -2,43 +2,49 @@
 
 ## Ready For Dev
 
-* Fix choam charity to not be claimable after auction has begun
-* Support situation where all leaders are tanked and you have to play without leader
-* Support Leader Capture mechanic
-* Support Special Treachery Cards
+### Needed For a game
 * Support ANY TIME Karama powers
-* Show battle round state
-  * What leaders have been used already
-* Redo Traitor selection widget
-* Test that leader revival works
-* Support no-fremen storm movement rules
+  * Harkonnen: steal treachery cards
+  * Emperor: revive 3 or a leader
+  * Fremen: make worm show up (Restricted to SPICE and MOVEMENT)
+  * block B worthless Karama
+* Support Special Treachery Cards
+  * Tleilaxu Ghola
+  * Truthtrance
+  * Weather Control
+  * Family Atomics
+  * Harj
+* Support Harkonnen Leader Capture mechanic
+
+### Nice for a Game
+* Support new Emperor alliance rule (allows emperor to revive 3 units on behalf of each of his allies)
+* Show which leaders have been used already in battle this turn
 * Support voice for lasgun
 * Support voice for cheap hero/heroine
 * Support voice for worthless cards
-* Interface for victory condition
 
+### Eventually Needed
+* Support situation where all leaders are tanked and you have to play without leader
+* Test that leader revival works
+* Support no-fremen storm movement rules
+
+### Could Do
+* Make "faction" Karama powers single use per game
+* Fix choam charity to not be claimable after auction has begun
 * Ponder new emperor alliance power and rules for bribes and allies
-    * Support new Emperor alliance rule
-    * Support allies paying for things for eachother...
-    * Maybe disable bribes for allies
-    * Maybe allow bribes to pay immediately since the emperor has a different alliance power now
-
 * Support spice-based combat
 * Support extra spice flow from strongholds
 
-
-
-## In Progress
 
 # Notes
 
 ## Karama Powers ##
 
   * ANY TIME:
-    * H KARAMA take treachery cards
-    * E KARAMA revive 3 or leader
-    * block B worthless Karama
+    * H KARAMA steal treachery cards
+    * E KARAMA revive 3 or a leader
     * F KARAMA make worm show up (Restricted to SPICE and MOVEMENT)
+    * block B worthless Karama
 
   * STORM
 
