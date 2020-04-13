@@ -75,8 +75,8 @@ export default function Battle({roundstate, factionOrder, interaction, selection
     };
 
     const plansRevealed = () => {
-        const revealSubStages = ["resolve", "traitors"];
-        if (roundstate.stage_state !== undefined && roundstate.stage_state.battle !== undefined && !roundstate.stage_state.winner) {
+        const revealSubStages = ["resolve", "traitors", "winner"];
+        if (roundstate.stage_state !== undefined && roundstate.stage_state.battle !== undefined) {
             const [attacker, defender, space, sector] = roundstate.stage_state.battle;
             const traitor_revealers = roundstate.stage_state.traitor_revealers;
             return (

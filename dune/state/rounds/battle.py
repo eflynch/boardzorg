@@ -99,7 +99,7 @@ class BattleStage(StageState):
             attacker = self.battle[0]
             defender = self.battle[1]
 
-        stage_allows = self.substage in ["traitors", "resolve"]
+        stage_allows = self.substage in ["traitors", "resolve", "winner"]
 
         reveal_entire_attack = attacker == faction or (self.reveal_entire and self.reveal_entire_is_attacker) or stage_allows 
         reveal_entire_defense = defender == faction or (self.reveal_entire and not self.reveal_entire_is_attacker) or stage_allows 
