@@ -190,7 +190,7 @@ const Choice = ({args, setArgs, clearSelection, config, ...props}) => {
                         <Widget {...props} key={i} type={subWidget.widget} config={subWidget.args} args={args} setArgs={(args) => {
                             clearSelection();
                             setArgs(args);
-                        }}/>
+                        }} clearSelection={clearSelection}/>
                     </div>
                 );
             })}
@@ -372,11 +372,11 @@ const Widget = (props) => {
     }
 
     if (type === "choice") {
-        return <Choice args={args} setArgs={setArgs} config={config} interaction={interaction} setInteraction={setInteraction} updateSelection={updateSelection}/>; 
+        return <Choice args={args} setArgs={setArgs} config={config} interaction={interaction} setInteraction={setInteraction} updateSelection={updateSelection} clearSelection={clearSelection}/>; 
     }
 
     if (type === "struct") {
-        return <Struct args={args} setArgs={setArgs} config={config} interaction={interaction} setInteraction={setInteraction} updateSelection={updateSelection}/>; 
+        return <Struct args={args} setArgs={setArgs} config={config} interaction={interaction} setInteraction={setInteraction} updateSelection={updateSelection} clearSelection={clearSelection}/>; 
     }
 
     if (type === "input") {
