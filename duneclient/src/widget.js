@@ -317,7 +317,7 @@ const Revival = ({me, args, setArgs, leaders, units}) => {
     const selectedLeader = args.split(",").filter((u) => {
         return u !== "1" && u !== "2";
     })[0];
-    const unitsSelected = hasUnitsSelected ? args.split(",").map((u)=>parseInt(u)) : [];
+    const unitsSelected = hasUnitsSelected ? args.split(",").map((u)=>parseInt(u)).filter((u)=>u) : [];
     const onesSelected = unitsSelected.filter((u)=>u==1).length;
     const twoSelected = unitsSelected.filter((u)=>u==2).indexOf(2) !== -1;
 
@@ -330,7 +330,7 @@ const Revival = ({me, args, setArgs, leaders, units}) => {
     for (let i=0; i< numOnesAvailable; i++){
         oneSelectors.push(<UnitSelect key={i} value={1} active={active} selected={i < onesSelected} setSelected={(s)=>{
             const newSelected = Array(onesSelected + (s ? 1 : -1)).fill("1");
-            if (twoAvailable) { newSelected.push("2"); }
+            if (twoSelected) { newSelected.push("2"); }
             if (selectedLeader) { newSelected.push(selectedLeader); }
             setArgs(newSelected.join(","));
         }}/>);
@@ -340,7 +340,7 @@ const Revival = ({me, args, setArgs, leaders, units}) => {
             {twoAvailable ? <UnitSelect value={2} active={active} selected={twoSelected} setSelected={(s)=>{
                 const newSelected = Array(onesSelected).fill("1");
                 if (s) { newSelected.push("2"); }
-                if (selectedLeader) { newSelected.push(selectedLeader.push()); }
+                if (selectedLeader) { newSelected.push(selectedLeader); }
                 setArgs(newSelected.join(","));
             }} /> : ""}
             {oneSelectors}
