@@ -100,6 +100,11 @@ class Action(object, metaclass=ActionMeta):
                 raise IllegalAction("Only {} can {}".format(cls.ck_faction, cls.name))
         if hasattr(cls, "ck_karama"):
             cls.check_karama(game_state, faction) 
+        if hasattr(cls, "ck_treachery"):
+            if faction not in game_state.faction_state:
+                raise IllegalAction("You can't be doing that")
+            if cls.ck_treachery not in game_state.faction_state[faction].treachery:
+                raise IllegalAction("Cannot use a card you don't have")
 
         if cls.su and faction is not None:
             raise IllegalAction("Only God can do that")
@@ -123,5 +128,5 @@ class Action(object, metaclass=ActionMeta):
 
 
 # These unsed imports register the Action classes
-from dune.actions import setup, storm, spice, nexus, bidding  # noqa # pylint: disable=unused-import
+from dune.actions import setup, storm, spice, nexus, bidding, treachery  # noqa # pylint: disable=unused-import
 from dune.actions import revival, movement, battle, collection, control, coexist   # noqa # pylint: disable=unused-import
