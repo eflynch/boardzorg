@@ -89,8 +89,8 @@ class SpiceBlow(Action):
         if card == "Shai-Hulud":
             previous_space = None
             for c in new_game_state.spice_discard:
-                if not c != "Shai-Hulud":
-                    previous_space = new_game_state.map_state[c]
+                if c != "Shai-Hulud":
+                    previous_space = c
                     break
 
             new_game_state.shai_hulud = previous_space

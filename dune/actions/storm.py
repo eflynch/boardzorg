@@ -12,12 +12,13 @@ def destroy_in_path(game_state, sectors):
             if space.type == "sand" or ("protected" in space.type and not game_state.shield_wall):
                 for s in set(space.sectors) & set(sectors):
                     for faction in space.forces:
-                        space.forces[faction][s]
-                        if "fremen" in space.forces:
-                            was = space.forces["fremen"][s]
-                            space.forces["fremen"][s] = sorted(was)[:len(was)/2]
-                        else:
-                            space.forces[faction][s] = []
+                        if s in space.forces[faction]:
+                            space.forces[faction][s]
+                            if "fremen" in space.forces:
+                                was = space.forces["fremen"][s]
+                                space.forces["fremen"][s] = list(reversed(sorted(was)))[:len(was)//2]
+                            else:
+                                space.forces[faction][s] = []
                     if s == space.spice_sector:
                         space.spice = 0
                     space.coexist = False
@@ -49,7 +50,7 @@ class Storm(Action):
         new_game_state.storm_position = (new_game_state.storm_position + advance) % 18
 
         destroy_in_path(new_game_state,
-                        range(game_state.storm_position, new_game_state.storm_position))
+                        range(game_state.storm_position, new_game_state.storm_position + 1))
 
         new_game_state.round = "spice"
 

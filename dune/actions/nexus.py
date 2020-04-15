@@ -16,9 +16,9 @@ from dune.actions.karama import discard_karama
 
 
 def fremen_allies_present(game_state):
-    allies = ["fremen"] + game_state.alliances["fremen"]
+    allies = set(["fremen"]) | game_state.alliances["fremen"]
     for a in allies:
-        if a in game_state.board_state.shai_hulud.forces:
+        if a in game_state.map_state[game_state.shai_hulud].forces:
             return True
     return False
 
@@ -38,7 +38,7 @@ def alliances_work(game_state):
     for f in game_state.alliances:
         if f not in game_state.round_state.proposals:
             return False
-        sets.append(frozenset(game_state.round_state.proposals[f] + [f]))
+        sets.append(frozenset(game_state.round_state.proposals[f] | set([f])))
 
     if not all_disjoint(set(sets)):
         return False
@@ -49,7 +49,7 @@ def alliances_work(game_state):
 class KaramaWormRide(Action):
     name = "karama-worm-ride"
     ck_round = "nexus"
-    ck_karam = True
+    ck_karama = True
 
     def __init__(self, faction):
         self.faction = faction
@@ -67,7 +67,6 @@ class KaramaWormRide(Action):
         new_game_state.round_state.worm_done = True
         discard_karama(new_game_state, self.faction)
 
-
         return new_game_state
 
 
@@ -80,6 +79,8 @@ class KaramaPassWormRide(Action):
 
     @classmethod
     def _check(cls, game_state, faction):
+        if faction == "fremen":
+            raise IllegalAction("You can't karama your own desert powers")
         if game_state.round_state.karama_done:
             raise IllegalAction("Karama already used or passed")
 
@@ -114,7 +115,7 @@ class ProposeAlliance(Action):
 
     @classmethod
     def get_arg_spec(cls, faction=None, game_state=None):
-        return args.Array(args.String())
+        return args.MultiFaction()
 
     def __init__(self, faction, factions):
         self.faction = faction
@@ -165,10 +166,14 @@ class EndNexus(Action):
 
     def _execute(self, game_state):
         new_game_state = deepcopy(game_state)
-        space = new_game_state.board_state.shai_hulud
-        space.forces = {}
+        space = new_game_state.map_state[new_game_state.shai_hulud]
+        factions = list(space.forces.keys())
+        for faction in factions:
+            if faction != "fremen":
+                del space.forces[faction]
         space.spice = 0
-        new_game_state.board_state.shai_hulud = None
+        space.coexist = False
+        new_game_state.shai_hulud = None
         new_game_state.round = "spice"
         return new_game_state
 
@@ -195,10 +200,11 @@ class WormRide(Action):
     @classmethod
     def _check(cls, game_state, faction):
         cls.check_alliance(game_state, faction, "fremen")
-        if faction not in game_state.board_state.shai_hulud.forces:
+        space = game_state.map_state[game_state.shai_hulud]
+        if faction not in space.forces:
             raise IllegalAction("You need worm riders to ride a worm")
 
-        if len(game_state.round_state.karam_passes) != 6:
+        if len(game_state.round_state.karama_passes) != len(game_state.faction_state) - 1:
             raise IllegalAction("Must wait to see if a Karama will be used")
 
         if game_state.round_state.worm_done:
@@ -206,11 +212,12 @@ class WormRide(Action):
 
     def _execute(self, game_state):
         new_game_state = deepcopy(game_state)
-        space = new_game_state.board_state.shai_hulud
-        new_space = new_game_state.board_state.map_state[self.space]
+        space = new_game_state.map_state[new_game_state.shai_hulud]
+        new_space = new_game_state.map_state[self.space]
 
         for s in space.forces[self.faction]:
-            move_units(new_game_state, self.faction, space, s, new_space, self.sector)
+            units = space.forces[self.faction][s][:]
+            move_units(new_game_state, self.faction, units, space, s, new_space, self.sector)
 
         new_game_state.round_state.worm_done = True
 

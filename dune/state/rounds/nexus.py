@@ -9,4 +9,11 @@ class NexusRound(RoundState):
         self.worm_done = False
         self.karama_done = False
         self.karama_passes = []
-        self.shai_hulud = None
+
+    def visible(self, game_state, faction):
+        visible = super().visible(game_state, faction)
+        visible["proposals"] = {
+            f: list(self.proposals[f])
+            for f in self.proposals
+        }
+        return visible

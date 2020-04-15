@@ -196,6 +196,13 @@ class Faction(String):
         }
 
 
+class MultiFaction(String):
+    def to_dict(self):
+        return {
+            "widget": "multi-faction-select",
+        }
+
+
 class Prescience(Args):
     def to_dict(self):
         return {

@@ -16,11 +16,9 @@ const interactionWidgets = [
 ];
 
 const defaultArgsForAction = (state, me, actionName, argSpec) => {
-    if (actionName === "bribe") {
-        return "emperor 2";
-    }
-    if (actionName === "gift") {
-        return "fremen 2";
+    if (actionName === "bribe" || actionName === "gift") {
+        const factions = Object.keys(state.faction_state).filter(f => f !== me);
+        return [factions.length ? factions[0] : me, "2"];
     }
 
     if (actionName === "fremen-placement") {

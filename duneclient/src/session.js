@@ -9,6 +9,7 @@ import Bidding from './rounds/bidding';
 import Battle from './rounds/battle';
 import Movement from './rounds/movement';
 import Revival from './rounds/revival';
+import Nexus from './rounds/nexus';
 import Deck from './components/deck';
 import update from 'immutability-helper';
 
@@ -48,6 +49,9 @@ const RoundState = ({roundState, stormPosition, logoPositions, interaction, sele
     }
     let stateDiv = null;
     let factionOrder = GetFactionOrder(logoPositions, stormPosition);
+    if (roundState && roundState.round == "nexus"){
+        stateDiv = <Nexus roundState={roundState} />;
+    }
     if (roundState && roundState.round == "bidding"){
         stateDiv = <Bidding factionOrder={factionOrder} roundstate={roundState} />;
     }
@@ -67,7 +71,6 @@ const RoundState = ({roundState, stormPosition, logoPositions, interaction, sele
         return (
             <div className="roundstate">
                 <h4>{titleCase(text)}</h4>
-                {JSON.stringify(roundState)}
             </div>
         );
     }

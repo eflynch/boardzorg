@@ -830,8 +830,6 @@ class Deploy(Action):
         new_game_state.round_state.ship_has_sailed = True
         m = MapGraph()
         if m.distance("The-Great-Flat", 14, self.space, self.sector) > 2:
-            print((self.space, self.sector))
-            print(m.g.edges[("The-Great-Flat", 14)])
             raise BadCommand("You cannot deploy there")
 
         space = new_game_state.map_state[self.space]

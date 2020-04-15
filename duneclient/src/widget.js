@@ -1,5 +1,4 @@
 import React, {useState} from 'react';
-import Select from 'react-select';
 import Slider, { Range } from 'rc-slider';
 import update from 'immutability-helper';
 
@@ -8,9 +7,8 @@ import TraitorSelect from './widgets/traitor-select';
 import Integer from './widgets/integer';
 import Units from './widgets/units';
 import Card from './components/card';
+import Logo from './components/logo';
 
-
-const AllFactions = ["emperor", "fremen", "guild", "bene-gesserit", "harkonnen", "atreides"];
 
 const humanReadable = {
     "token-select": "Token Placement",
@@ -273,14 +271,35 @@ const SelectOnMap = ({args, setArgs, interaction, setInteraction, mode, nullable
     );
 };
 
-const FactionSelect = ({args, setArgs, config}) => {
-    return <Select
-      className="basic-single"
-      value={{label: args, value: args}}
-      options={AllFactions.map((faction)=>{return {label: faction, value: faction}})}
-      onChange={(e)=>{setArgs(e.value);}}
-      isSearchable={true}
-    />;
+
+
+const FactionSelector = ({faction, selected, diameter, onSelect}) => {
+    return (
+        <Logo className={"select-faction" + (selected ? " selected" : "")} onClick={onSelect} faction={faction} diameter={diameter} />
+    );
+}
+
+const FactionSelect = ({args, setArgs, factionsAvailable, allowMulti}) => {
+    const selectedFactions = args ? args.split(" ") : [];
+    return (
+        <div style={{display:"flex", justifyContent:"space-around", flexWrap:"wrap"}}>
+            {factionsAvailable.map((faction)=> {
+                const selected = selectedFactions.indexOf(faction) !== -1;
+                return <FactionSelector diameter={75} key={faction} faction={faction} selected={selected} onSelect={()=>{
+                    if (allowMulti) {
+                        if (selected) {
+                            setArgs(selectedFactions.filter(f => f !== faction).join(" "));
+                        } else {
+                            selectedFactions.push(faction);
+                            setArgs(selectedFactions.join(" "));
+                        }
+                    } else {
+                        setArgs(selected ? "" : faction);
+                    }
+                }} />;
+            })}
+        </div>
+    );
 };
 
 const FremenPlacementSelect = ({args, setArgs, config}) => {
@@ -372,11 +391,11 @@ const Widget = (props) => {
     }
 
     if (type === "choice") {
-        return <Choice args={args} setArgs={setArgs} config={config} interaction={interaction} setInteraction={setInteraction} updateSelection={updateSelection} clearSelection={clearSelection}/>; 
+        return <Choice state={state} me={me} args={args} setArgs={setArgs} config={config} interaction={interaction} setInteraction={setInteraction} updateSelection={updateSelection} clearSelection={clearSelection}/>; 
     }
 
     if (type === "struct") {
-        return <Struct args={args} setArgs={setArgs} config={config} interaction={interaction} setInteraction={setInteraction} updateSelection={updateSelection} clearSelection={clearSelection}/>; 
+        return <Struct state={state} me={me} args={args} setArgs={setArgs} config={config} interaction={interaction} setInteraction={setInteraction} updateSelection={updateSelection} clearSelection={clearSelection}/>; 
     }
 
     if (type === "input") {
@@ -384,8 +403,15 @@ const Widget = (props) => {
     }
 
     if (type === "faction-select") {
-        return <FactionSelect args={args} setArgs={setArgs} config={config} />;
+        const factionsAvailable = Object.keys(state.faction_state).filter(f => f !== me);
+        return <FactionSelect allowMulti={false} factionsAvailable={factionsAvailable} args={args} setArgs={setArgs} />;
     }
+
+    if (type === "multi-faction-select") {
+        const factionsAvailable = Object.keys(state.faction_state).filter(f => f !== me);
+        return <FactionSelect allowMulti={true} factionsAvailable={factionsAvailable} args={args} setArgs={setArgs} />;
+    }
+
 
     if (type === "constant") {
         return <Constant value={config} setArgs={setArgs} />;
@@ -400,7 +426,7 @@ const Widget = (props) => {
     }
 
     if (type === "array") {
-        return <ArrayWidget args={args} setArgs={setArgs} config={config}/>;
+        return <ArrayWidget args={args} setArgs={setArgs} config={config} state={state} me={me} />;
     }
 
     if (type === "fremen-placement-select") {

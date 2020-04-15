@@ -254,6 +254,18 @@ class Board extends React.Component {
         return this._getMapParts(sectorPaths, "sector", onClick, selectedParts);
     }
 
+    getShaiHulud () {
+        let {shai_hulud, map_state} = this.props.state;
+        if (shai_hulud) {
+            const space = map_state.filter((s)=>s.name === shai_hulud)[0];
+            const sector = space.spice_sector !== undefined ? space.spice_sector : space.sectors[0];
+            const wormLocation = TokenLocations[shai_hulud][sector][1];
+            return (
+                <image xlinkHref={`/static/app/png/shai-hulud.png`} x={wormLocation.left - 0.1} y={wormLocation.top - 0.1} width={0.2} height={0.2}/>
+            );
+        }
+    }
+
     render () {
         let {round_state, turn, map_state} = this.props.state;
         let AllSpaces = Object.keys(spaceSectorPaths);
@@ -288,11 +300,12 @@ class Board extends React.Component {
                     {futureSpice}
                     {this.getSpaces()}
                     {this.getSpaceSectors()}
+                    <Storm sector={this.props.stormSector} color="rgba(255, 0, 0, 0.5)"/>
                     {this.getMovementArrows()}
                     {this.getLogos()}
                     {this.getSpice()}
                     {this.getTokenPiles()}
-                    <Storm sector={this.props.stormSector} color="rgba(255, 0, 0, 0.5)"/>
+                    {this.getShaiHulud()}
                 </svg>
             </div>
         );

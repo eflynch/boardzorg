@@ -28,6 +28,7 @@ class GameState(State):
             random.seed(seed)
 
         spice_deck = SPICE_CARDS[:]
+        random.shuffle(spice_deck)
         while spice_deck[0] == "Shai-Hulud":
             random.shuffle(spice_deck)
 
@@ -71,6 +72,7 @@ class GameState(State):
             self.map_state["Tueks-Sietch"].forces["guild"] = {4: [1, 1, 1, 1, 1]}
 
         self.winner = None
+        self.shai_hulud = None
 
     @property
     def round(self):
@@ -113,7 +115,7 @@ class GameState(State):
         else:
             visible["round_state"] = self.round
 
-        visible["alliances"] = self.alliances
+        visible["alliances"] = [list(a) for a in self.alliances]
         visible["turn"] = self.turn
         visible["shield_wall"] = self.shield_wall
         visible["storm_position"] = self.storm_position
@@ -125,5 +127,6 @@ class GameState(State):
 
         visible["map_state"] = [self.map_state[s].visible(self, faction) for s in self.map_state]
         visible["winner"] = self.winner
+        visible["shai_hulud"] = self.shai_hulud
 
         return visible
