@@ -105,7 +105,6 @@ const maybeFlowInteraction = (interaction, selection, flows) => {
     if (interaction.mode == null) {
         for (const flow of flows) {
             if (selection[flow.mode] == null) {
-                console.log("reflowed to", flow);
                 return flow;
             }
         }
@@ -150,7 +149,6 @@ export default function Session({state, actions, history, me, error, sendCommand
     };
 
     const wrapInteraction = (interaction, combinedState) => {
-        console.log("wrapping interaction", interaction, combinedState);
         let newInteraction = maybeFlowInteraction(
             interaction,
             combinedState.selection,

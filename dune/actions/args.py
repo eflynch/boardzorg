@@ -107,17 +107,30 @@ class Units(Args):
         }
 
 
-class Revival(Args):
-    def __init__(self, leaders, units):
-        self.leaders = leaders
+class RevivalUnits(Args):
+    def __init__(self, units):
         self.units = units
 
     def to_dict(self):
         return {
-            "widget": "revival",
+            "widget": "revival-units",
+            "args": {
+                "units": self.units
+            }
+        }
+
+
+class RevivalLeader(Args):
+    def __init__(self, leaders, required=False):
+        self.leaders = leaders
+        self.required = required
+
+    def to_dict(self):
+        return {
+            "widget": "revival-leader",
             "args": {
                 "leaders": self.leaders,
-                "units": self.units
+                "required": self.required,
             }
         }
 
