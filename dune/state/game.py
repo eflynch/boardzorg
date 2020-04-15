@@ -48,6 +48,10 @@ class GameState(State):
         self.spice_discard = []
         self.treachery_discard = []
         self.pause = []
+        self.pause_context = None
+
+        self.treachery_to_return = None
+        self.treachery_to_return_faction = None
 
         self.treachery_reference = {
             "worthless": WORTHLESS,

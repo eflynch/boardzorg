@@ -182,6 +182,7 @@ class ResolveWinner(Action):
                 break
 
         new_game_state.round_state.stage_state.substage_state = bidding.PaymentSubStage()
+        new_game_state.pause_context = "payment"
         new_game_state.round_state.stage_state.winner = winner
         new_game_state.round_state.stage_state.winning_bid = bid
 
@@ -236,6 +237,7 @@ class KaramaFreeBid(Action):
     ck_stage = "auction"
     ck_substage = "payment"
     ck_karama = True
+    ck_pause_context = ["payment"]
 
     @classmethod
     def _check(cls, game_state, faction):
@@ -249,6 +251,7 @@ class KaramaFreeBid(Action):
         new_game_state.faction_state[self.faction].treachery.append(card)
 
         new_game_state.round_state.stage_state.substage_state = bidding.CollectSubStage()
+        new_game_state.pause_context = None
 
         return new_game_state
 
@@ -258,6 +261,7 @@ class Pay(Action):
     ck_round = "bidding"
     ck_stage = "auction"
     ck_substage = "payment"
+    ck_pause_context = ["payment"]
 
     @classmethod
     def _check(cls, game_state, faction):
@@ -268,6 +272,7 @@ class Pay(Action):
         new_game_state = deepcopy(game_state)
         do_payment(new_game_state)
         new_game_state.round_state.stage_state.substage_state = bidding.CollectSubStage()
+        new_game_state.pause_context = None
 
         return new_game_state
 

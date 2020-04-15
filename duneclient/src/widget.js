@@ -178,6 +178,34 @@ const DiscardTreachery = ({state, me, args, setArgs}) => {
         </div>
     );
 };
+
+
+const ReturnTreachery = ({state, me, args, setArgs, number}) => {
+    const selectedCards = args ? args.split(" ") : [];
+    const numSelected = selectedCards.length;
+    const treachery = state.faction_state[me].treachery;
+
+    return (
+        <div style={{display:"flex"}}>
+            {treachery.map((card, i)=> {
+                const selected = selectedCards.indexOf(card) !== -1;
+                return <Card key={card + i} type="Treachery" name={card} selected={selected} width={100} onClick={()=>{
+                    if (selected) {
+                        const index = selectedCards.indexOf(card)
+                        selectedCards.splice(index, 1);
+                        setArgs(selectedCards.join(" "));
+                    } else {
+                        if (numSelected < number) {
+                            selectedCards.push(card)
+                            setArgs(selectedCards.join(" "));
+                        }
+                    }
+                }
+                }/>;
+            })}
+        </div>
+    );
+};
  
 const Choice = ({args, setArgs, clearSelection, config, ...props}) => {
     return (
@@ -464,6 +492,10 @@ const Widget = (props) => {
 
     if (type === "discard-treachery") {
         return <DiscardTreachery state={state} me={me} args={args} setArgs={setArgs} />;
+    }
+
+    if (type === "return-treachery") {
+        return <ReturnTreachery state={state} me={me} args={args} setArgs={setArgs} number={config.number} />;
     }
 
     if (type === "voice") {

@@ -130,6 +130,7 @@ def _execute_revival(units, leader, faction, game_state, cost):
 class KaramaFreeUnitRevival(Action):
     name = "karama-free-unit-revival"
     ck_karama = True
+    ck_faction = "emperor"
 
     def __init__(self, faction, units):
         self.faction = faction
@@ -137,8 +138,6 @@ class KaramaFreeUnitRevival(Action):
 
     @classmethod
     def _check(cls, game_state, faction):
-        if faction != "emperor":
-            raise IllegalAction("Only the emperor can revive units for free")
         if not game_state.faction_state[faction].tank_units:
             raise IllegalAction("You don't have any units to revive")
 
@@ -166,6 +165,7 @@ class KaramaFreeUnitRevival(Action):
 class KaramaFreeLeaderRevival(Action):
     name = "karama-free-leader-revival"
     ck_karama = True
+    ck_faction = "emperor"
 
     def __init__(self, faction, leader):
         self.faction = faction
@@ -173,8 +173,6 @@ class KaramaFreeLeaderRevival(Action):
 
     @classmethod
     def _check(cls, game_state, faction):
-        if faction != "emperor":
-            raise IllegalAction("Only the emperor can revive leaders for free")
         if not game_state.faction_state[faction].tank_leaders:
             raise IllegalAction("You don't have any leaders to revive")
 

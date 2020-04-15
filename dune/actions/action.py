@@ -105,6 +105,13 @@ class Action(object, metaclass=ActionMeta):
                 raise IllegalAction("You can't be doing that")
             if cls.ck_treachery not in game_state.faction_state[faction].treachery:
                 raise IllegalAction("Cannot use a card you don't have")
+        if game_state.pause_context is not None:
+            if not hasattr(cls, "ck_pause_context"):
+                raise IllegalAction("Global pause context in effect")
+            else:
+                if game_state.pause_context not in cls.ck_pause_context:
+                    raise IllegalAction(
+                        "Global pause context {} in effect".format(game_state.pause_context))
 
         if cls.su and faction is not None:
             raise IllegalAction("Only God can do that")

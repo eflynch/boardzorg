@@ -257,6 +257,19 @@ class DiscardTreachery(Args):
         }
 
 
+class ReturnTreachery(Args):
+    def __init__(self, number):
+        self.number = number
+
+    def to_dict(self):
+        return {
+            "widget": "return-treachery",
+            "args": {
+                "number": self.number
+            }
+        }
+
+
 class Turn(Integer):
     def __init__(self):
         super(Turn, self).__init__(min=0, max=10)
