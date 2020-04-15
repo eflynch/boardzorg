@@ -56,7 +56,7 @@ class ProgressRevival(Action):
         return new_game_state
 
 
-def _parse_revival_units(args):
+def parse_revival_units(args):
     if not args:
         return []
 
@@ -69,7 +69,7 @@ def _parse_revival_units(args):
     return units
 
 
-def _parse_revival_leader(args):
+def parse_revival_leader(args):
     if (args == "") or (args == "-"):
         return None
     if args == "Kwisatz-Haderach":
@@ -93,29 +93,36 @@ def _get_unit_cost(faction, units):
     return cost
 
 
+def revive_units(units, faction, game_state):
+    for u in units:
+        if u not in game_state.faction_state[faction].tank_units:
+            raise BadCommand("Those units are not in the tanks")
+        game_state.faction_state[faction].tank_units.remove(u)
+        game_state.faction_state[faction].reserve_units.append(u)
+
+
+def revive_leader(leader, faction, game_state):
+    if leader is not None:
+        if leader[0] == "Kwisatz-Haderach":
+            game_state.faction_state[faction].kwisatz_haderach_tanks = None
+        else:
+            game_state.faction_state[faction].tank_leaders.remove(leader)
+            game_state.faction_state[faction].leaders.append(leader)
+
+
 def _execute_revival(units, leader, faction, game_state, cost):
     if len(units) > 3:
         raise BadCommand("You can only revive up to three units")
     if units.count("2") > 1:
         raise BadCommand("Only 1 Sardukar or Fedykin can be be revived per turn")
     new_game_state = deepcopy(game_state)
-    for u in units:
-        if u not in new_game_state.faction_state[faction].tank_units:
-            raise BadCommand("Those units are not in the tanks")
-        new_game_state.faction_state[faction].tank_units.remove(u)
-        new_game_state.faction_state[faction].reserve_units.append(u)
-
 
     if cost > new_game_state.faction_state[faction].spice:
         raise BadCommand("You do not have the spice to perform this revival")
     new_game_state.faction_state[faction].spice -= cost
 
-    if leader is not None:
-        if leader[0] == "Kwisatz-Haderach":
-            new_game_state.faction_state[faction].kwisatz_haderach_tanks = None
-        else:
-            new_game_state.faction_state[faction].tank_leaders.remove(leader)
-            new_game_state.faction_state[faction].leaders.append(leader)
+    revive_units(units, faction, new_game_state)
+    revive_leader(leader, faction, new_game_state)
 
     return new_game_state
 
@@ -137,7 +144,7 @@ class KaramaFreeUnitRevival(Action):
 
     @classmethod
     def parse_args(cls, faction, args):
-        units = _parse_revival_units(args)
+        units = parse_revival_units(args)
         if not units:
             raise IllegalAction("Can't revive no units")
         return KaramaFreeUnitRevival(faction, units)
@@ -199,7 +206,7 @@ class Revive(Action):
         if not args:
             return Revive(faction, [], None)
         units, leader = args.split(" ")
-        return Revive(faction, _parse_revival_units(units), _parse_revival_leader(leader))
+        return Revive(faction, parse_revival_units(units), parse_revival_leader(leader))
 
     @classmethod
     def get_arg_spec(cls, faction=None, game_state=None):

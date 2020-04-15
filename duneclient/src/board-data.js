@@ -1,19 +1,19 @@
 export const SpiceLocations = {
-    "Hagga-Basin": {top: 0.32, left: 0.35},
-    "Broken-Land": {top: 0.08, left: 0.31},
-    "Old-Gap": {top: 0.06, left: 0.56},
-    "Sihaya-Ridge": {top: 0.16, left: 0.75},
-    "Red-Chasm": {top: 0.42, left: 0.865},
-    "Minor-Erg": {top: 0.39, left: 0.60},
-    "Cielago-North": {top: 0.60, left: 0.515},
-    "South-Mesa": {top: 0.62, left: 0.83},
-    "Cielago-South": {top: 0.86, left: 0.48},
-    "Habbanya-Ridge-Flat": {top: 0.76, left: 0.21},
-    "Habbanya-Erg": {top: 0.56, left: 0.08},
-    "Great-Flat": {top: 0.435, left: 0.07},
-    "Wind-Pass-North": {top: 0.505, left: 0.37},
-    "Rock-Outcroppings": {top: 0.215, left: 0.13},
-    "Funeral-Plain": {top: 0.355, left: 0.10}
+    "Hagga-Basin": {top: 0.36, left: 0.39},
+    "Broken-Land": {top: 0.12, left: 0.35},
+    "Old-Gap": {top: 0.10, left: 0.60},
+    "Sihaya-Ridge": {top: 0.20, left: 0.79},
+    "Red-Chasm": {top: 0.46, left: 0.905},
+    "Minor-Erg": {top: 0.43, left: 0.64},
+    "Cielago-North": {top: 0.64, left: 0.555},
+    "South-Mesa": {top: 0.66, left: 0.87},
+    "Cielago-South": {top: 0.90, left: 0.51},
+    "Habbanya-Ridge-Flat": {top: 0.80, left: 0.25},
+    "Habbanya-Erg": {top: 0.60, left: 0.12},
+    "Great-Flat": {top: 0.475, left: 0.11},
+    "Wind-Pass-North": {top: 0.545, left: 0.41},
+    "Rock-Outcroppings": {top: 0.255, left: 0.17},
+    "Funeral-Plain": {top: 0.395, left: 0.14}
 }
 
 export const TokenLocations = {
@@ -2080,6 +2080,12 @@ export const TokenLocations = {
     }
   },
   "Cielago-South": {
+    "1": {
+      "1": {
+        "top": 0.84125,
+        "left": 0.585
+      }
+    },
     "2": {
       "1": {
         "top": 0.84125,

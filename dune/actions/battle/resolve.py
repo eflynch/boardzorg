@@ -8,8 +8,17 @@ from dune.exceptions import IllegalAction, BadCommand
 from dune.state.leaders import get_leader_faction
 from dune.actions.battle import ops
 from dune.actions.battle.winner import DiscardTreachery, TankUnits
+from dune.actions.treachery import discard_treachery as discard_treachery_from_hand
 
 logger = getLogger(__name__)
+
+
+def discard_cheap_heroine(game_state):
+    [attacker, defender, _, _] = game_state.round_state.stage_state.battle
+    if game_state.round_state.stage_state.defender_plan["leader"][0] == "Cheap-Hero/Heroine":
+        discard_treachery_from_hand(game_state, defender, "Cheap-Hero/Heroine")
+    if game_state.round_state.stage_state.attacker_plan["leader"][0] == "Cheap-Hero/Heroine":
+        discard_treachery_from_hand(game_state, attacker, "Cheap-Hero/Heroine")
 
 
 class CommitPlan(Action):
@@ -193,7 +202,7 @@ class AutoResolveWithTraitor(Action):
         battle_id = stage_state.battle
         space = new_game_state.map_state[battle_id[2]]
 
-        if self.faction == battle_id[0]:
+        if stage_state.traitor_revealers[0] == battle_id[0]:
             winner = battle_id[0]
             loser = battle_id[1]
             ops.discard_treachery(new_game_state, stage_state.defender_plan["weapon"])
@@ -223,11 +232,15 @@ class AutoResolveWithTraitor(Action):
             for u in units_to_tank:
                 ops.tank_unit(new_game_state, loser, space, sec, u)
 
+        discard_cheap_heroine(new_game_state)
+
         new_game_state.round_state.stage_state.winner = winner
         new_game_state.pause.append(loser)
         new_game_state.round_state.stage_state.substage_state = battle.WinnerSubStage()
         new_game_state.round_state.stage_state.substage_state.power_left_to_tank = 0
-        if not (stage_state.attacker_plan["weapon"] or stage_state.attacker_plan["defense"]):
+
+        winner_plan = stage_state.attacker_plan if winner == battle_id[0] else stage_state.defender_plan
+        if not (winner_plan["weapon"] or winner_plan["defense"]):
             new_game_state.round_state.stage_state.substage_state.discard_done = True
             new_game_state.pause.append(winner)
 
@@ -345,6 +358,7 @@ class AutoResolveDisaster(Action):
         ops.discard_treachery(new_game_state, stage_state.attacker_plan["defense"])
         ops.discard_treachery(new_game_state, stage_state.defender_plan["weapon"])
         ops.discard_treachery(new_game_state, stage_state.defender_plan["defense"])
+        discard_cheap_heroine(new_game_state)
 
         new_game_state.pause.extend(battle_id[:2])
         new_game_state.round_state.stage = "main"
@@ -426,7 +440,10 @@ class AutoResolve(Action):
         new_game_state.round_state.stage_state.substage_state = battle.WinnerSubStage()
         new_game_state.round_state.stage_state.substage_state.power_left_to_tank = power_left_to_tank
 
-        if not (stage_state.attacker_plan["weapon"] or stage_state.attacker_plan["defense"]):
+        discard_cheap_heroine(new_game_state)
+
+        winner_plan = stage_state.attacker_plan if winner == battle_id[0] else stage_state.defender_plan
+        if not (winner_plan["weapon"] or winner_plan["defense"]):
             new_game_state.round_state.stage_state.substage_state.discard_done = True
             if power_left_to_tank == 0:
                 new_game_state.pause.append(winner)

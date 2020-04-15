@@ -41,7 +41,7 @@ class DoControl(Action):
 
         alliances = []
         for faction in new_game_state.alliances:
-            alliance = tuple(sorted(new_game_state.alliances[faction] + [faction]))
+            alliance = tuple(sorted(new_game_state.alliances[faction] | set([faction])))
             alliances.append(alliance)
         alliances = set(alliances)
 

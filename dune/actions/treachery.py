@@ -1,6 +1,9 @@
 from copy import deepcopy
 
+from dune.actions import args
 from dune.actions.action import Action
+from dune.actions.revival import parse_revival_units, parse_revival_leader
+from dune.actions.revival import revive_units, revive_leader
 
 
 def discard_treachery(game_state, faction, treachery):
@@ -16,4 +19,58 @@ class TruthTrance(Action):
         new_game_state = deepcopy(game_state)
         new_game_state.pause.append(self.faction)
         discard_treachery(new_game_state, self.faction, "Truth-Trance")
+        return new_game_state
+
+
+class TleilaxuGhola(Action):
+    name = "tleilaxu-ghola"
+    ck_treachery = "Tleilaxu-Ghola"
+
+    @classmethod
+    def parse_args(cls, faction, args):
+        if not args:
+            return TleilaxuGhola(faction, [], None)
+        if "1" in args or "2" in args:
+            units = args
+            leader = ""
+        else:
+            leader = args
+            units = ""
+        return TleilaxuGhola(faction, parse_revival_units(units), parse_revival_leader(leader))
+
+    @classmethod
+    def get_arg_spec(cls, faction=None, game_state=None):
+        return args.Union(
+            args.RevivalUnits(game_state.faction_state[faction].tank_units),
+            args.RevivalLeader(game_state.faction_state[faction].tank_leaders)
+        )
+
+    def __init__(self, faction, units, leader):
+        self.faction = faction
+        self.units = units
+        self.leader = leader
+
+    @classmethod
+    def _check(cls, game_state, faction):
+        if (not game_state.faction_state[faction].tank_units) and \
+           game_state.faction_state[faction].tank_leaders:
+            raise IllegalAction("You don't have anything to revive")
+
+    def _execute(self, game_state):
+        new_game_state = deepcopy(game_state)
+
+        if self.leader and self.units:
+            raise BadCommand("You must pick units or a leader")
+
+        if self.leader:
+            if self.leader not in new_game_state.faction_state[self.faction].tank_leaders:
+                raise BadCommand("That leader is not revivable")
+            revive_leader(self.leader, self.faction, new_game_state)
+
+        if self.units:
+            if len(self.units) > 5:
+                raise BadCommand("You can only revive up to five units")
+            revive_units(self.units, self.faction, new_game_state)
+
+        discard_treachery(new_game_state, self.faction, "Tleilaxu-Ghola")
         return new_game_state

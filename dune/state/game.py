@@ -58,7 +58,7 @@ class GameState(State):
         self.faction_state = {f: FactionState.from_name(f) for f in factions}
         self._round_state = SetupRound()
         self._round = None
-        self.alliances = {f: [] for f in factions}
+        self.alliances = {f: set([]) for f in factions}
         self.turn = 1
         self.storm_position = 0
         self.shield_wall = True
@@ -115,7 +115,7 @@ class GameState(State):
         else:
             visible["round_state"] = self.round
 
-        visible["alliances"] = [list(a) for a in self.alliances]
+        visible["alliances"] = {a: list(self.alliances[a]) for a in self.alliances}
         visible["turn"] = self.turn
         visible["shield_wall"] = self.shield_wall
         visible["storm_position"] = self.storm_position

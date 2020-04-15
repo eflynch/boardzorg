@@ -93,7 +93,8 @@ const Decks = ({state}) => {
             alignSelf: "stretch",
             backgroundColor: "black",
             alignItems: "center",
-            justifyContent: "space-around"
+            justifyContent: "space-around",
+            paddingRight: 10
         }}>
             <Deck type="Treachery" facedown={state.treachery_deck} faceup={state.treachery_discard} />
             <Deck type="Spice" facedown={state.spice_deck} faceup={state.spice_discard} />

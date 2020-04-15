@@ -7,7 +7,7 @@ export default function Deck({facedown, faceup, type}) {
     const Faceup = (faceup) => {
         return faceup.concat().reverse().map((name, i )=> {
             return (
-                <div key={name} style={{position: "absolute", top:0, left: 0}}>
+                <div key={i + name} style={{position: "absolute", top:0, left: 0}}>
                     <Card type={type} name={name} width={100}/>
                 </div>
             );
@@ -16,7 +16,7 @@ export default function Deck({facedown, faceup, type}) {
 
     const Facedown = (facedown) => {
         let cards = [
-            <Card type={type} name="Reverse" width={100}>
+            <Card key="reverse" type={type} name="Reverse" width={100}>
                 <div style={{position: "absolute", color:"white", top:4, right: 4, fontSize: 10}}>{facedown.length} Remain</div>
             </Card>
         ];
@@ -25,7 +25,7 @@ export default function Deck({facedown, faceup, type}) {
         }
         return cards.map((card, i) => {
             return (
-                <div key={i} style={{position: "absolute", top:0, left: 0}}>
+                <div key={i + "card"} style={{position: "absolute", top:0, left: 0}}>
                     {card}
                 </div>
             );
