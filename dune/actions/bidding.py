@@ -7,6 +7,7 @@ from dune.state.rounds.revival import RevivalRound
 from dune.state.rounds import bidding
 from dune.actions import args
 from dune.actions.karama import discard_karama
+from dune.actions.spice import spend_spice
 
 
 def next_bidder(game_state):
@@ -31,9 +32,7 @@ def next_first_bidder(game_state):
 def do_payment(game_state):
     winner = game_state.round_state.stage_state.winner
     bid = game_state.round_state.stage_state.winning_bid
-    if bid > game_state.faction_state[winner].spice:
-        raise BadCommand("Cannot pay if you don't have enough spice")
-    game_state.faction_state[winner].spice -= bid
+    spend_spice(game_state, winner, bid, "payment")
     if winner != "emperor" and "emperor" in game_state.faction_state:
         game_state.faction_state["emperor"].spice += bid
     card = game_state.round_state.up_for_auction.pop(0)
@@ -51,17 +50,13 @@ class ChoamCharity(Action):
 
     @classmethod
     def _check(cls, game_state, faction):
-        if faction != "bene-gesserit" and game_state.faction_state[faction].spice > 0:
+        if faction not in game_state.round_state.choam_claimers:
             raise IllegalAction("CHOAM Charity is only for the poor and meek")
-
-        if faction == "bene-gesserit" and game_state.round_state.bene_gesserit_charity_claimed:
-            raise IllegalAction("CHOAM is generous but not so generous")
 
     def _execute(self, game_state):
         new_game_state = deepcopy(game_state)
-        new_game_state.faction_state[self.faction].spice += 2
-        if self.faction == "bene-gesserit":
-            new_game_state.round_state.bene_gesserit_charity_claimed = True
+        new_game_state.faction_state[self.faction].spice = 2
+        new_game_state.round_state.choam_claimers.remove(self.faction)
         return new_game_state
 
 
@@ -77,6 +72,11 @@ class StartAuction(Action):
             if new_game_state.treachery_deck:
                 c = new_game_state.treachery_deck.pop(0)
                 new_game_state.round_state.up_for_auction.append(c)
+
+        for faction in new_game_state.faction_state:
+            if faction == "bene-gesserit" or new_game_state.faction_state[faction].spice <= 2:
+                new_game_state.round_state.choam_claimers.append(faction)
+
         new_game_state.round_state.total_for_auction = len(new_game_state.round_state.up_for_auction)
         new_game_state.round_state.stage_state = bidding.AuctionStage()
         new_game_state.round_state.stage_state.substage_state.faction_turn = next_first_bidder(new_game_state)
@@ -124,10 +124,28 @@ class Bid(Action):
         if self.spice <= highest:
             raise BadCommand("Must bid higher than the highest bid")
 
+        new_game_state = deepcopy(game_state)
+
+        # WEIRD PATTERN ALERT
+        class LocalException(Exception):
+            pass
+
+        try:
+            self.check_karama(game_state, self.faction, LocalException)
+            reserve_spice = None
+        except LocalException:
+            reserve_spice = self.spice
+
+        # END ALERT
+
+        new_game_state.spice_reserve[self.faction] = reserve_spice
+        if reserve_spice is not None:
+            new_game_state.spice_context[self.faction] = "payment"
+
         if self.spice > game_state.faction_state[self.faction].spice:
             self.check_karama(game_state, self.faction, BadCommand("Must not bid higher than you have spice"))
+            new_game_state.karama_context[self.faction] = "payment"
 
-        new_game_state = deepcopy(game_state)
         new_game_state.round_state.stage_state.bids[self.faction] = self.spice
         new_game_state.round_state.stage_state.substage_state.faction_turn = next_bidder(new_game_state)
 
@@ -152,6 +170,9 @@ class Pass(Action):
         new_game_state = deepcopy(game_state)
         new_game_state.round_state.stage_state.bids[self.faction] = "pass"
         new_game_state.round_state.stage_state.substage_state.faction_turn = next_bidder(new_game_state)
+        new_game_state.karama_context[self.faction] = None
+        new_game_state.spice_context[self.faction] = None
+        new_game_state.spice_reserve[self.faction] = None
         return new_game_state
 
 
@@ -237,6 +258,7 @@ class KaramaFreeBid(Action):
     ck_stage = "auction"
     ck_substage = "payment"
     ck_karama = True
+    ck_karama_context = ["payment"]
     ck_pause_context = ["payment"]
 
     @classmethod
@@ -252,6 +274,7 @@ class KaramaFreeBid(Action):
 
         new_game_state.round_state.stage_state.substage_state = bidding.CollectSubStage()
         new_game_state.pause_context = None
+        new_game_state.karama_context[self.faction] = None
 
         return new_game_state
 

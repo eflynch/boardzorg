@@ -32,9 +32,17 @@ class Action(object, metaclass=ActionMeta):
 
     @classmethod
     def check_karama(cls, game_state, faction, exception=None):
-        is_bene = faction == "bene-gesserit"
         if faction is None:
             raise IllegalAction("Got to be someone to do this")
+
+        if game_state.karama_context[faction] is not None:
+            if (not hasattr(cls, "ck_karama_context")) or game_state.karama_context[faction] not in cls.ck_karama_context:
+                if exception is None:
+                    raise IllegalAction("Karama is spoken for")
+                else:
+                    raise exception
+
+        is_bene = faction == "bene-gesserit"
         has_karama = "Karama" in game_state.faction_state[faction].treachery
         worthless_count = sum([1 for card in game_state.faction_state[faction].treachery if card in WORTHLESS])
         if is_bene:

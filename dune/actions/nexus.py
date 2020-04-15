@@ -79,10 +79,11 @@ class KaramaPassWormRide(Action):
 
     @classmethod
     def _check(cls, game_state, faction):
+        if not fremen_allies_present(game_state):
+            raise IllegalAction("No worm ride to karama")
+
         if faction == "fremen":
             raise IllegalAction("You can't karama your own desert powers")
-        if game_state.round_state.karama_done:
-            raise IllegalAction("Karama already used or passed")
 
         if faction in game_state.round_state.karama_passes:
             raise IllegalAction("You already passed karama")

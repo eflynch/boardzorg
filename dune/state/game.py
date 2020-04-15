@@ -49,6 +49,10 @@ class GameState(State):
         self.treachery_discard = []
         self.pause = []
         self.pause_context = None
+        self.karama_context = {f: None for f in factions}
+
+        self.spice_context = {f: None for f in factions}
+        self.spice_reserve = {f: None for f in factions}
 
         self.treachery_to_return = None
         self.treachery_to_return_faction = None

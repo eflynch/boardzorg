@@ -2,6 +2,7 @@ from copy import deepcopy
 
 from dune.actions import args
 from dune.actions.action import Action
+from dune.exceptions import IllegalAction, BadCommand
 from dune.actions.revival import parse_revival_units, parse_revival_leader
 from dune.actions.revival import revive_units, revive_leader
 

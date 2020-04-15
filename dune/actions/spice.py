@@ -8,6 +8,20 @@ from dune.exceptions import IllegalAction, BadCommand
 from dune.state.rounds import nexus, bidding
 
 
+def spend_spice(game_state, faction, amount, context=None):
+    spice_to_spend = game_state.faction_state[faction].spice
+    if game_state.spice_context[faction] is not None:
+        if game_state.spice_reserve[faction] is not None:
+            if context == game_state.spice_context[faction]:
+                game_state.spice_reserve[faction] = None
+                game_state.spice_context[faction] = None
+            else:
+                spice_to_spend = game_state.faction_state[faction].spice - game_state.spice_reserve[faction]
+    if amount > spice_to_spend:
+        raise IllegalAction("Insufficient spice for this action")
+    game_state.faction_state[faction].spice -= amount
+
+
 class Gift(Action):
     name = "gift"
     ck_faction = "emperor"
@@ -36,11 +50,8 @@ class Gift(Action):
         if "emperor" not in game_state.alliances[self.other_faction]:
             raise IllegalAction("The emperor can only gift spice to allies.")
 
-        if game_state.faction_state[self.faction].spice < self.spice:
-            raise IllegalAction("Insufficient spice for this gift")
-
         new_game_state = deepcopy(game_state)
-        new_game_state.faction_state[self.faction].spice -= self.spice
+        spend_spice(new_game_state, self.faction, self.spice)
         new_game_state.faction_state[self.other_faction].bribe_spice += self.spice
 
         return new_game_state
@@ -70,11 +81,17 @@ class Bribe(Action):
         self.spice = spice
 
     def _execute(self, game_state):
-        if game_state.faction_state[self.faction].spice < self.spice:
-            raise BadCommand("Insufficient spice for this bribe")
-
         new_game_state = deepcopy(game_state)
-        new_game_state.faction_state[self.faction].spice -= self.spice
+
+        # Try to spend from bribe_spice first
+        to_spend = self.spice
+        if new_game_state.faction_state[self.faction].bribe_spice:
+            from_bribe = min(new_game_state.faction_state[self.faction].bribe_spice, to_spend)
+            new_game_state.faction_state[self.faction].bribe_spice -= from_bribe
+            to_spend -= from_bribe
+
+        spend_spice(new_game_state, self.faction, to_spend)
+
         new_game_state.faction_state[self.other_faction].bribe_spice += self.spice
         return new_game_state
 

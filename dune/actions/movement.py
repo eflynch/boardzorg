@@ -8,6 +8,7 @@ from dune.state.rounds import movement, battle
 from dune.map.map import MapGraph
 from dune.actions import args
 from dune.actions.karama import discard_karama
+from dune.actions.spice import spend_spice
 
 
 def ship_units(game_state, faction, units, space, sector):
@@ -237,7 +238,6 @@ class EndMovementTurn(Action):
         if game_state.round_state.stage_state.query_flip_to_fighters:
             raise IllegalAction("Query fighter flip in progress")
 
-
     def _execute(self, game_state):
         new_game_state = deepcopy(game_state)
         idx = new_game_state.round_state.turn_order.index(self.faction)
@@ -330,12 +330,25 @@ class Ship(Action):
             if self.faction != "fremen":
                 raise BadCommand("Only the Fremen can ship into the storm")
 
-        min_cost = spice_cost(new_game_state, self.faction, len(self.units), space)
+        # WEIRD PATTERN ALERT
+        class LocalException(Exception):
+            pass
 
-        if "Karama" in new_game_state.faction_state[self.faction].treachery:
+        try:
+            self.check_karama(game_state, self.faction, LocalException)
             min_cost = spice_cost(new_game_state, "guild", len(self.units), space)
+        except LocalException:
+            min_cost = spice_cost(new_game_state, self.faction, len(self.units), space)
+
+        # END ALERT
+
         if new_game_state.faction_state[self.faction].spice < min_cost:
-            raise BadCommand("Insufficient spice for this shipment")
+            self.check_karama(game_state, self.faction, BadCommand("Insufficent spice for this shipment"))
+            if new_game_state.faction_state[self.faction].spice < min_cost:
+                raise BadCommand("Insufficient spice for this shipment")
+            new_game_state.karama_context[self.faction] = "shipment-payment"
+        new_game_state.spice_reserve[self.faction] = min_cost
+        new_game_state.spice_context[self.faction] = "shipment-payment"
 
         new_game_state.round_state.stage_state.substage_state = movement.ShipSubStage()
         new_game_state.round_state.stage_state.substage_state.units = self.units
@@ -415,6 +428,7 @@ class KaramaCheapShipment(Action):
     ck_stage = "turn"
     ck_substage = "ship"
     ck_karama = True
+    ck_karama_context = ["shipment-payment"]
 
     @classmethod
     def _check(cls, game_state, faction):
@@ -438,7 +452,8 @@ class KaramaCheapShipment(Action):
         discard_karama(new_game_state, self.faction)
 
         ship_units(new_game_state, self.faction, units, space, sector)
-        new_game_state.faction_state[self.faction].spice -= cost
+        spend_spice(new_game_state, self.faction, cost, "shipment-payment")
+        new_game_state.karama_context[self.faction] = None
 
         return new_game_state
 
@@ -469,7 +484,7 @@ class PayShipment(Action):
             raise BadCommand("You cannot pay full price for this shipment")
 
         ship_units(new_game_state, self.faction, units, space, sector)
-        new_game_state.faction_state[self.faction].spice -= cost
+        spend_spice(new_game_state, self.faction, cost, "shipment-payment")
         if self.faction != "guild":
             if "guild" in new_game_state.faction_state:
                 new_game_state.faction_state["guild"].spice += cost
@@ -718,7 +733,8 @@ class CrossShip(Action):
         cost = spice_cost(new_game_state, self.faction, len(self.units), space_b)
         if new_game_state.faction_state[self.faction].spice < cost:
             raise BadCommand("You don't have enough spice")
-        new_game_state.faction_state[self.faction].spice -= cost
+        spend_spice(new_game_state, self.faction, cost)
+
         if self.faction != "guild":
             if "guild" in new_game_state.faction_state:
                 new_game_state.faction_state["guild"] += cost
@@ -774,7 +790,9 @@ class ReverseShip(Action):
         cost = math.ceil(len(self.units)/2)
         if new_game_state.faction_state[self.faction].spice < cost:
             raise BadCommand("You don't have enough spice")
-        new_game_state.faction_state[self.faction].spice -= cost
+
+        spend_spice(new_game_state, self.faction, cost)
+
         if self.faction != "guild":
             if "guild" in new_game_state.faction_state:
                 new_game_state.faction_state["guild"] += cost

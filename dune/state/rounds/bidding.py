@@ -58,14 +58,13 @@ class CollectSubStage(SubStageState):
 class BiddingRound(RoundState):
     def __init__(self):
         self.round = "bidding"
-        self.bene_gesserit_charity_claimed = False
         self.total_for_auction = 0
         self.stage_state = SetupStage()
         self.up_for_auction = []
+        self.choam_claimers = []
 
     def visible(self, game_state, faction):
         visible = super().visible(game_state, faction)
-        visible["bene_gesserit_charity_claimed"] = self.bene_gesserit_charity_claimed
         visible["total_for_auction"] = self.total_for_auction
         visible["stage_state"] = self.stage_state.visible(game_state, faction)
         visible["up_for_auction"] = {"length": len(self.up_for_auction)}
