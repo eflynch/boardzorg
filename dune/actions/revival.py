@@ -57,6 +57,9 @@ class ProgressRevival(Action):
 
 
 def _parse_revival_units(args):
+    if not args:
+        return []
+
     units = []
     for i in args.split(","):
         if i in ["1", "2"]:
@@ -67,7 +70,7 @@ def _parse_revival_units(args):
 
 
 def _parse_revival_leader(args):
-    if args is None:
+    if (args == "") or (args == "-"):
         return None
     if args == "Kwisatz-Haderach":
         return ("Kwisatz-Haderach", 2)
@@ -134,7 +137,10 @@ class KaramaFreeUnitRevival(Action):
 
     @classmethod
     def parse_args(cls, faction, args):
-        return KaramaFreeUnitRevival(faction, _parse_revival_units(args))
+        units = _parse_revival_units(args)
+        if not units:
+            raise IllegalAction("Can't revive no units")
+        return KaramaFreeUnitRevival(faction, units)
 
     @classmethod
     def get_arg_spec(cls, faction=None, game_state=None):
@@ -167,11 +173,12 @@ class KaramaFreeLeaderRevival(Action):
 
     @classmethod
     def parse_args(cls, faction, args):
-        return KaramaFreeLeaderRevival(faction, _parse_revival_leader(args))
+        return KaramaFreeLeaderRevival(faction, parse_leader(args))
 
     @classmethod
     def get_arg_spec(cls, faction=None, game_state=None):
-        return args.RevivalLeader(game_state.faction_state[faction].tank_leaders)
+        return args.RevivalLeader(game_state.faction_state[faction].tank_leaders,
+                                  required=True)
 
     def _execute(self, game_state):
         new_game_state = _execute_revival([],
@@ -189,6 +196,8 @@ class Revive(Action):
 
     @classmethod
     def parse_args(cls, faction, args):
+        if not args:
+            return Revive(faction, [], None)
         units, leader = args.split(" ")
         return Revive(faction, _parse_revival_units(units), _parse_revival_leader(leader))
 
@@ -212,7 +221,7 @@ class Revive(Action):
         Action.check_turn(game_state, faction)
 
     def _execute(self, game_state):
-        if leader not in get_revivable_leaders(game_state, faction):
+        if self.leader and self.leader not in get_revivable_leaders(game_state, self.faction):
             raise BadCommand("That leader is not revivable")
 
         new_game_state = _execute_revival(self.units,

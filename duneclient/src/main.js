@@ -61,7 +61,6 @@ function renderSession(sessionID, roleID, data, error){
 
 function renderAssignment(sessionID, data, error) {
     last_assignment_data = data;
-    console.log(data);
     render(<Assignment assignedRoles={data.assigned_roles} unassignedRoles={data.unassigned_roles} assignRole={(role)=>{
         assignRole(sessionID, role);}} />, document.getElementById("content"));
 }

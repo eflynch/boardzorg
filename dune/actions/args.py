@@ -121,14 +121,16 @@ class RevivalUnits(Args):
 
 
 class RevivalLeader(Args):
-    def __init__(self, leaders):
+    def __init__(self, leaders, required=False):
         self.leaders = leaders
+        self.required = required
 
     def to_dict(self):
         return {
             "widget": "revival-leader",
             "args": {
-                "leaders": self.leaders
+                "leaders": self.leaders,
+                "required": self.required,
             }
         }
 

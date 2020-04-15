@@ -311,10 +311,14 @@ const FremenPlacementSelect = ({args, setArgs, config}) => {
     );
 };
 
-const RevivalLeader = ({me, args, leaders, setArgs}) => {
+const RevivalLeader = ({me, args, leaders, setArgs, required}) => {
     return <PlanLeader leaders={leaders} treachery={[]} selectedLeader={args} setLeader={(leader)=>{
-        setArgs(leader);
-    }} active={true} canDeselect={true}/>;
+        if (leader) {
+            setArgs(leader);
+        } else {
+            setArgs('-');
+        }
+    }} active={true} canDeselect={!required}/>;
 };
 
 const RevivalUnits = ({me, args, setArgs, units}) => {
@@ -448,7 +452,7 @@ const Widget = (props) => {
         return <RevivalUnits args={args} setArgs={setArgs} units={config.units} />;
     }
     if (type === "revival-leader") {
-        return <RevivalLeader args={args} setArgs={setArgs} leaders={config.leaders} />;
+        return <RevivalLeader args={args} setArgs={setArgs} leaders={config.leaders} required={config.required}/>;
     }
     console.warn(type);
 

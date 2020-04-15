@@ -49,6 +49,10 @@ const defaultArgsForAction = (state, me, actionName, argSpec) => {
         }
     }
 
+    if (argSpec.widget === "revival-leader") {
+        return "-";
+    }
+
     if (argSpec.widget === "struct") {
         let subArgs = [];
         for (const subWidget of argSpec.args) {
