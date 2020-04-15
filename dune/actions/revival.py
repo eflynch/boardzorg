@@ -56,37 +56,23 @@ class ProgressRevival(Action):
         return new_game_state
 
 
-def _parse_revival_args(faction, args):
-        if not args:
-            return Revive(faction, [], None)
-        units = []
-        leader = None
-        for i in args.split(","):
-            if i in ["1", "2"]:
-                units.append(int(i))
-            else:
-                if leader is not None:
-                    raise BadCommand("Only one leader can be revived per turn")
-                leader = i
-        if leader is not None:
-            if leader == "Kwisatz-Haderach":
-                leader = ("Kwisatz-Haderach", 2)
-            else:
-                leader = parse_leader(leader)
-        return (faction, units, leader)
+def _parse_revival_units(args):
+    units = []
+    for i in args.split(","):
+        if i in ["1", "2"]:
+            units.append(int(i))
+        else:
+            raise BadCommand("What sort of unit is _that_?")
+    return units
 
 
-def _check_revival(game_state, faction):
-    if (not game_state.faction_state[faction].tank_units) and \
-       get_revivable_leaders(game_state, faction):
-        raise IllegalAction("You don't have anything to revive")
-    Action.check_turn(game_state, faction)
-
-
-def _get_revival_arg_spec(game_state, faction):
-    leaders = get_revivable_leaders(game_state, faction)
-    units = game_state.faction_state[faction].tank_units
-    return args.Revival(leaders=leaders, units=units)
+def _parse_revival_leader(args):
+    if args is None:
+        return None
+    if args == "Kwisatz-Haderach":
+        return ("Kwisatz-Haderach", 2)
+    else:
+        return parse_leader(args)
 
 
 def _get_leader_cost(leader):
@@ -122,35 +108,22 @@ def _execute_revival(units, leader, faction, game_state, cost):
     new_game_state.faction_state[faction].spice -= cost
 
     if leader is not None:
-        if leader not in get_revivable_leaders(game_state, faction):
-            raise BadCommand("That leader is not revivable")
-
         if leader[0] == "Kwisatz-Haderach":
             new_game_state.faction_state[faction].kwisatz_haderach_tanks = None
         else:
             new_game_state.faction_state[faction].tank_leaders.remove(leader)
             new_game_state.faction_state[faction].leaders.append(leader)
 
-    faction_order = storm.get_faction_order(game_state)
-    index = faction_order.index(faction) + 1
-    if index < len(faction_order):
-        new_game_state.round_state.factions_done.append(faction)
-        new_game_state.round_state.faction_turn = faction_order[index]
-    else:
-        new_game_state.round_state = MovementRound()
-
     return new_game_state
 
 
 class KaramaFreeUnitRevival(Action):
     name = "karama-free-unit-revival"
-    ck_round = "revival"
     ck_karama = True
 
-    def __init__(self, faction, units, leader):
+    def __init__(self, faction, units):
         self.faction = faction
         self.units = units
-        self.leader = leader
 
     @classmethod
     def _check(cls, game_state, faction):
@@ -158,58 +131,54 @@ class KaramaFreeUnitRevival(Action):
             raise IllegalAction("Only the emperor can revive units for free")
         if not game_state.faction_state[faction].tank_units:
             raise IllegalAction("You don't have any units to revive")
-        _check_revival(game_state, faction)
 
     @classmethod
     def parse_args(cls, faction, args):
-        return KaramaFreeUnitRevival(*_parse_revival_args(faction, args))
+        return KaramaFreeUnitRevival(faction, _parse_revival_units(args))
 
     @classmethod
     def get_arg_spec(cls, faction=None, game_state=None):
-        return _get_revival_arg_spec(game_state, faction)
+        return args.RevivalUnits(game_state.faction_state[faction].tank_units)
 
     def _execute(self, game_state):
         new_game_state = _execute_revival(self.units,
-                                          self.leader,
+                                          None,
                                           self.faction,
                                           game_state,
-                                          _get_leader_cost(self.leader))
+                                          0)
         discard_karama(new_game_state, self.faction)
         return new_game_state
 
 
 class KaramaFreeLeaderRevival(Action):
     name = "karama-free-leader-revival"
-    ck_round = "revival"
     ck_karama = True
 
-    def __init__(self, faction, units, leader):
+    def __init__(self, faction, leader):
         self.faction = faction
-        self.units = units
         self.leader = leader
 
     @classmethod
     def _check(cls, game_state, faction):
         if faction != "emperor":
             raise IllegalAction("Only the emperor can revive leaders for free")
-        if not get_revivable_leaders(game_state, faction):
+        if not game_state.faction_state[faction].tank_leaders:
             raise IllegalAction("You don't have any leaders to revive")
-        _check_revival(game_state, faction)
 
     @classmethod
     def parse_args(cls, faction, args):
-        return KaramaFreeLeaderRevival(*_parse_revival_args(faction, args))
+        return KaramaFreeLeaderRevival(faction, _parse_revival_leader(args))
 
     @classmethod
     def get_arg_spec(cls, faction=None, game_state=None):
-        return _get_revival_arg_spec(game_state, faction)
+        return args.RevivalLeader(game_state.faction_state[faction].tank_leaders)
 
     def _execute(self, game_state):
-        new_game_state = _execute_revival(self.units,
+        new_game_state = _execute_revival([],
                                           self.leader,
                                           self.faction,
                                           game_state,
-                                          _get_unit_cost(self.faction, self.units))
+                                          0)
         discard_karama(new_game_state, self.faction)
         return new_game_state
 
@@ -220,11 +189,15 @@ class Revive(Action):
 
     @classmethod
     def parse_args(cls, faction, args):
-        return Revive(*_parse_revival_args(faction, args))
+        units, leader = args.split(" ")
+        return Revive(faction, _parse_revival_units(units), _parse_revival_leader(leader))
 
     @classmethod
     def get_arg_spec(cls, faction=None, game_state=None):
-        return _get_revival_arg_spec(game_state, faction)
+        return args.Struct(
+            args.RevivalUnits(game_state.faction_state[faction].tank_units),
+            args.RevivalLeader(get_revivable_leaders(game_state, faction))
+        )
 
     def __init__(self, faction, units, leader):
         self.faction = faction
@@ -233,11 +206,26 @@ class Revive(Action):
 
     @classmethod
     def _check(cls, game_state, faction):
-        _check_revival(game_state, faction)
+        if (not game_state.faction_state[faction].tank_units) and \
+           get_revivable_leaders(game_state, faction):
+            raise IllegalAction("You don't have anything to revive")
+        Action.check_turn(game_state, faction)
 
     def _execute(self, game_state):
-        return _execute_revival(self.units,
+        if leader not in get_revivable_leaders(game_state, faction):
+            raise BadCommand("That leader is not revivable")
+
+        new_game_state = _execute_revival(self.units,
                                 self.leader,
                                 self.faction,
                                 game_state,
                                 _get_unit_cost(self.faction, self.units) + _get_leader_cost(self.leader))
+        faction_order = storm.get_faction_order(game_state)
+        index = faction_order.index(self.faction) + 1
+        if index < len(faction_order):
+            new_game_state.round_state.factions_done.append(self.faction)
+            new_game_state.round_state.faction_turn = faction_order[index]
+        else:
+            new_game_state.round_state = MovementRound()
+        return new_game_state
+
