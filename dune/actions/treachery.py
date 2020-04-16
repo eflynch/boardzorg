@@ -5,6 +5,8 @@ from dune.actions.action import Action
 from dune.exceptions import IllegalAction, BadCommand
 from dune.actions.revival import parse_revival_units, parse_revival_leader
 from dune.actions.revival import revive_units, revive_leader
+from dune.map.map import MapGraph
+from dune.actions.battle import ops
 
 
 def discard_treachery(game_state, faction, treachery):
@@ -74,4 +76,36 @@ class TleilaxuGhola(Action):
             revive_units(self.units, self.faction, new_game_state)
 
         discard_treachery(new_game_state, self.faction, "Tleilaxu-Ghola")
+        return new_game_state
+
+
+class FamilyAtomics(Action):
+    name = "family-atomics"
+    ck_treachery = "Family-Atomics"
+    ck_round = "control"
+
+    @classmethod
+    def _check(cls, game_state, faction):
+        someone_close = False
+        m = MapGraph()
+        for space in game_state.map_state.values():
+            if faction in space.forces:
+                for sector in space.forces[faction]:
+                    if m.distance(space.name, sector, "Shield-Wall", 7) <= 1:
+                        someone_close = True
+                        break
+                    if m.distance(space.name, sector, "Shield-Wall", 8) <= 1:
+                        someone_close = True
+                        break
+
+        if not someone_close:
+            raise IllegalAction("You cannot get to the shield wall")
+
+    def _execute(self, game_state):
+        new_game_state = deepcopy(game_state)
+        new_game_state.shield_wall = False
+
+        ops.tank_all_units(new_game_state, "Shield-Wall")
+
+        discard_treachery(new_game_state, self.faction, "Family-Atomics")
         return new_game_state

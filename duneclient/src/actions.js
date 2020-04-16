@@ -98,7 +98,6 @@ const getFlowForWidget = (type, config, setArgs, updateSelection) => {
                 setArgs(val);
             },
         }];
-        console.log("solo flow:", flow);
         return flow;
     }
 
@@ -112,7 +111,6 @@ const getFlowForWidget = (type, config, setArgs, updateSelection) => {
             };
             ret = ret.concat(getFlowForWidget(subWidget.widget, subWidget.args, setSubArgs, updateSelection));
         }
-        console.log("struct flow - ", ret);
         return ret;
     }
     return [];

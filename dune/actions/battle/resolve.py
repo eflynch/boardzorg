@@ -8,9 +8,13 @@ from dune.exceptions import IllegalAction, BadCommand
 from dune.state.leaders import get_leader_faction
 from dune.actions.battle import ops
 from dune.actions.battle.winner import DiscardTreachery, TankUnits
-from dune.actions.treachery import discard_treachery as discard_treachery_from_hand
 
 logger = getLogger(__name__)
+
+
+def discard_treachery_from_hand(game_state, faction, treachery):
+    game_state.faction_state[faction].treachery.remove(treachery)
+    game_state.treachery_discard.insert(0, treachery)
 
 
 def discard_cheap_heroine(game_state):
@@ -336,13 +340,7 @@ class AutoResolveDisaster(Action):
 
         # If explosion tank all other units and leaders in the sector too
         if was_explosion:
-            space = new_game_state.map_state[battle_id[2]]
-            space.coexist = False
-            for fac in space.forces:
-                for sec in space.forces[fac]:
-                    units_to_tank = space.forces[fac][sec][:]
-                    for u in units_to_tank:
-                        ops.tank_unit(new_game_state, fac, space, sec, u)
+            ops.tank_all_units(new_game_state, battle_id[2])
 
             for leader_name in new_game_state.round_state.leaders_used:
                 space, sector = new_game_state.round_state.leaders_used[leader_name]["location"]

@@ -142,8 +142,8 @@ class Session:
             try:
                 session.handle_cmd(f, cmd)
             except BadCommand as e:
-                print(e)
+                print("ERROR:", cmd, e)
             except IllegalAction as e:
-                print(e)
+                print("ERROR", cmd, e)
 
         return session

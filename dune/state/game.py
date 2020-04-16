@@ -130,7 +130,7 @@ class GameState(State):
         visible["storm_deck"] = {"length": len(self.storm_deck)}
         visible["ornithopters"] = self.ornithopters
 
-        if faction == "fremen":
+        if faction == "fremen" or self.round == "control":
             visible["storm_deck"]["next"] = self.storm_deck[0]
 
         visible["map_state"] = [self.map_state[s].visible(self, faction) for s in self.map_state]

@@ -46,4 +46,5 @@ class DoCollection(Action):
                         space.spice -= spice_collected
 
         new_game_state.round = "control"
+        new_game_state.pause = list(game_state.faction_state.keys())
         return new_game_state

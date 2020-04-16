@@ -2,6 +2,7 @@ from copy import deepcopy
 from random import randint
 
 from dune.actions.action import Action
+from dune.actions.battle import ops
 
 TOKEN_SECTORS = [1, 4, 7, 10, 13, 16]
 
@@ -9,19 +10,10 @@ TOKEN_SECTORS = [1, 4, 7, 10, 13, 16]
 def destroy_in_path(game_state, sectors):
     for space in game_state.map_state.values():
         if not set(space.sectors).isdisjoint(set(sectors)):
-            if space.type == "sand" or ("protected" in space.type and not game_state.shield_wall):
-                for s in set(space.sectors) & set(sectors):
-                    for faction in space.forces:
-                        if s in space.forces[faction]:
-                            space.forces[faction][s]
-                            if "fremen" in space.forces:
-                                was = space.forces["fremen"][s]
-                                space.forces["fremen"][s] = list(reversed(sorted(was)))[:len(was)//2]
-                            else:
-                                space.forces[faction][s] = []
-                    if s == space.spice_sector:
-                        space.spice = 0
-                    space.coexist = False
+            if space.type == "sand" or ("shielded" in space.type and not game_state.shield_wall):
+                ops.tank_all_units(game_state, space.name, restrict_sectors=sectors, half_fremen=True)
+                if space.spice_sector and space.spice_sector in sectors:
+                    space.spice = 0
 
 
 def get_faction_order(game_state):

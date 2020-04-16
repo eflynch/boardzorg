@@ -298,6 +298,21 @@ def pick_number(game_state, max_power, is_attacker, number):
         game_state.round_state.stage_state.defender_plan["number"] = number
 
 
+def tank_all_units(game_state, space, restrict_sectors=None, half_fremen=False):
+    space = game_state.map_state[space]
+    factions = list(space.forces.keys())
+    for fac in factions:
+        sectors = list(space.forces[fac].keys())
+        if restrict_sectors:
+            sectors = list(set(sectors) & set(restrict_sectors))
+        for sec in sectors:
+            units_to_tank = space.forces[fac][sec][:]
+            if half_fremen and fac == "fremen":
+                units_to_tank = list(reversed(sorted(space.forces[fac][sec][:len(space.forces[fac][sec])//2])))
+            for u in units_to_tank:
+                tank_unit(game_state, fac, space, sec, u)
+
+
 def tank_unit(game_state, faction, space, sector, unit):
     faction_state = game_state.faction_state[faction]
     if faction == "atreides":
