@@ -268,6 +268,15 @@ class Board extends React.Component {
         }
     }
 
+    getAtomics() {
+        let {shield_wall} = this.props.state;
+        if (!shield_wall) {
+            return (
+                <image xlinkHref={`/static/app/png/atomics.png`} x={0.5} y={0.24} width={0.2} height={0.2} style={{opacity:0.8}}/>
+            );
+        }
+    }
+
     render () {
         let {round_state, turn, map_state} = this.props.state;
         let AllSpaces = Object.keys(spaceSectorPaths);
@@ -308,6 +317,7 @@ class Board extends React.Component {
                     {this.getSpice()}
                     {this.getTokenPiles()}
                     {this.getShaiHulud()}
+                    {this.getAtomics()}
                 </svg>
             </div>
         );
