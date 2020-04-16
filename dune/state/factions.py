@@ -88,6 +88,8 @@ class EmperorState(FactionState):
         self.name = "emperor"
         super().__init__()
         self.spice = 10
+        self.treachery = ["Karama"]
+        self.tank_units = [2,2,2,1,1,1,1,1]
         self.reserve_units = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2]
 
 
