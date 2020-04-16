@@ -108,14 +108,18 @@ class Units(Args):
 
 
 class RevivalUnits(Args):
-    def __init__(self, units):
+    def __init__(self, units, max_units=3, single_2=True):
         self.units = units
+        self.max_units = max_units
+        self.single_2 = single_2
 
     def to_dict(self):
         return {
             "widget": "revival-units",
             "args": {
-                "units": self.units
+                "units": self.units,
+                "maxUnits": self.max_units,
+                "single2": self.single_2,
             }
         }
 

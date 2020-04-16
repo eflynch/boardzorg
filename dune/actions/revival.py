@@ -104,17 +104,17 @@ def revive_units(units, faction, game_state):
 def revive_leader(leader, faction, game_state):
     if leader is not None:
         if leader[0] == "Kwisatz-Haderach":
+            if game_state.faction_state[faction].kwisatz_haderach_tanks is None:
+                raise BadCommand("There's no kwisatz haderach to revive!")
             game_state.faction_state[faction].kwisatz_haderach_tanks = None
         else:
+            if leader not in game_state.faction_state[faction].tank_leaders:
+                raise BadCommand("You can't revive that leader, because they are not in the tanks!")
             game_state.faction_state[faction].tank_leaders.remove(leader)
             game_state.faction_state[faction].leaders.append(leader)
 
 
 def _execute_revival(units, leader, faction, game_state, cost):
-    if len(units) > 3:
-        raise BadCommand("You can only revive up to three units")
-    if units.count("2") > 1:
-        raise BadCommand("Only 1 Sardukar or Fedykin can be be revived per turn")
     new_game_state = deepcopy(game_state)
 
     if cost > new_game_state.faction_state[faction].spice:
@@ -150,14 +150,14 @@ class KaramaFreeUnitRevival(Action):
 
     @classmethod
     def get_arg_spec(cls, faction=None, game_state=None):
-        return args.RevivalUnits(game_state.faction_state[faction].tank_units)
+        return args.RevivalUnits(game_state.faction_state[faction].tank_units,
+                                 single_2=False)
 
     def _execute(self, game_state):
-        new_game_state = _execute_revival(self.units,
-                                          None,
-                                          self.faction,
-                                          game_state,
-                                          0)
+        if len(self.units) > 3:
+            raise BadCommand("You can only revive up to three units")
+        new_game_state = deepcopy(game_state)
+        revive_units(self.units, self.faction, new_game_state)
         discard_karama(new_game_state, self.faction)
         return new_game_state
 
@@ -178,7 +178,10 @@ class KaramaFreeLeaderRevival(Action):
 
     @classmethod
     def parse_args(cls, faction, args):
-        return KaramaFreeLeaderRevival(faction, parse_leader(args))
+        leader = parse_revival_leader(args)
+        if leader is None:
+            raise BadCommand("Can't revive not a leader for free!")
+        return KaramaFreeLeaderRevival(faction, leader)
 
     @classmethod
     def get_arg_spec(cls, faction=None, game_state=None):
@@ -186,11 +189,8 @@ class KaramaFreeLeaderRevival(Action):
                                   required=True)
 
     def _execute(self, game_state):
-        new_game_state = _execute_revival([],
-                                          self.leader,
-                                          self.faction,
-                                          game_state,
-                                          0)
+        new_game_state = deepcopy(game_state)
+        revive_leader(self.leader, self.faction, new_game_state)
         discard_karama(new_game_state, self.faction)
         return new_game_state
 
@@ -228,6 +228,10 @@ class Revive(Action):
     def _execute(self, game_state):
         if self.leader and self.leader not in get_revivable_leaders(game_state, self.faction):
             raise BadCommand("That leader is not revivable")
+        if len(self.units) > 3:
+            raise BadCommand("You can only revive up to three units")
+        if self.units.count("2") > 1:
+            raise BadCommand("Only 1 Sardukar or Fedykin can be be revived per turn")
 
         new_game_state = _execute_revival(self.units,
                                 self.leader,

@@ -368,32 +368,44 @@ const RevivalLeader = ({me, args, leaders, setArgs, required}) => {
     }} active={true} canDeselect={!required}/>;
 };
 
-const RevivalUnits = ({me, args, setArgs, units}) => {
+const RevivalUnits = ({me, args, setArgs, units, maxUnits, single2}) => {
     const hasUnitsSelected = (args.indexOf("1") !== -1) || (args.indexOf("2") !== -1);
     const unitsSelected = hasUnitsSelected ? args.split(",").map((u)=>parseInt(u)).filter((u)=>u) : [];
     const onesSelected = unitsSelected.filter((u)=>u==1).length;
-    const twoSelected = unitsSelected.filter((u)=>u==2).indexOf(2) !== -1;
+    const twosSelected = unitsSelected.filter((u)=>u==2).length;
 
-    const twoAvailable = units.indexOf(2) !== -1;
-    const numOnesAvailable = Math.min(units.filter((u)=>u==1).length, 3);
+    const numTwosAvailable = (() => {
+        const numTwosAvailable = Math.min(units.filter((u)=>u==2).length, maxUnits);
+        if (single2 && numTwosAvailable) {
+             return 1;
+        }
+        return numTwosAvailable;
+    })();
 
-    const active = unitsSelected.length < 3;
+    const numOnesAvailable = Math.min(units.filter((u)=>u==1).length, maxUnits);
+
+    const active = unitsSelected.length < maxUnits;
 
     let oneSelectors = [];
     for (let i=0; i< numOnesAvailable; i++){
         oneSelectors.push(<UnitSelect key={i} value={1} active={active} selected={i < onesSelected} setSelected={(s)=>{
-            const newSelected = Array(onesSelected + (s ? 1 : -1)).fill("1");
-            if (twoSelected) { newSelected.push("2"); }
+            const newSelected = Array(onesSelected + (s ? 1 : -1)).fill("1")
+                  .concat(Array(twosSelected).fill("2"));
+            setArgs(newSelected.join(","));
+        }}/>);
+    }
+
+    let twoSelectors = [];
+    for (let i=0; i< numTwosAvailable; i++) {
+        twoSelectors.push(<UnitSelect key={`2-${i}`} value={2} active={active} selected={i < twosSelected} setSelected={(s)=>{
+            const newSelected = Array(onesSelected).fill("1")
+                .concat(Array(twosSelected + (s ? 1 : -1)).fill("2"));
             setArgs(newSelected.join(","));
         }}/>);
     }
     return (
         <div style={{display:"flex"}}>
-            {twoAvailable ? <UnitSelect value={2} active={active} selected={twoSelected} setSelected={(s)=>{
-                const newSelected = Array(onesSelected).fill("1");
-                if (s) { newSelected.push("2"); }
-                setArgs(newSelected.join(","));
-            }} /> : ""}
+            {twoSelectors}
             {oneSelectors}
         </div>
     );
@@ -507,7 +519,7 @@ const Widget = (props) => {
     }
 
     if (type === "revival-units") {
-        return <RevivalUnits args={args} setArgs={setArgs} units={config.units} />;
+        return <RevivalUnits args={args} setArgs={setArgs} units={config.units} maxUnits={config.maxUnits} single2={config.single2}/>;
     }
     if (type === "revival-leader") {
         return <RevivalLeader args={args} setArgs={setArgs} leaders={config.leaders} required={config.required}/>;

@@ -44,7 +44,7 @@ class TleilaxuGhola(Action):
     @classmethod
     def get_arg_spec(cls, faction=None, game_state=None):
         return args.Union(
-            args.RevivalUnits(game_state.faction_state[faction].tank_units),
+            args.RevivalUnits(game_state.faction_state[faction].tank_units, max_units=5, single_2=False),
             args.RevivalLeader(game_state.faction_state[faction].tank_leaders)
         )
 
