@@ -3,6 +3,7 @@ from random import randint
 
 from dune.actions.action import Action
 from dune.actions.battle import ops
+from dune.exceptions import IllegalAction
 
 TOKEN_SECTORS = [1, 4, 7, 10, 13, 16]
 
@@ -29,29 +30,34 @@ def get_faction_order(game_state):
     return faction_order
 
 
+def do_storm_round(game_state, advance):
+    game_state.storm_position = (game_state.storm_position + advance) % 18
+
+    destroy_in_path(game_state,
+                    range(game_state.storm_position, game_state.storm_position + 1))
+
+    game_state.round = "spice"
+
+    game_state.ornithopters = []
+    carthag = game_state.map_state["Carthag"]
+    arrakeen = game_state.map_state["Arrakeen"]
+    if carthag.forces:
+        game_state.ornithopters.append(list(carthag.forces.keys())[0])
+    if arrakeen.forces:
+        game_state.ornithopters.append(list(arrakeen.forces.keys())[0])
+
+
 class Storm(Action):
     name = "storm"
     ck_round = "storm"
     su = True
 
+    @classmethod
+    def _check(cls, game_state, faction):
+        if any("Weather-Control" in state.treachery for state in game_state.faction_state.values()):
+            raise IllegalAction("Someone has weather control, can't proceed as normal")
+
     def _execute(self, game_state):
         new_game_state = deepcopy(game_state)
-
-        advance = new_game_state.storm_deck.pop(0)
-
-        new_game_state.storm_position = (new_game_state.storm_position + advance) % 18
-
-        destroy_in_path(new_game_state,
-                        range(game_state.storm_position, new_game_state.storm_position + 1))
-
-        new_game_state.round = "spice"
-
-        new_game_state.ornithopters = []
-        carthag = new_game_state.map_state["Carthag"]
-        arrakeen = new_game_state.map_state["Arrakeen"]
-        if carthag.forces:
-            new_game_state.ornithopters.append(list(carthag.forces.keys())[0])
-        if arrakeen.forces:
-            new_game_state.ornithopters.append(list(arrakeen.forces.keys())[0])
-
+        do_storm_round(new_game_state, new_game_state.storm_deck.pop(0))
         return new_game_state
