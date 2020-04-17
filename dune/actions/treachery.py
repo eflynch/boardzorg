@@ -7,6 +7,7 @@ from dune.actions.revival import parse_revival_units, parse_revival_leader
 from dune.actions.revival import revive_units, revive_leader
 from dune.map.map import MapGraph
 from dune.actions.battle import ops
+from dune.actions.movement import parse_movement_args, perform_movement
 
 
 def discard_treachery(game_state, faction, treachery):
@@ -108,4 +109,32 @@ class FamilyAtomics(Action):
         ops.tank_all_units(new_game_state, "Shield-Wall")
 
         discard_treachery(new_game_state, self.faction, "Family-Atomics")
+        return new_game_state
+
+
+class Hajr(Action):
+    name = "hajr"
+    ck_round = "movement"
+    ck_stage = "turn"
+    ck_substage = "main"
+    ck_treachery = "Hajr"
+
+    @classmethod
+    def parse_args(cls, faction, args):
+        return Hajr(faction, parse_movement_args(args))
+
+    @classmethod
+    def get_arg_spec(cls, faction=None, game_state=None):
+        return args.Struct(args.Units(faction), args.SpaceSectorStart(), args.SpaceSectorEnd())
+
+    def __init__(self, faction, move_args):
+        self.faction = faction
+        self.move_args = move_args
+
+    def _execute(self, game_state):
+        new_game_state = deepcopy(game_state)
+        perform_movement(new_game_state,
+                         self.faction,
+                         *self.move_args)
+        discard_treachery(new_game_state, self.faction, "Hajr")
         return new_game_state
