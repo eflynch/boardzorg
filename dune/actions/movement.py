@@ -2,7 +2,7 @@ from copy import deepcopy
 import math
 
 from dune.actions.action import Action
-from dune.actions import storm
+from dune.actions.common import get_faction_order
 from dune.exceptions import IllegalAction, BadCommand
 from dune.state.rounds import movement, battle
 from dune.map.map import MapGraph
@@ -144,7 +144,7 @@ class KaramaBlockGuildTurnChoice(Action):
     def _execute(self, game_state):
         new_game_state = deepcopy(game_state)
         new_game_state.round_state.guild_choice_blocked = True
-        faction_order = storm.get_faction_order(game_state)
+        faction_order = get_faction_order(game_state)
         new_game_state.round_state.faction_turn = faction_order[0]
         new_game_state.round_state.turn_order = faction_order
         new_game_state.round_state.stage_state = movement.TurnStage()
@@ -184,7 +184,7 @@ class SkipKaramaGuildTurnChoice(Action):
 
     def _execute(self, game_state):
         new_game_state = deepcopy(game_state)
-        faction_order = storm.get_faction_order(game_state)
+        faction_order = get_faction_order(game_state)
         if "guild" in faction_order:
             faction_order.remove("guild")
             faction_order.insert(0, "guild")

@@ -15,6 +15,19 @@ const Logo = ({faction, diameter, x, y}) => {
     return <image xlinkHref={`/static/app/png/${faction}_logo.png`} x={x} y={y} width={diameter} height={diameter}/>;
 }
 
+const Alliance = ({factions, diameter, overlap, cx, cy}) => {
+    const width = (diameter - overlap) * factions.length;
+    return (
+        <g>
+            {factions.map((faction, i)=>{
+                return <Logo key={faction} faction={faction} diameter={diameter}
+                             x={(cx - width/2) + i * (diameter - overlap)}
+                             y={cy - diameter/2} />;
+            })}
+        </g>
+    );
+}
+
 const BlankLogo = ({diameter, className, x, y, ...props}) => {
     return <circle className={"blank-logo " + className} r={diameter/2} cx={x+diameter/2} cy={y+diameter/2} {...props}/>;
 }
@@ -278,7 +291,7 @@ class Board extends React.Component {
     }
 
     render () {
-        let {round_state, turn, map_state} = this.props.state;
+        let {round_state, turn, map_state, alliances} = this.props.state;
         let AllSpaces = Object.keys(spaceSectorPaths);
         let transform=`translate(0.000000,1.000000) scale(${0.100000/848},${-0.100000/848})`;
         let spaces = AllSpaces.map((territory) => {
@@ -307,6 +320,9 @@ class Board extends React.Component {
                 <svg width={this.state.size} height={this.state.size} viewBox={`0 0 1 1`}>
                     <text x={0.04} y={0.04} style={{fill: "white", font: "normal 0.02px Optima"}}>Turn {turn} / 10</text>
                     <image xlinkHref="/static/app/png/board.png" x="0" y="0" width="1" height="1"/>
+                    {alliances.filter(alliance=>alliance.length > 1).map((alliance, i)=> {
+                        return <Alliance factions={alliance} key={alliance.join("-")} diameter={0.04} overlap={0.004} cx={0.08} cy={0.08 + 0.05 * i}/>;
+                    })}
                     {futureStorm}
                     {futureSpice}
                     {this.getSpaces()}

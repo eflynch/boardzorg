@@ -1,6 +1,7 @@
 from copy import deepcopy
 
 from dune.actions import storm, args
+from dune.actions.common import get_faction_order
 from dune.actions.action import Action
 from dune.exceptions import IllegalAction, BadCommand
 from dune.state.rounds.movement import MovementRound
@@ -42,7 +43,7 @@ class ProgressRevival(Action):
 
     def _execute(self, game_state):
         new_game_state = deepcopy(game_state)
-        for faction in storm.get_faction_order(game_state):
+        for faction in get_faction_order(game_state):
             if faction in game_state.round_state.factions_done:
                 continue
             if game_state.faction_state[faction].tank_units:
@@ -238,7 +239,7 @@ class Revive(Action):
                                 self.faction,
                                 game_state,
                                 _get_unit_cost(self.faction, self.units) + _get_leader_cost(self.leader))
-        faction_order = storm.get_faction_order(game_state)
+        faction_order = get_faction_order(game_state)
         index = faction_order.index(self.faction) + 1
         if index < len(faction_order):
             new_game_state.round_state.factions_done.append(self.faction)

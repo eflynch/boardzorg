@@ -7,8 +7,6 @@ from dune.actions.battle import ops
 from dune.actions.treachery import discard_treachery
 from dune.exceptions import IllegalAction
 
-TOKEN_SECTORS = [1, 4, 7, 10, 13, 16]
-
 
 def destroy_in_path(game_state, sectors):
     for space in game_state.map_state.values():
@@ -17,19 +15,6 @@ def destroy_in_path(game_state, sectors):
                 ops.tank_all_units(game_state, space.name, restrict_sectors=sectors, half_fremen=True)
                 if space.spice_sector and space.spice_sector in sectors:
                     space.spice = 0
-
-
-def get_faction_order(game_state):
-    faction_order = []
-    storm_position = game_state.storm_position
-    for i in range(18):
-        sector = (storm_position + i + 1) % 18
-        if sector in TOKEN_SECTORS:
-            for f in game_state.faction_state:
-                faction_state = game_state.faction_state[f]
-                if faction_state.token_position == sector:
-                    faction_order.append(f)
-    return faction_order
 
 
 def do_storm_round(game_state, advance):
@@ -63,6 +48,7 @@ class Storm(Action):
         new_game_state = deepcopy(game_state)
         do_storm_round(new_game_state, new_game_state.storm_deck.pop(0))
         return new_game_state
+
 
 class WeatherControl(Action):
     name = "weather-control"

@@ -1,4 +1,4 @@
-from dune.actions import storm
+from dune.actions.common import get_faction_order
 from dune.exceptions import BadCommand
 from dune.map.map import MapGraph
 from dune.state.leaders import parse_leader
@@ -51,7 +51,7 @@ def get_min_sector_map(game_state, space, faction):
 
 
 def find_battles(game_state):
-    faction_order = storm.get_faction_order(game_state)
+    faction_order = get_faction_order(game_state)
     battles = []
 
     for s in game_state.map_state:

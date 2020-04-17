@@ -14,7 +14,9 @@
 
 from copy import deepcopy
 
-from dune.actions import movement, storm, args
+from dune.actions.common import TOKEN_SECTORS
+from dune.actions.storm import destroy_in_path
+from dune.actions import movement, args
 from dune.actions.action import Action
 from dune.exceptions import IllegalAction, BadCommand
 from dune.state.leaders import parse_leader
@@ -103,7 +105,7 @@ class PlaceToken(Action):
             raise IllegalAction("{} token already placed".format(faction))
 
     def _execute(self, game_state):
-        if self.token_position not in storm.TOKEN_SECTORS:
+        if self.token_position not in TOKEN_SECTORS:
             raise BadCommand("Not a valid token position")
 
         for f in game_state.faction_state:
@@ -329,6 +331,6 @@ class StormPlacement(Action):
     def _execute(self, game_state):
         new_game_state = deepcopy(game_state)
         new_game_state.storm_position = new_game_state.storm_deck.pop(0)
-        storm.destroy_in_path(new_game_state, [new_game_state.storm_position])
+        destroy_in_path(new_game_state, [new_game_state.storm_position])
         new_game_state.round = "spice"
         return new_game_state

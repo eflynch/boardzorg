@@ -1,7 +1,7 @@
 from copy import deepcopy
 
-from dune.actions import storm
 from dune.actions.action import Action
+from dune.actions.common import get_faction_order
 from dune.exceptions import IllegalAction, BadCommand
 from dune.state.rounds.revival import RevivalRound
 from dune.state.rounds import bidding
@@ -11,7 +11,7 @@ from dune.actions.spice import spend_spice
 
 
 def next_bidder(game_state):
-    faction_order = storm.get_faction_order(game_state)
+    faction_order = get_faction_order(game_state)
     turn_index = faction_order.index(game_state.round_state.stage_state.substage_state.faction_turn)
     num_factions = len(faction_order)
     for i in range(num_factions):
@@ -24,7 +24,7 @@ def next_bidder(game_state):
 
 
 def next_first_bidder(game_state):
-    faction_order = storm.get_faction_order(game_state)
+    faction_order = get_faction_order(game_state)
     faction_index = game_state.round_state.total_for_auction - len(game_state.round_state.up_for_auction)
     return faction_order[faction_index % len(faction_order)]
 

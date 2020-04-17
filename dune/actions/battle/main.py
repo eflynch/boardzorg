@@ -2,7 +2,8 @@ from copy import deepcopy
 from logging import getLogger
 
 from dune.actions.action import Action
-from dune.actions import storm, args
+from dune.actions import args
+from dune.actions.common import get_faction_order
 from dune.state.rounds import battle
 from dune.exceptions import IllegalAction, BadCommand
 from dune.actions.battle import ops
@@ -19,7 +20,7 @@ class StartBattle(Action):
     def _execute(self, game_state):
         new_game_state = deepcopy(game_state)
 
-        new_game_state.round_state.faction_turn = storm.get_faction_order(game_state)[0]
+        new_game_state.round_state.faction_turn = get_faction_order(game_state)[0]
         new_game_state.round_state.battles = ops.find_battles(new_game_state)
         new_game_state.round_state.stage = "main"
 

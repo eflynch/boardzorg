@@ -123,7 +123,11 @@ class GameState(State):
         else:
             visible["round_state"] = self.round
 
-        visible["alliances"] = {a: list(self.alliances[a]) for a in self.alliances}
+        visible_alliances = []
+        for a in self.alliances:
+            visible_alliances.append(tuple(sorted(self.alliances[a] | set([a]))))
+
+        visible["alliances"] = list(set(visible_alliances))
         visible["turn"] = self.turn
         visible["shield_wall"] = self.shield_wall
         visible["storm_position"] = self.storm_position
