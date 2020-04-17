@@ -1,6 +1,7 @@
 from copy import deepcopy
 
 from dune.actions.action import Action
+from dune.state.rounds.storm import StormRound
 
 
 VICTORY_MATRIX = {
@@ -83,5 +84,5 @@ class DoControl(Action):
             new_game_state.round = "end"
             return new_game_state
 
-        new_game_state.round = "storm"
+        new_game_state.round_state = StormRound()
         return new_game_state

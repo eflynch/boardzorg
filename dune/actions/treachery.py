@@ -7,7 +7,6 @@ from dune.actions.revival import parse_revival_units, parse_revival_leader
 from dune.actions.revival import revive_units, revive_leader
 from dune.map.map import MapGraph
 from dune.actions.battle import ops
-from dune.actions.storm import do_storm_round
 
 
 def discard_treachery(game_state, faction, treachery):
@@ -109,40 +108,4 @@ class FamilyAtomics(Action):
         ops.tank_all_units(new_game_state, "Shield-Wall")
 
         discard_treachery(new_game_state, self.faction, "Family-Atomics")
-        return new_game_state
-
-
-class WeatherControl(Action):
-    name = "weather-control"
-    ck_round = "storm"
-    ck_treachery = "Weather-Control"
-
-    @classmethod
-    def parse_args(cls, faction, args):
-        return WeatherControl(faction, int(args))
-
-    @classmethod
-    def get_arg_spec(cls, faction=None, game_state=None):
-        return args.Integer(min=0, max=10)
-
-    def __init__(self, faction, advance):
-        self.faction = faction
-        self.advance = advance
-
-    def _execute(self, game_state):
-        new_game_state = deepcopy(game_state)
-        new_game_state.storm_deck.pop(0)
-        do_storm_round(new_game_state, self.advance)
-        discard_treachery(new_game_state, self.faction, "Weather-Control")
-        return new_game_state
-
-
-class PassWeatherControl(Action):
-    name = "pass-weather-control"
-    ck_round = "storm"
-    ck_treachery = "Weather-Control"
-
-    def _execute(self, game_state):
-        new_game_state = deepcopy(game_state)
-        do_storm_round(new_game_state, new_game_state.storm_deck.pop(0))
         return new_game_state
