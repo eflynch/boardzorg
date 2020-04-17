@@ -19,23 +19,24 @@ class Voice(Action):
     @classmethod
     def parse_args(cls, faction, args):
         parts = args.split(" ")
-        if len(parts) == 3:
-            no, projectile_poison, weapon_defense = parts
+        if len(parts) == 2:
+            no, voice = parts
             if no != "no":
                 raise BadCommand("No means no")
             no = True
-        elif len(parts) == 2:
-            projectile_poison, weapon_defense = parts
+        elif len(parts) == 1:
+            voice = parts[0]
             no = False
         else:
             raise BadCommand("Bad args")
 
-        if projectile_poison not in ["projectile", "poison"]:
-            raise BadCommand("Must specify either projectile or poison")
-        if weapon_defense not in ["weapon", "defense"]:
-            raise BadCommand("Must specify either weapon or defense")
+        if (voice not in [f"{flavor}-{category}"
+                          for flavor in ["projectile", "poison"]
+                          for category in ["weapon", "defense"]]) and (
+            voice not in ("lasgun", "worthless", "cheap-hero-heroine")):
+            raise BadCommand("Not something you can voice!")
 
-        return Voice(faction, no, projectile_poison, weapon_defense)
+        return Voice(faction, no, voice)
 
     @classmethod
     def get_arg_spec(clas, faction=None, game_state=None):
@@ -49,11 +50,10 @@ class Voice(Action):
                 if defender not in game_state.alliances["bene-gesserit"]:
                     raise IllegalAction("No legal voice is possible")
 
-    def __init__(self, faction, no, projectile_poison, weapon_defense):
+    def __init__(self, faction, no, voice):
         self.faction = faction
         self.no = no
-        self.projectile_poison = projectile_poison
-        self.weapon_defense = weapon_defense
+        self.voice = voice
 
     def _execute(self, game_state):
         new_game_state = deepcopy(game_state)
@@ -65,8 +65,7 @@ class Voice(Action):
         else:
             raise BadCommand("You ain't voicing no one")
 
-        new_game_state.round_state.stage_state.voice = (
-            self.no, self.projectile_poison, self.weapon_defense)
+        new_game_state.round_state.stage_state.voice = (self.no, self.voice)
         new_game_state.round_state.stage_state.substage = "karama-voice"
         return new_game_state
 

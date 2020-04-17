@@ -132,12 +132,12 @@ export default function BattlePlan({me, state, args, setArgs, maxPower}) {
         (t)=>state.treachery_reference.worthless.indexOf(t) !== -1);
 
 
-    const weapons = <PlanTreachery title="Weapon" cards={meWeapons} active={mePlan.weapon === undefined} selectedCard={selected.weapon} setSelectedCard={(selectedCard)=>{
+    const weapons = <PlanTreachery title="Weapon" cards={meWeapons.concat(meWorthless)} active={mePlan.weapon === undefined} selectedCard={selected.weapon} setSelectedCard={(selectedCard)=>{
         const newArgs = [selected.leader, selected.number, selectedCard, selected.defense ? selected.defense : "-", selected.kwisatz].join(" ");
         setArgs(newArgs);
     }} />;
 
-    const defenses = <PlanTreachery title="Defenses" cards={meDefenses} active={mePlan.defense === undefined} selectedCard={selected.defense} setSelectedCard={(selectedCard)=>{
+    const defenses = <PlanTreachery title="Defenses" cards={meDefenses.concat(meWorthless)} active={mePlan.defense === undefined} selectedCard={selected.defense} setSelectedCard={(selectedCard)=>{
         const newArgs = [selected.leader, selected.number, selected.weapon ? selected.weapon : "-", selectedCard, selected.kwisatz].join(" ");
         setArgs(newArgs);
     }} />;
