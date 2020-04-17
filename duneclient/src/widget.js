@@ -512,9 +512,9 @@ const Widget = (props) => {
 
     if (type === "voice") {
         return <Options options={[
-            "poison weapon", "poison defense", "projectile weapon", "projectile defense",
-            "no poison weapon", "no poison defense", "no projectile weapon", "no projectile defense",
-            "lasgun", "no lasgun"
+            "poison-weapon", "poison-defense", "projectile-weapon", "projectile-defense",
+            "no poison-weapon", "no poison-defense", "no projectile-weapon", "no projectile-defense",
+            "lasgun", "no lasgun", "worthless", "no worthless", "cheap-hero-heroine", "no cheap-hero-heroine",
         ]} args={args} setArgs={setArgs} />;
     }
 

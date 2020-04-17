@@ -270,6 +270,10 @@ class AutoEndMovementTurn(Action):
         if game_state.round_state.stage_state.query_flip_to_fighters:
             raise IllegalAction("Query fighter flip in progress")
 
+        faction_turn = game_state.round_state.faction_turn
+        if "Hajr" in game_state.faction_state[faction_turn].treachery:
+            raise IllegalAction("Still could use Hajr card")
+
     def _execute(self, game_state):
         new_game_state = deepcopy(game_state)
         faction_turn = new_game_state.round_state.faction_turn
@@ -615,6 +619,45 @@ class KarmaPassStopSpiritualAdvisor(Action):
         return new_game_state
 
 
+def parse_movement_args(args):
+    parts = args.split(" ")
+    if len(parts) == 5:
+        units, space_a, sector_a, space_b, sector_b = parts
+    else:
+        raise BadCommand("wrong number of args")
+
+    if units == "":
+        raise BadCommand("No units selected")
+    units = [int(u) for u in units.split(",")]
+    return (units, space_a, int(sector_a), space_b, int(sector_b))
+
+
+def perform_movement(game_state, faction, units, space_a, sector_a, space_b, sector_b):
+    m = MapGraph()
+    if faction == "fremen":
+        m.deadend_sector(game_state.storm_position)
+    else:
+        m.remove_sector(game_state.storm_position)
+    for space in game_state.map_state.values():
+        if "stronghold" in space.type:
+            if faction not in space.forces:
+                if len(space.forces) - (1 if space.coexist else 0) > 1:
+                    m.remove_space(space.name)
+
+    allowed_distance = 1
+    if faction == "fremen":
+        allowed_distance = 2
+    if faction in game_state.ornithopters:
+        allowed_distance = 3
+    if m.distance(space_a, sector_a, space_b, sector_b) > allowed_distance:
+        raise BadCommand("You cannot move there")
+
+    space_a = game_state.map_state[space_a]
+    space_b = game_state.map_state[space_b]
+    move_units(game_state, faction, units, space_a, sector_a, space_b,
+               sector_b)
+
+
 class Move(Action):
     name = "move"
     ck_round = "movement"
@@ -623,18 +666,7 @@ class Move(Action):
 
     @classmethod
     def parse_args(cls, faction, args):
-        parts = args.split(" ")
-        if len(parts) == 5:
-            units, space_a, sector_a, space_b, sector_b = parts
-        else:
-            raise BadCommand("wrong number of args")
-
-        if units == "":
-            raise BadCommand("No units selected")
-        units = [int(u) for u in units.split(",")]
-        sector_a = int(sector_a)
-        sector_b = int(sector_b)
-        return Move(faction, units, space_a, sector_a, space_b, sector_b)
+        return Move(faction, *parse_movement_args(args))
 
     @classmethod
     def get_arg_spec(cls, faction=None, game_state=None):
@@ -657,30 +689,13 @@ class Move(Action):
     def _execute(self, game_state):
 
         new_game_state = deepcopy(game_state)
-        m = MapGraph()
-        if self.faction == "fremen":
-            m.deadend_sector(new_game_state.storm_position)
-        else:
-            m.remove_sector(new_game_state.storm_position)
-        for space in new_game_state.map_state.values():
-            if "stronghold" in space.type:
-                if self.faction not in space.forces:
-                    if len(space.forces) - (1 if space.coexist else 0) > 1:
-                        m.remove_space(space.name)
-
-        allowed_distance = 1
-        if self.faction == "fremen":
-            allowed_distance = 2
-        if self.faction in new_game_state.ornithopters:
-            allowed_distance = 3
-        if m.distance(self.space_a, self.sector_a, self.space_b, self.sector_b) > allowed_distance:
-            raise BadCommand("You cannot move there")
-
-        space_a = new_game_state.map_state[self.space_a]
-        space_b = new_game_state.map_state[self.space_b]
-        move_units(new_game_state, self.faction, self.units, space_a, self.sector_a, space_b,
-                   self.sector_b)
-
+        perform_movement(new_game_state,
+                         self.faction,
+                         self.units,
+                         self.space_a,
+                         self.sector_a,
+                         self.space_b,
+                         self.sector_b)
         new_game_state.round_state.stage_state.movement_used = True
 
         return new_game_state
