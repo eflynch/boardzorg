@@ -109,6 +109,16 @@ def pick_leader(game_state, is_attacker, leader):
     else:
         faction = battle_id[1]
 
+    if game_state.round_state.stage_state.voice is not None:
+        (no, voice) = game_state.round_state.stage_state.voice
+        if voice == "cheap-hero-heroine":
+            if no:
+                if leader == "Cheap-Hero/Heroine":
+                    raise BadCommand("You were told not to send a cheap hero or heroine to battle!")
+            else:
+                if leader != "Cheap-Hero/Heroine" and "Cheap-Hero/Heroine" in game_state.faction_state[faction].treachery:
+                    raise BadCommand("You were told to send a cheap hero or heroine to battle!")
+
     if leader == "Cheap-Hero/Heroine":
         if leader not in game_state.faction_state[faction].treachery:
             raise BadCommand("You do not have a Cheap-Hero/Heroine available")
@@ -201,24 +211,43 @@ def pick_weapon(game_state, is_attacker, weapon):
 
     if is_attacker == game_state.round_state.stage_state.voice_is_attacker:
         if game_state.round_state.stage_state.voice is not None:
-            (no, poi_proj, weap_def) = game_state.round_state.stage_state.voice
-            if weap_def == "weapon":
+            (no, voice) = game_state.round_state.stage_state.voice
+            if voice == "lasgun":
                 if no:
-                    if poi_proj == "poison":
-                        if weapon in POISON_WEAPONS:
-                            raise BadCommand("You were told not to use that one")
-                    if poi_proj == "projectile":
-                        if weapon in PROJECTILE_WEAPONS:
-                            raise BadCommand("You were told not to use that one")
+                    if weapon == "Lasgun":
+                        raise BadCommand("You were told not to use a lasgun!")
                 else:
-                    if poi_proj == "poison":
-                        if weapon not in POISON_WEAPONS:
-                            if (any(w in POISON_WEAPONS for w in game_state.faction_state[faction].treachery)):
-                                raise BadCommand("You were told to use your poison weapon")
-                    if poi_proj == "projectile":
-                        if weapon not in PROJECTILE_WEAPONS:
-                            if (any(w in PROJECTILE_WEAPONS for w in game_state.faction_state[faction].treachery)):
-                                raise BadCommand("You were told to use your poison weapon")
+                    if weapon != "Lasgun" and "Lasgun" in game_state.faction_state[faction].treachery:
+                        raise BadCommand("You were told to use your lasgun!")
+            elif voice == "worthless":
+                if no:
+                    if weapon in WORTHLESS:
+                        raise BadCommand("You were told not to use a worthless card!")
+                else:
+                    stage_state = game_state.round_state.stage_state
+                    plan = stage_state.attacker_plan if is_attacker else stage_state.defender_plan
+                    if "defense" in plan and plan["defense"] not in WORTHLESS:
+                        if weapon not in WORTHLESS and any(t in WORTHLESS for t in game_state.faction_state[faction].treachery):
+                            raise BadCommand("You were told to use a worthless card!")
+            elif len(voice.split("-")) == 2:
+                poi_proj, weap_def = voice.split("-")
+                if weap_def == "weapon":
+                    if no:
+                        if poi_proj == "poison":
+                            if weapon in POISON_WEAPONS:
+                                raise BadCommand("You were told not to use that one")
+                        if poi_proj == "projectile":
+                            if weapon in PROJECTILE_WEAPONS:
+                                raise BadCommand("You were told not to use that one")
+                    else:
+                        if poi_proj == "poison":
+                            if weapon not in POISON_WEAPONS:
+                                if (any(w in POISON_WEAPONS for w in game_state.faction_state[faction].treachery)):
+                                    raise BadCommand("You were told to use your poison weapon")
+                        if poi_proj == "projectile":
+                            if weapon not in PROJECTILE_WEAPONS:
+                                if (any(w in PROJECTILE_WEAPONS for w in game_state.faction_state[faction].treachery)):
+                                    raise BadCommand("You were told to use your projectile weapon")
 
     if weapon is not None and weapon not in game_state.faction_state[faction].treachery:
         raise BadCommand("That weapon card is not available to you. You have {}".format(
@@ -247,24 +276,36 @@ def pick_defense(game_state, is_attacker, defense):
 
     if is_attacker == game_state.round_state.stage_state.voice_is_attacker:
         if game_state.round_state.stage_state.voice is not None:
-            (no, poi_proj, weap_def) = game_state.round_state.stage_state.voice
-            if weap_def == "defense":
+            (no, voice) = game_state.round_state.stage_state.voice
+            if voice == "worthless":
                 if no:
-                    if poi_proj == "poison":
-                        if defense in POISON_DEFENSES:
-                            raise BadCommand("You were told not to use that one")
-                    if poi_proj == "projectile":
-                        if defense in PROJECTILE_DEFENSES:
-                            raise BadCommand("You were told not to use that one")
+                    if defense in WORTHLESS:
+                        raise BadCommand("You were told not to use a worthless card!")
                 else:
-                    if poi_proj == "poison":
-                        if defense not in POISON_DEFENSES:
-                            if (any(w in POISON_DEFENSES for w in game_state.faction_state[faction].treachery)):
-                                raise BadCommand("You were told to use your poison defense")
-                    if poi_proj == "projectile":
-                        if defense not in PROJECTILE_DEFENSES:
-                            if (any(w in PROJECTILE_DEFENSES for w in game_state.faction_state[faction].treachery)):
-                                raise BadCommand("You were told to use your poison defense")
+                    stage_state = game_state.round_state.stage_state
+                    plan = stage_state.attacker_plan if is_attacker else stage_state.defender_plan
+                    if "weapon" in plan and plan["weapon"] not in WORTHLESS:
+                        if defense not in WORTHLESS and any(t in WORTHLESS for t in game_state.faction_state[faction].treachery):
+                            raise BadCommand("You were told to use a worthless card!")
+            if len(voice.split("-")) == 2:
+                poi_proj, weap_def = voice.split("-")
+                if weap_def == "defense":
+                    if no:
+                        if poi_proj == "poison":
+                            if defense in POISON_DEFENSES:
+                                raise BadCommand("You were told not to use that one")
+                        if poi_proj == "projectile":
+                            if defense in PROJECTILE_DEFENSES:
+                                raise BadCommand("You were told not to use that one")
+                    else:
+                        if poi_proj == "poison":
+                            if defense not in POISON_DEFENSES:
+                                if (any(w in POISON_DEFENSES for w in game_state.faction_state[faction].treachery)):
+                                    raise BadCommand("You were told to use your poison defense")
+                        if poi_proj == "projectile":
+                            if defense not in PROJECTILE_DEFENSES:
+                                if (any(w in PROJECTILE_DEFENSES for w in game_state.faction_state[faction].treachery)):
+                                    raise BadCommand("You were told to use your projectile defense")
 
     if defense is not None and defense not in game_state.faction_state[faction].treachery:
         raise BadCommand("That defense card is not available to you")
