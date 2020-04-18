@@ -15,10 +15,11 @@ def discard_treachery_from_hand(game_state, faction, treachery):
 
 
 def discard_cheap_heroine(game_state):
-    [attacker, defender, _, _] = game_state.round_state.stage_state.battle
-    if game_state.round_state.stage_state.defender_plan["leader"][0] == "Cheap-Hero/Heroine":
+    ss = game_state.round_state.stage_state
+    [attacker, defender, _, _] = ss.battle
+    if ss.defender_plan["leader"] is not None and ss.defender_plan["leader"][0] == "Cheap-Hero/Heroine":
         discard_treachery_from_hand(game_state, defender, "Cheap-Hero/Heroine")
-    if game_state.round_state.stage_state.attacker_plan["leader"][0] == "Cheap-Hero/Heroine":
+    if ss.attacker_plan["leader"] is not None and ss.attacker_plan["leader"][0] == "Cheap-Hero/Heroine":
         discard_treachery_from_hand(game_state, attacker, "Cheap-Hero/Heroine")
 
 
@@ -43,6 +44,8 @@ class CommitPlan(Action):
             weapon = None
         if defense == "-":
             defense = None
+        if leader == "-":
+            leader = None
         number = int(number)
         return CommitPlan(faction, leader, number, weapon, defense, kwisatz_haderach)
 
@@ -168,7 +171,7 @@ class RevealTraitor(Action):
             else:
                 raise IllegalAction("You are not allies with the embattled")
 
-        if game_state.round_state.kwisatz_haderach_leader == leader[0]:
+        if leader and game_state.round_state.kwisatz_haderach_leader == leader[0]:
             raise IllegalAction("No tratorin' in front of the messiah!")
 
         if leader not in game_state.faction_state[faction].traitors:
@@ -177,8 +180,13 @@ class RevealTraitor(Action):
     def _execute(self, game_state):
         new_game_state = deepcopy(game_state)
         stage_state = new_game_state.round_state.stage_state
-        battle_id = stage_state.battle
-        stage_state.traitor_revealers.append(self.faction)
+        [attacker, defender, _, _] = stage_state.battle
+        if self.faction in [attacker, defender]:
+            stage_state.traitor_revealers.append(self.faction)
+        elif attacker in new_game_state.alliances[self.faction]:
+            stage_state.traitor_revealers.append(attacker)
+        elif defender in new_game_state.alliances[self.faction]:
+            stage_state.traitor_revealers.append(defender)
         return new_game_state
 
 
@@ -212,7 +220,7 @@ class AutoResolveWithTraitor(Action):
         ops.discard_treachery(new_game_state, loser_plan["defense"])
         ops.tank_leader(new_game_state, loser, loser_plan["leader"])
         new_game_state.faction_state[winner].spice += loser_plan["leader"][1]
-        if winner_plan["leader"][0] != "Cheap-Hero/Heroine":
+        if winner_plan["leader"] is not None and winner_plan["leader"][0] != "Cheap-Hero/Heroine":
             new_game_state.round_state.leaders_used[winner_plan["leader"][0]] = {
                 "location": (battle_id[2], battle_id[3]),
                 "leader": winner_plan["leader"][0]
@@ -371,6 +379,9 @@ class AutoResolve(Action):
         dead_leaders = []
 
         def clash_leaders(plan_a, plan_b, faction_b, location):
+            if plan_b["leader"] is None:
+                return 0
+
             if ops.clash_weapons(plan_a["weapon"], plan_b["defense"]):
                 ops.tank_leader(new_game_state, faction_b, plan_b["leader"])
                 dead_leaders.append(plan_b["leader"])
@@ -381,7 +392,6 @@ class AutoResolve(Action):
                     "location": location,
                     "leader": plan_b["leader"]
                 }
-
             return plan_b["leader"][1] + (2 if plan_b["kwisatz_haderach"] else 0)
 
         attacker_power += clash_leaders(stage_state.defender_plan, stage_state.attacker_plan, battle_id[0], (battle_id[2], battle_id[3]))

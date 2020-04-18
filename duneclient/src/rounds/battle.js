@@ -10,16 +10,28 @@ const Logo = ({faction, diameter, ...props}) => {
 };
 
 const Plan = ({faction, traitor, isAttacker, leader, number, weapon, defense, dead, kwisatz_haderach}) => {
-    let leaderToken = leader !== undefined ? <LeaderToken traitor={traitor} name={leader[0]}/> : <span className="question-leader">?</span>;
-    const cardWidth = 100;
-    if (leader && leader[0] === "Cheap-Hero/Heroine") {
-         leaderToken = <Card key="Cheap-Hero/Heroine"
+    let leaderToken;
+    let leaderValue = 0;
+    if (leader !== undefined) {
+        if (leader !== null) {
+            if (leader[0] === "Cheap-Hero/Heroine") {
+                leaderToken = <Card key="Cheap-Hero/Heroine"
                         type="Treachery"
                         name="Cheap-Hero/Heroine"
                         width={cardWidth}/>;
+            } else {
+                leaderToken = <LeaderToken traitor={traitor} name={leader[0]}/>;
+                leaderValue = leader[1];
+            }
+        } else {
+            leaderToken = <span className="question-leader">X</span>;
+        }
+    } else {
+        leaderToken = <span className="question-leader">?</span>;
     }
+    const cardWidth = 100;
     const numberText = number !== undefined ? number : <span>?</span>;
-    const resultText = (number !== undefined && leader !== undefined) ? <span>{number + (dead ? 0 : leader[1] + (kwisatz_haderach ? 2 : 0))}</span> : <span>?</span>;
+    const resultText = (number !== undefined && leader !== undefined) ? <span>{number + (dead ? 0 : leaderValue + (kwisatz_haderach ? 2 : 0))}</span> : <span>?</span>;
     const weaponShow = weapon !== undefined ? <Card type="Treachery" name={weapon ? weapon : "Reverse"} width={cardWidth} /> : <span className="question-card">?</span>;
     const defenseShow = defense !== undefined ? <Card type="Treachery" name={defense ? defense : "Reverse"} width={cardWidth} /> : <span className="question-card">?</span>;
     return (

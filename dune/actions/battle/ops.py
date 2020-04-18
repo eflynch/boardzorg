@@ -137,6 +137,23 @@ def pick_leader(game_state, is_attacker, leader):
         game_state.faction_state[faction].treachery.remove(leader)
         return
 
+    if leader is None:
+        for leader in game_state.faction_state[faction].leaders:
+            if leader[0] not in game_state.round_state.leaders_used:
+                raise BadCommand("You could have used a leader and therefore must")
+            else:
+                space, sector = game_state.round_state.leaders_used[leader[0]]["location"]
+                if m.distance(space, sector, battle_id[2], battle_id[3]) == 0:
+                    raise BadCommand("You could have reused {}".format(leader[0]))
+
+        if "Cheap-Hero/Heroine" in game_state.faction_state[faction].treachery:
+            raise BadCommand("You could have used a Cheap Heroine")
+        if is_attacker:
+            game_state.round_state.stage_state.attacker_plan["leader"] = None
+        else:
+            game_state.round_state.stage_state.defender_plan["leader"] = None
+        return
+
     leader = parse_leader(leader)
     if leader not in game_state.faction_state[faction].leaders:
         raise BadCommand("That leader is not available")
@@ -162,6 +179,9 @@ def pick_leader(game_state, is_attacker, leader):
 
 
 def pick_kwisatz_haderach(game_state, is_attacker, kwisatz_haderach, leader):
+    if kwisatz_haderach and leader is None:
+        raise BadCommand("God must only work in mysterious ways")
+
     battle_id = game_state.round_state.stage_state.battle
     if is_attacker:
         faction = battle_id[0]
@@ -377,6 +397,9 @@ def tank_unit(game_state, faction, space, sector, unit):
 
 
 def tank_leader(game_state, user_faction, leader, kill_attached_kwisatz_haderach=False):
+    if leader is None:
+        return
+
     if leader not in LEADERS[user_faction]:
         # This must be a captured leader
         home_faction = [f for f in LEADERS if leader in LEADERS[f]][0]

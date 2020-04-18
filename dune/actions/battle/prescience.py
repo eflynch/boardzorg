@@ -116,7 +116,7 @@ class AnswerPrescience(Action):
 
     def __init__(self, faction, part):
         self.faction = faction
-        self.part = part
+        self.part = part if part != "-" else None
 
     @classmethod
     def _check(cls, game_state, faction):

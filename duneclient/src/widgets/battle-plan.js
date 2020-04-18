@@ -12,7 +12,7 @@ export function PlanLeader({leaders, treachery, selectedLeader, active, setLeade
         if (active) {
             onClick = ()=> {
                 if (isSelected && canDeselect) {
-                    setLeader(null);
+                    setLeader("-");
                 } else {
                     setLeader(name);
                 }
@@ -106,7 +106,7 @@ export default function BattlePlan({me, state, args, setArgs, maxPower}) {
     const [selectedLeader, selectedNumber, selectedWeapon, selectedDefense, selectedKwisatz] = args.split(" ");
 
     const selected = {
-        leader: mePlan.leader === undefined ? selectedLeader : mePlan.leader[0],
+        leader: mePlan.leader === undefined ? (selectedLeader === "-" ? null : selectedLeader) : mePlan.leader[0],
         number: mePlan.number === undefined ? selectedNumber : mePlan.number,
         weapon: mePlan.weapon === undefined ? (selectedWeapon === "-" ? null : selectedWeapon) : mePlan.weapon,
         defense: mePlan.defense === undefined ? (selectedDefense === "-" ? null : selectedDefense) : mePlan.defense,
@@ -133,12 +133,12 @@ export default function BattlePlan({me, state, args, setArgs, maxPower}) {
 
 
     const weapons = <PlanTreachery title="Weapon" cards={meWeapons.concat(meWorthless)} active={mePlan.weapon === undefined} selectedCard={selected.weapon} setSelectedCard={(selectedCard)=>{
-        const newArgs = [selected.leader, selected.number, selectedCard, selected.defense ? selected.defense : "-", selected.kwisatz].join(" ");
+        const newArgs = [selected.leader ? selected.leader : "-", selected.number, selectedCard, selected.defense ? selected.defense : "-", selected.kwisatz].join(" ");
         setArgs(newArgs);
     }} />;
 
     const defenses = <PlanTreachery title="Defenses" cards={meDefenses.concat(meWorthless)} active={mePlan.defense === undefined} selectedCard={selected.defense} setSelectedCard={(selectedCard)=>{
-        const newArgs = [selected.leader, selected.number, selected.weapon ? selected.weapon : "-", selectedCard, selected.kwisatz].join(" ");
+        const newArgs = [selected.leader ? selected.leader : "-", selected.number, selected.weapon ? selected.weapon : "-", selectedCard, selected.kwisatz].join(" ");
         setArgs(newArgs);
     }} />;
 
@@ -157,7 +157,7 @@ export default function BattlePlan({me, state, args, setArgs, maxPower}) {
              active={mePlan["kwisatz-haderach"] === undefined}
              selected={selected.kwisatz === "Kwisatz-Haderach"}
              setKwisatz={(kwisatz) => {
-                 const newArgs = [selected.leader, selected.number, selected.weapon ? selected.weapon : "-", selected.defense ? selected.defense : "-", kwisatz].join(" ");
+                 const newArgs = [selected.leader ? selected.leader : "-", selected.number, selected.weapon ? selected.weapon : "-", selected.defense ? selected.defense : "-", kwisatz].join(" ");
                  setArgs(newArgs);
              }}/>
           : null;
@@ -169,7 +169,7 @@ export default function BattlePlan({me, state, args, setArgs, maxPower}) {
             }} />
             {kwisatz}
             <PlanNumber number={selected.number} active={mePlan.number === undefined} maxNumber={meMaxNumber} setNumber={(number)=>{
-                const newArgs = [selected.leader, number, selected.weapon ? selected.weapon : "-", selected.defense ? selected.defense : "-", selectedKwisatz].join(" ");
+                const newArgs = [selected.leader ? selected.leader : "-", number, selected.weapon ? selected.weapon : "-", selected.defense ? selected.defense : "-", selectedKwisatz].join(" ");
                 setArgs(newArgs);
             }}/>
             Total Power: {selectedLeaderPower + parseInt(selectedNumber)}

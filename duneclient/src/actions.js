@@ -33,7 +33,7 @@ const defaultArgsForAction = (state, me, actionName, argSpec) => {
         const iAmAttacker = me === attacker;
         const mePlan = iAmAttacker ? stageState.attacker_plan : stageState.defender_plan;
 
-        const defaultArg =`${mePlan.leader ? mePlan.leader[0] : ""} ${mePlan.number ? mePlan.number : "0"} ${mePlan.weapon ? mePlan.weapon : "-"} ${mePlan.defense ? mePlan.defense : "-"} -`;
+        const defaultArg =`${mePlan.leader ? mePlan.leader[0] : "-"} ${mePlan.number ? mePlan.number : "0"} ${mePlan.weapon ? mePlan.weapon : "-"} ${mePlan.defense ? mePlan.defense : "-"} -`;
         return defaultArg;
     }
     if (actionName === "answer-prescience") {
