@@ -249,43 +249,6 @@ class EndMovementTurn(Action):
         return new_game_state
 
 
-class AutoEndMovementTurn(Action):
-    name = "auto-end-movement"
-    ck_round = "movement"
-    ck_stage = "turn"
-    ck_substage = "main"
-    su = True
-
-    @classmethod
-    def _check(cls, game_state, faction):
-        if not game_state.round_state.stage_state.shipment_used:
-            raise IllegalAction("Shipment still possible")
-
-        if not game_state.round_state.stage_state.movement_used:
-            raise IllegalAction("Movement still possible")
-
-        if game_state.round_state.stage_state.query_flip_to_advisors:
-            raise IllegalAction("Query advisor flip in progress")
-
-        if game_state.round_state.stage_state.query_flip_to_fighters:
-            raise IllegalAction("Query fighter flip in progress")
-
-        faction_turn = game_state.round_state.faction_turn
-        if "Hajr" in game_state.faction_state[faction_turn].treachery:
-            raise IllegalAction("Still could use Hajr card")
-
-    def _execute(self, game_state):
-        new_game_state = deepcopy(game_state)
-        faction_turn = new_game_state.round_state.faction_turn
-        idx = new_game_state.round_state.turn_order.index(faction_turn)
-        if idx == len(new_game_state.round_state.turn_order) - 1:
-            new_game_state.round_state = battle.BattleRound()
-            return new_game_state
-        new_game_state.round_state.faction_turn = new_game_state.round_state.turn_order[idx + 1]
-        new_game_state.round_state.stage_state = movement.TurnStage()
-        return new_game_state
-
-
 class Ship(Action):
     name = "ship"
     ck_round = "movement"
