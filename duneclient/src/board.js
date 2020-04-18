@@ -222,11 +222,12 @@ class Board extends React.Component {
 
         const selectedParts = [selection["space-sector-select-end"], selection["space-sector-select-start"]].map((part)=>{
             return part !== undefined ? part.replace(" ", "-") : part;
-        });
+        }).filter((x) => x);
         if (!inInteraction && !selectedParts.length) {
             return <g/>;
         }
-
+        console.log(inInteraction);
+        console.log(selectedParts);
         const onClick = inInteraction ? (spaceSector) => {
             let split = spaceSector.split("-");
             const sector = split.pop();
@@ -271,8 +272,8 @@ class Board extends React.Component {
         let {shai_hulud, map_state} = this.props.state;
         if (shai_hulud) {
             const space = map_state.filter((s)=>s.name === shai_hulud)[0];
-            let wormLocation = TokenLocations[shai_hulud][space.sectors[0]][1];
-            if (space.spice_sector !== undefined) {
+            let wormLocation = TokenLocations[shai_hulud][space.sectors[0]][3];
+            if (space.spice_sector != undefined) {
                 wormLocation = SpiceLocations[shai_hulud];
             }
             return (
