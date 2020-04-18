@@ -1,4 +1,5 @@
 import random
+import math
 
 from dune.state import State
 from dune.state.treachery_cards import TREACHERY_CARDS, WORTHLESS, WEAPONS, DEFENSES
@@ -7,6 +8,8 @@ from dune.state.spice_cards import SPICE_CARDS
 from dune.state.rounds.setup import SetupRound
 from dune.state.factions import FactionState
 from dune.state.leaders import LEADERS
+
+MAX_CHOICE_SIZE = 5
 
 
 class GameState(State):
@@ -37,14 +40,21 @@ class GameState(State):
         storm_deck = [random.randint(1, 6) for i in range(20)]
         storm_deck.insert(0, random.randint(0, 17))
 
-        return GameState(factions, treachery_deck, spice_deck, traitor_deck, storm_deck)
+        random_choice_deck = [random.randint(0, math.factorial(MAX_CHOICE_SIZE)) for i in range(50)]
 
-    def __init__(self, factions, treachery_deck, spice_deck, traitor_deck, storm_deck):
+        return GameState(
+            factions, treachery_deck, spice_deck, traitor_deck, storm_deck, random_choice_deck)
+
+    def __init__(self, factions, treachery_deck, spice_deck, traitor_deck, storm_deck,
+                 random_choice_deck=None):
         self.factions = factions
         self.treachery_deck = treachery_deck
         self.spice_deck = spice_deck
         self.traitor_deck = traitor_deck
         self.storm_deck = storm_deck
+        if not random_choice_deck:
+            random_choice_deck = [random.randint(0, math.factorial(MAX_CHOICE_SIZE)) for i in range(50)]
+        self.random_choice_deck = random_choice_deck
         self.spice_discard = []
         self.treachery_discard = []
         self.pause = []

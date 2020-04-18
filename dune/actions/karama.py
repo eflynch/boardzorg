@@ -1,5 +1,4 @@
 from copy import deepcopy
-import random
 
 from dune.state.treachery_cards import WORTHLESS
 from dune.actions import args
@@ -45,9 +44,12 @@ class KaramaStealTreachery(Action):
         treachery = new_game_state.faction_state[self.target_faction].treachery[:]
 
         real_number = min(self.number, len(treachery))
+        treachery_to_steal = []
+        for i in range(real_number):
+            choice = new_game_state.random_choice_deck.pop(0)
+            treachery_to_steal.append(treachery.pop(choice % len(treachery)))
 
-        random.shuffle(treachery)
-        for card in treachery[:real_number]:
+        for card in treachery_to_steal:
             new_game_state.faction_state[self.target_faction].treachery.remove(card)
             new_game_state.faction_state[self.faction].treachery.append(card)
         new_game_state.treachery_to_return = real_number

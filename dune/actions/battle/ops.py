@@ -4,6 +4,7 @@ from dune.map.map import MapGraph
 from dune.state.leaders import parse_leader
 from dune.state.treachery_cards import WEAPONS, DEFENSES, WORTHLESS
 from dune.state.treachery_cards import PROJECTILE_WEAPONS, POISON_WEAPONS, PROJECTILE_DEFENSES, POISON_DEFENSES
+from dune.state.leaders import LEADERS
 
 
 def compute_max_powers(game_state):
@@ -375,27 +376,50 @@ def tank_unit(game_state, faction, space, sector, unit):
     faction_state.tank_units.append(unit)
 
 
-def tank_leader(game_state, faction, leader, kill_attached_kwisatz_haderach=False):
-    faction_state = game_state.faction_state[faction]
+def tank_leader(game_state, user_faction, leader, kill_attached_kwisatz_haderach=False):
+    if leader not in LEADERS[user_faction]:
+        # This must be a captured leader
+        home_faction = [f for f in LEADERS if leader in LEADERS[f]][0]
+    else:
+        home_faction = user_faction
+
+    user_faction_state = game_state.faction_state[user_faction]
+    home_faction_state = game_state.faction_state[home_faction]
 
     if kill_attached_kwisatz_haderach and game_state.round_state.kwisatz_haderach_leader == leader:
         # Calculate when we can revive the kwisatz haderach
-        if len(faction_state.leader_death_count) < 5:
-            faction_state.kwisatz_haderach_tanks = 1
+        if len(home_faction_state.leader_death_count) < 5:
+            home_faction_state.kwisatz_haderach_tanks = 1
 
-        faction_state.kwisatz_haderach_tanks = min(faction_state.leader_death_count.values()) + 1
+        home_faction_state.kwisatz_haderach_tanks = min(home_faction_state.leader_death_count.values()) + 1
 
     if leader[0] == "Cheap-Hero/Heroine":
         return
 
-    if leader not in faction_state.leaders:
-        raise BadCommand("Leader {} is not available to tank for {}".format(leader, faction))
-    if leader not in faction_state.leader_death_count:
-        faction_state.leader_death_count[leader[0]] = 0
+    if leader not in user_faction_state.leaders:
+        raise BadCommand("Leader {} is not available to tank for {}".format(leader, user_faction))
+    if leader not in home_faction_state.leader_death_count:
+        home_faction_state.leader_death_count[leader[0]] = 0
 
-    faction_state.leader_death_count[leader[0]] += 1
-    faction_state.leaders.remove(leader)
-    faction_state.tank_leaders.append(leader)
+    home_faction_state.leader_death_count[leader[0]] += 1
+    user_faction_state.leaders.remove(leader)
+    home_faction_state.tank_leaders.append(leader)
+    if leader in user_faction_state.leaders_captured:
+        user_faction_state.leaders_captured.remove(leader)
+
+
+def return_leader(game_state, capturing_faction, leader):
+    home_faction = [f for f in LEADERS if leader in LEADERS[f]][0]
+
+    # Check if leader was killed (in which case they can't be returned now)
+    if leader not in game_state.faction_state[home_faction].tank_leaders:
+        game_state.faction_state[home_faction].leaders.append(leader)
+        if leader not in game_state.faction_state[capturing_faction].leaders:
+            raise BadCommand("You can't return a leader you don't have")
+        if leader not in game_state.faction_state[capturing_faction].leaders_captured:
+            raise BadCommand("You can't return a leader you don't have")
+        game_state.faction_state[capturing_faction].leaders.remove(leader)
+        game_state.faction_state[capturing_faction].leaders_captured.remove(leader)
 
 
 def discard_treachery(game_state, card):

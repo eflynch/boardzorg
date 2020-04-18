@@ -126,11 +126,19 @@ class ConcludeWinner(Action):
     def _execute(self, game_state):
         new_game_state = deepcopy(game_state)
 
-        space = new_game_state.map_state[new_game_state.round_state.stage_state.battle[2]]
+        # Return captured leader if used
+        [attacker, defender, space, _] = new_game_state.round_state.stage_state.battle
+        attacker_plan = new_game_state.round_state.stage_state.attacker_plan
+        defender_plan = new_game_state.round_state.stage_state.defender_plan
+        if attacker_plan["leader"] in new_game_state.faction_state[attacker].leaders_captured:
+            ops.return_leader(new_game_state, capturing_faction=attacker, leader=attacker_plan["leader"])
+        if defender_plan["leader"] in new_game_state.faction_state[defender].leaders_captured:
+            ops.return_leader(new_game_state, capturing_faction=defender, leader=defender_plan["leader"])
+
+        space = new_game_state.map_state[space]
         # If bene-gesserit not present or alone, there can be no advisors
         if "bene-gesserit" not in space.forces or len(space.forces) == 1:
             space.coexist = False
 
-        new_game_state.round_state.battles.remove(new_game_state.round_state.stage_state.battle)
-        new_game_state.round_state.stage = "main"
+        new_game_state.round_state.stage_state.substage = "karama-leader-capture"
         return new_game_state

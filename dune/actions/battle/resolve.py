@@ -1,5 +1,4 @@
 from copy import deepcopy
-from logging import getLogger
 
 from dune.actions import args
 from dune.actions.action import Action
@@ -8,8 +7,6 @@ from dune.exceptions import IllegalAction, BadCommand
 from dune.state.leaders import get_leader_faction
 from dune.actions.battle import ops
 from dune.actions.battle.winner import DiscardTreachery, TankUnits
-
-logger = getLogger(__name__)
 
 
 def discard_treachery_from_hand(game_state, faction, treachery):
@@ -206,30 +203,20 @@ class AutoResolveWithTraitor(Action):
         battle_id = stage_state.battle
         space = new_game_state.map_state[battle_id[2]]
 
-        if stage_state.traitor_revealers[0] == battle_id[0]:
-            winner = battle_id[0]
-            loser = battle_id[1]
-            ops.discard_treachery(new_game_state, stage_state.defender_plan["weapon"])
-            ops.discard_treachery(new_game_state, stage_state.defender_plan["defense"])
-            ops.tank_leader(new_game_state, loser, stage_state.defender_plan["leader"])
-            new_game_state.faction_state[winner].spice += stage_state.defender_plan["leader"][1]
-            if stage_state.attacker_plan["leader"][0] != "Cheap-Hero/Heroine":
-                new_game_state.round_state.leaders_used[stage_state.attacker_plan["leader"][0]] = {
-                    "location": (battle_id[2], battle_id[3]),
-                    "leader": stage_state.attacker_plan["leader"][0]
-                }
-        else:
-            winner = battle_id[1]
-            loser = battle_id[0]
-            ops.discard_treachery(new_game_state, stage_state.attacker_plan["weapon"])
-            ops.discard_treachery(new_game_state, stage_state.attacker_plan["defense"])
-            ops.tank_leader(new_game_state, loser, stage_state.attacker_plan["leader"])
-            new_game_state.faction_state[winner].spice += stage_state.attacker_plan["leader"][1]
-            if stage_state.defender_plan["leader"][0] != "Cheap-Hero/Heroine":
-                new_game_state.round_state.leaders_used[stage_state.defender_plan["leader"][0]] = {
-                    "location": (battle_id[2], battle_id[3]),
-                    "leader": stage_state.defender_plan["leader"][0]
-                }
+        winner = stage_state.traitor_revealers[0]
+        loser = [faction for faction in battle_id[:2] if faction != winner][0]
+        loser_plan = stage_state.attacker_plan if loser == battle_id[0] else stage_state.defender_plan
+        winner_plan = stage_state.attacker_plan if winner == battle_id[0] else stage_state.defender_plan
+
+        ops.discard_treachery(new_game_state, loser_plan["weapon"])
+        ops.discard_treachery(new_game_state, loser_plan["defense"])
+        ops.tank_leader(new_game_state, loser, loser_plan["leader"])
+        new_game_state.faction_state[winner].spice += loser_plan["leader"][1]
+        if winner_plan["leader"][0] != "Cheap-Hero/Heroine":
+            new_game_state.round_state.leaders_used[winner_plan["leader"][0]] = {
+                "location": (battle_id[2], battle_id[3]),
+                "leader": winner_plan["leader"][0]
+            }
 
         for sec in space.forces[loser]:
             units_to_tank = space.forces[loser][sec][:]
@@ -243,7 +230,6 @@ class AutoResolveWithTraitor(Action):
         new_game_state.round_state.stage_state.substage_state = battle.WinnerSubStage()
         new_game_state.round_state.stage_state.substage_state.power_left_to_tank = 0
 
-        winner_plan = stage_state.attacker_plan if winner == battle_id[0] else stage_state.defender_plan
         if not (winner_plan["weapon"] or winner_plan["defense"]):
             new_game_state.round_state.stage_state.substage_state.discard_done = True
             new_game_state.pause.append(winner)

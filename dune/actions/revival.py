@@ -10,20 +10,30 @@ from dune.actions.karama import discard_karama
 
 
 def get_revivable_leaders(game_state, faction):
+    fs = game_state.faction_state[faction]
+    non_captured_leaders = [leader[0] for leader in fs.leaders[:] + fs.tank_leaders[:]]
+
     leader_death_count = game_state.faction_state[faction].leader_death_count
-    if len(leader_death_count) != 5:
-        return []
+
+    def _ldc(leader_name):
+        if leader_name in leader_death_count:
+            return leader_death_count[leader_name]
+        else:
+            return 0
+
+    min_count = min([_ldc(leader_name) for leader_name in non_captured_leaders])
 
     all_revivable_leaders = []
 
     if faction == "atreides":
-        kwisatz_haderach_tanks = game_state.faction_state[faction].kwisatz_haderach_tanks
-        if kwisatz_haderach_tanks is not None and kwisatz_haderach_tanks <= min(leader_death_count.values()):
+        kwisatz_haderach_tanks = fs.kwisatz_haderach_tanks
+        if kwisatz_haderach_tanks is not None and kwisatz_haderach_tanks <= min_count:
             all_revivable_leaders.append(("Kwisatz-Haderach", 2))
 
-    for leader in game_state.faction_state[faction].tank_leaders:
-        if all([leader_death_count[leader[0]] <= leader_death_count[ldr] for ldr in leader_death_count]):
+    for leader in fs.tank_leaders:
+        if _ldc(leader[0]) <= min_count:
             all_revivable_leaders.append(leader)
+
     return all_revivable_leaders
 
 

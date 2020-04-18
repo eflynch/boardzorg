@@ -1,5 +1,4 @@
 from copy import deepcopy
-from random import randint
 
 from dune.actions import args
 from dune.actions.action import Action

@@ -7,6 +7,7 @@ class FactionState(State):
 
     def __init__(self):
         self.leaders = LEADERS[self.name][:]
+        self.leaders_captured = []
         self.treachery = []
         self.traitors = []
         self.rejected_traitors = []
@@ -19,6 +20,7 @@ class FactionState(State):
     def visible(self, game_state, faction):
         visible = super().visible(game_state, faction)
         visible["leaders"] = self.leaders
+        visible["leaders_captured"] = self.leaders_captured
         visible["leader_death_count"] = self.leader_death_count
         visible["tank_leaders"] = self.tank_leaders
         visible["tank_units"] = self.tank_units

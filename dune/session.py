@@ -119,6 +119,7 @@ class Session:
             "spice_deck": init_state.spice_deck,
             "traitor_deck": init_state.traitor_deck,
             "storm_deck": init_state.storm_deck,
+            "random_choice_deck": init_state.random_choice_deck,
             "command_log": session.command_log
         }
         return json.dumps(to_json)
@@ -134,7 +135,8 @@ class Session:
             treachery_deck=from_json["treachery_deck"],
             spice_deck=from_json["spice_deck"],
             traitor_deck=list(map(tuple, from_json["traitor_deck"])),
-            storm_deck=from_json["storm_deck"]
+            storm_deck=from_json["storm_deck"],
+            random_choice_deck=from_json.get("random_choice_deck", None)
         )
         session = Session(init_state, from_json["seed"])
 
@@ -145,5 +147,4 @@ class Session:
                 print("ERROR:", cmd, e)
             except IllegalAction as e:
                 print("ERROR", cmd, e)
-
         return session

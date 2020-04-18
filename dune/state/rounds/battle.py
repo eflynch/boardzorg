@@ -74,6 +74,8 @@ class BattleStage(StageState):
         self.karama_kwisatz_haderach = False
         self.karama_kwisatz_haderach_passes = []
 
+        self.karama_leader_capture_passes = []
+
         self.traitor_passes = []
         self.traitor_revealers = []
 
@@ -117,7 +119,6 @@ class BattleStage(StageState):
                     visible[relevant_plan_key] = {self.prescience: relevant_plan[self.prescience]}
 
         return visible
-
 
 
 class BattleRound(RoundState):
