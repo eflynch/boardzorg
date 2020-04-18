@@ -130,18 +130,22 @@ def _shai_hulud(game_state, space_name):
         _progress_worm(game_state)
     else:
         game_state.round_state.stage = "fremen-worm-karama"
+    game_state.round_state.fremen_can_redirect_worm = True
 
 
 def _draw_spice_card(game_state):
     card = game_state.spice_deck.pop(0)
     if card == "Shai-Hulud":
-        previous_space = None
-        for c in game_state.spice_discard:
-            if c != "Shai-Hulud":
-                previous_space = c
-                break
+        if game_state.round_state.fremen_can_redirect_worm:
+            game_state.round_state.stage = "fremen-redirect-worm"
+        else:
+            previous_space = None
+            for c in game_state.spice_discard:
+                if c != "Shai-Hulud":
+                    previous_space = c
+                    break
 
-        _shai_hulud(game_state, previous_space)
+            _shai_hulud(game_state, previous_space)
     else:
         space = game_state.map_state[card]
         if game_state.storm_position != space.spice_sector:
@@ -358,6 +362,29 @@ class PassProtectFromWorm(Action):
         _shai_hulud_eat_forces(new_game_state,
                                new_game_state.round_state.stage_state.faction_turn)
         _progress_worm(new_game_state)
+        return new_game_state
+
+
+class FremenRedirectWorm(Action):
+    name = "fremen-redirect-worm"
+    ck_round = "spice"
+    ck_stage = "fremen-redirect-worm"
+
+    @classmethod
+    def parse_args(cls, faction, args):
+        return FremenRedirectWorm(faction, args)
+
+    @classmethod
+    def get_arg_spec(cls, faction=None, game_state=None):
+        return args.Space()
+
+    def __init__(self, faction, space):
+        self.faction = faction
+        self.space = space
+
+    def _execute(self, game_state):
+        new_game_state = deepcopy(game_state)
+        _shai_hulud(new_game_state, self.space)
         return new_game_state
 
 

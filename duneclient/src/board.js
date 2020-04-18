@@ -307,7 +307,7 @@ class Board extends React.Component {
             futureStorm = <Storm sector={this.props.futureStorm} color="rgba(0, 0, 255, 0.2)"/>;
         }
         let futureSpice = <g/>;
-        if (this.props.futureSpice !== undefined) {
+        if (this.props.futureSpice !== undefined && this.props.futureSpice !== "Shai-Hulud") {
             const spiceSector = map_state.filter((s)=>s.name === this.props.futureSpice)[0].spice_sector;
             futureSpice = <MapPart style={{
                 fill: "green",

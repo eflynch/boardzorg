@@ -29,6 +29,7 @@ class SpiceRound(RoundState):
         self.stage = "fremen-worm-karama"
         self.drawn_card = False
         self.needs_nexus = False
+        self.fremen_can_redirect_worm = False
 
     def visible(self, game_state, faction):
         visible = super().visible(game_state, faction)
