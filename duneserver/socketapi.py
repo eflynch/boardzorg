@@ -4,6 +4,7 @@ from flask import request
 from sessionwrapper import SessionWrapper, subscribe, unsubscribe
 import rolewrapper
 
+
 class UnknownSubscriptionType(Exception):
     pass
 
@@ -21,6 +22,7 @@ class _NamespaceInfo:
     check_data: any
     serialize: any
     room_for_data: any
+
 
 def connect_namespace(socketio, namespace_info):
     subs = {}

@@ -93,7 +93,10 @@ def _get_leader_cost(leader):
     return leader[1] if leader else 0
 
 
-def _get_unit_cost(faction, units):
+def _get_unit_cost(faction, units, fremen_blessing=False):
+    if fremen_blessing:
+        return 0
+
     cost = len(units) * 2
     if faction in ["emperor", "bene-gesserit", "guild"]:
         cost = max(0, cost - 2)
@@ -206,6 +209,40 @@ class KaramaFreeLeaderRevival(Action):
         return new_game_state
 
 
+class FremenBlessing(Action):
+    name = "allow-free-ally-revival"
+    ck_round = "revival"
+    ck_faction = "fremen"
+
+    @classmethod
+    def parse_args(cls, faction, args):
+        allies = args.split(" ")
+        return FremenBlessing(faction, allies)
+
+    @classmethod
+    def _check(cls, game_state, faction):
+        if not game_state.alliances[faction]:
+            raise IllegalAction("You cannot give allies free revival if you have no allies")
+
+    def __init__(self, faction, allies):
+        self.faction = faction
+        self.allies = allies
+
+    @classmethod
+    def get_arg_spec(cls, faction=None, game_state=None):
+        factions = game_state.alliances[faction]
+        return args.MultiFaction(factions=factions)
+
+    def _execute(self, game_state):
+        new_game_state = deepcopy(game_state)
+        new_game_state.round_state.fremen_blessings = []
+        for ally in self.allies:
+            if ally not in new_game_state.alliances[self.faction]:
+                raise BadCommand("You cannot give free revival to non-allies")
+            new_game_state.round_state.fremen_blessings.append(ally)
+        return new_game_state
+
+
 class Revive(Action):
     name = "revive"
     ck_round = "revival"
@@ -244,11 +281,9 @@ class Revive(Action):
         if self.units.count("2") > 1:
             raise BadCommand("Only 1 Sardukar or Fedykin can be be revived per turn")
 
-        new_game_state = _execute_revival(self.units,
-                                self.leader,
-                                self.faction,
-                                game_state,
-                                _get_unit_cost(self.faction, self.units) + _get_leader_cost(self.leader))
+        has_fremen_blessing = self.faction in game_state.round_state.fremen_blessings
+        cost = _get_unit_cost(self.faction, self.units, has_fremen_blessing) + _get_leader_cost(self.leader)
+        new_game_state = _execute_revival(self.units, self.leader, self.faction, game_state, cost)
         faction_order = get_faction_order(game_state)
         index = faction_order.index(self.faction) + 1
         if index < len(faction_order):
@@ -257,4 +292,3 @@ class Revive(Action):
         else:
             new_game_state.round_state = MovementRound()
         return new_game_state
-

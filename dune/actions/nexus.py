@@ -116,7 +116,8 @@ class ProposeAlliance(Action):
 
     @classmethod
     def get_arg_spec(cls, faction=None, game_state=None):
-        return args.MultiFaction()
+        factions = [f for f in game_state.faction_state if f != faction]
+        return args.MultiFaction(factions)
 
     def __init__(self, faction, factions):
         self.faction = faction

@@ -8,6 +8,7 @@ class RevivalRound(RoundState):
         self.stage = "main"
         self.faction_turn = None
         self.factions_done = []
+        self.fremen_blessings = []
 
     def visible(self, game_state, faction):
         visible = super().visible(game_state, faction)

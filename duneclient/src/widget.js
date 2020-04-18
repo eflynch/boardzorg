@@ -437,8 +437,7 @@ const Widget = (props) => {
     }
 
     if (type === "multi-faction-select") {
-        const factionsAvailable = Object.keys(state.faction_state).filter(f => f !== me);
-        return <FactionSelect allowMulti={true} factionsAvailable={factionsAvailable} args={args} setArgs={setArgs} />;
+        return <FactionSelect allowMulti={true} factionsAvailable={config.factions} args={args} setArgs={setArgs} />;
     }
 
 

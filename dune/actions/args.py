@@ -214,9 +214,15 @@ class Faction(String):
 
 
 class MultiFaction(String):
+    def __init__(self, factions):
+        self.factions = factions
+
     def to_dict(self):
         return {
             "widget": "multi-faction-select",
+            "args": {
+                "factions": list(self.factions)
+            }
         }
 
 
