@@ -20,6 +20,7 @@ from dune.actions import movement, args
 from dune.actions.action import Action
 from dune.exceptions import IllegalAction, BadCommand
 from dune.state.leaders import parse_leader
+from dune.state.rounds import spice
 
 
 def all_traitors_selected(game_state):
@@ -332,5 +333,5 @@ class StormPlacement(Action):
         new_game_state = deepcopy(game_state)
         new_game_state.storm_position = new_game_state.storm_deck.pop(0)
         destroy_in_path(new_game_state, [new_game_state.storm_position])
-        new_game_state.round = "spice"
+        new_game_state.round_state = spice.SpiceRound()
         return new_game_state

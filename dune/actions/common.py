@@ -13,3 +13,19 @@ def get_faction_order(game_state):
                 if faction_state.token_position == sector:
                     faction_order.append(f)
     return faction_order
+
+
+def spend_spice(game_state, faction, amount, context=None):
+    spice_to_spend = game_state.faction_state[faction].spice
+    if game_state.spice_context[faction] is not None:
+        if game_state.spice_reserve[faction] is not None:
+            if context == game_state.spice_context[faction]:
+                game_state.spice_reserve[faction] = None
+                game_state.spice_context[faction] = None
+            else:
+                spice_to_spend = game_state.faction_state[faction].spice - game_state.spice_reserve[faction]
+    if amount > spice_to_spend:
+        raise IllegalAction("Insufficient spice for this action")
+    game_state.faction_state[faction].spice -= amount
+
+

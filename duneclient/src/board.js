@@ -226,8 +226,6 @@ class Board extends React.Component {
         if (!inInteraction && !selectedParts.length) {
             return <g/>;
         }
-        console.log(inInteraction);
-        console.log(selectedParts);
         const onClick = inInteraction ? (spaceSector) => {
             let split = spaceSector.split("-");
             const sector = split.pop();

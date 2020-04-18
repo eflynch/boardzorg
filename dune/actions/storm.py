@@ -6,7 +6,7 @@ from dune.actions.action import Action
 from dune.actions.battle import ops
 from dune.actions.treachery import discard_treachery
 from dune.exceptions import IllegalAction
-
+from dune.state.rounds import spice
 
 def destroy_in_path(game_state, sectors):
     for space in game_state.map_state.values():
@@ -23,7 +23,7 @@ def do_storm_round(game_state, advance):
     destroy_in_path(game_state,
                     range(game_state.storm_position, game_state.storm_position + 1))
 
-    game_state.round = "spice"
+    game_state.round_state = spice.SpiceRound()
 
     game_state.ornithopters = []
     carthag = game_state.map_state["Carthag"]
