@@ -275,7 +275,7 @@ class Board extends React.Component {
                 wormLocation = SpiceLocations[shai_hulud];
             }
             return (
-                <image xlinkHref={`/static/app/png/shai-hulud.png`} x={wormLocation.left - 0.09} y={wormLocation.top - 0.12} width={0.2} height={0.2}/>
+                <image className={"shai-hulud"} xlinkHref={`/static/app/png/shai-hulud.png`} x={wormLocation.left - 0.09} y={wormLocation.top - 0.12} width={0.2} height={0.2}/>
             );
         }
     }

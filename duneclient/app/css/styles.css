@@ -416,6 +416,10 @@ img.alive {
     font-weight: bold;
 }
 
+.shai-hulud {
+    pointer-events: none;
+}
+
 .history-item.su {
     opacity: 0.5;
     font-style:italic;

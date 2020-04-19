@@ -9,6 +9,7 @@ from dune.exceptions import IllegalAction, BadCommand
 from dune.state.rounds import nexus, bidding, spice
 from dune.actions.common import get_faction_order, spend_spice
 from dune.actions.movement import move_units
+from dune.actions.battle import ops
 
 
 class Gift(Action):
@@ -87,9 +88,10 @@ class Bribe(Action):
 
 def _shai_hulud_eat_forces(game_state, faction):
     space = game_state.map_state[game_state.shai_hulud]
-    if faction == "bene-gesserit":
-        space.coexist = False
-    del space.forces[faction]
+    sectors = list(space.forces[faction].keys())
+    for sec in sectors:
+        for u in space.forces[faction][sec][:]:
+            ops.tank_unit(game_state, faction, space, sec, u)
 
 
 def _progress_worm(game_state):

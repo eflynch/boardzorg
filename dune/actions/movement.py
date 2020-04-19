@@ -8,6 +8,7 @@ from dune.state.rounds import movement, battle
 from dune.map.map import MapGraph
 from dune.actions import args
 from dune.actions.karama import discard_karama
+from dune.actions.battle import ops
 
 
 def ship_units(game_state, faction, units, space, sector):
@@ -243,6 +244,19 @@ class EndMovementTurn(Action):
     def _execute(self, game_state):
         new_game_state = deepcopy(game_state)
         idx = new_game_state.round_state.turn_order.index(self.faction)
+
+        # Edge case - if we're in an alliance, and our alliance partner has
+        # forces in the space as us, and they've moved already, our units get tanked!
+        moved_alliances = (alliance for alliance in new_game_state.alliances[self.faction] if
+                     new_game_state.round_state.turn_order.index(alliance) < idx)
+        for space in new_game_state.map_state.values():
+            if (self.faction in space.forces and
+                any((alliance in space.forces for alliance in moved_alliances))):
+                    sectors = list(space.forces[self.faction].keys())
+                    for sec in sectors:
+                        for u in space.forces[self.faction][sec][:]:
+                            ops.tank_unit(game_state, self.faction, space, sec, u)
+
         if idx == len(new_game_state.round_state.turn_order) - 1:
             new_game_state.round_state = battle.BattleRound()
             return new_game_state
