@@ -140,7 +140,7 @@ def _execute_revival(units, leader, faction, game_state, cost):
 class KaramaFreeUnitRevival(Action):
     name = "karama-free-unit-revival"
     ck_karama = True
-    ck_faction = "emperor"
+    ck_faction_karama = "emperor"
 
     def __init__(self, faction, units):
         self.faction = faction
@@ -169,13 +169,14 @@ class KaramaFreeUnitRevival(Action):
         new_game_state = deepcopy(game_state)
         revive_units(self.units, self.faction, new_game_state)
         discard_karama(new_game_state, self.faction)
+        new_game_state.faction_state[self.faction].used_faction_karama = True
         return new_game_state
 
 
 class KaramaFreeLeaderRevival(Action):
     name = "karama-free-leader-revival"
     ck_karama = True
-    ck_faction = "emperor"
+    ck_faction_karama = "emperor"
 
     def __init__(self, faction, leader):
         self.faction = faction
@@ -202,6 +203,7 @@ class KaramaFreeLeaderRevival(Action):
         new_game_state = deepcopy(game_state)
         revive_leader(self.leader, self.faction, new_game_state)
         discard_karama(new_game_state, self.faction)
+        new_game_state.faction_state[self.faction].used_faction_karama = True
         return new_game_state
 
 

@@ -129,7 +129,7 @@ class KaramaLeaderCapture(Action):
         new_game_state = deepcopy(game_state)
         new_game_state.round_state.battles.remove(new_game_state.round_state.stage_state.battle)
         new_game_state.round_state.stage = "main"
-        discard_karama(game_state, self.faction)
+        discard_karama(new_game_state, self.faction)
         return new_game_state
 
 

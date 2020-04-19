@@ -15,6 +15,7 @@ class FactionState(State):
         self.tank_leaders = []
         self.tank_units = []
         self.bribe_spice = 0
+        self.used_faction_karama = False
         self.token_position = None
 
     def visible(self, game_state, faction):
