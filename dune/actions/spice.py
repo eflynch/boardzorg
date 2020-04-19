@@ -117,7 +117,11 @@ def _shai_hulud(game_state, space_name):
     factions = list(space.forces.keys())
 
     # Immediately kill everyone who's not in a fremen alliance
-    fremen_and_friends = set(["fremen"]) | game_state.alliances["fremen"]
+    if "fremen" in game_state.faction_state:
+        fremen_and_friends = set(["fremen"]) | game_state.alliances["fremen"]
+    else:
+        fremen_and_friends = []
+
     for faction in factions:
         if faction not in fremen_and_friends:
             _shai_hulud_eat_forces(game_state, faction)
@@ -156,6 +160,30 @@ def _draw_spice_card(game_state):
     game_state.spice_discard.insert(0, card)
 
 
+class SkipFremenWormKarama(Action):
+    name = "skip-fremen-worm-karama"
+    ck_round = "spice"
+    ck_stage = "fremen-worm-karama"
+    su = True
+
+    @classmethod
+    def _check(cls, game_state, faction):
+        if "fremen" in game_state.faction_state:
+            raise IllegalAction("Fremen need the opportunity to karama a worm")
+        if game_state.turn <= 1:
+            raise IllegalAction("Cannot karama worm on round 1")
+
+    def _execute(self, game_state):
+        new_game_state = deepcopy(game_state)
+        if new_game_state.round_state.drawn_card:
+            new_game_state.round_state = (nexus.NexusRound()
+                                      if new_game_state.round_state.needs_nexus
+                                      else bidding.BiddingRound())
+        else:
+            _draw_spice_card(new_game_state)
+        return new_game_state
+
+
 class PassFremenWormKarama(Action):
     name = "pass-fremen-worm-karama"
     ck_round = "spice"
@@ -164,7 +192,8 @@ class PassFremenWormKarama(Action):
 
     @classmethod
     def _check(cls, game_state, faction):
-        return game_state.turn > 1
+        if game_state.turn <= 1:
+            raise IllegalAction("Cannot karama worm on round 1")
 
     def _execute(self, game_state):
         new_game_state = deepcopy(game_state)
@@ -190,7 +219,8 @@ class FremenWormKarama(Action):
 
     @classmethod
     def _check(cls, game_state, faction):
-        return game_state.turn > 1
+        if game_state.turn <= 1:
+            raise IllegalAction("Cannot karama worm on round 1")
 
     @classmethod
     def get_arg_spec(cls, faction=None, game_state=None):
@@ -203,7 +233,7 @@ class FremenWormKarama(Action):
     def _execute(self, game_state):
         new_game_state = deepcopy(game_state)
         _shai_hulud(new_game_state, self.space)
-        discard_karama(new_game_state, "fremen")
+        discard_karama(new_game_state, self.faction)
         return new_game_state
 
 

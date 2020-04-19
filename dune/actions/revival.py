@@ -1,7 +1,7 @@
 from copy import deepcopy
 
 from dune.actions import storm, args
-from dune.actions.common import get_faction_order
+from dune.actions.common import get_faction_order, spend_spice
 from dune.actions.action import Action
 from dune.exceptions import IllegalAction, BadCommand
 from dune.state.rounds.movement import MovementRound
@@ -130,11 +130,7 @@ def revive_leader(leader, faction, game_state):
 
 def _execute_revival(units, leader, faction, game_state, cost):
     new_game_state = deepcopy(game_state)
-
-    if cost > new_game_state.faction_state[faction].spice:
-        raise BadCommand("You do not have the spice to perform this revival")
-    new_game_state.faction_state[faction].spice -= cost
-
+    spend_spice(new_game_state, faction, cost)
     revive_units(units, faction, new_game_state)
     revive_leader(leader, faction, new_game_state)
 
@@ -251,12 +247,13 @@ class EmperorAllyRevival(Action):
     @classmethod
     def parse_args(cls, faction, args):
         parts = args.split(" ") if args != "" else []
-        if not len(parts) % 2 == 0:
+        if len(parts) % 2 != 0:
             raise BadCommand("Need to specify units and faction per ally")
 
         revivals = {}
         for i in range(0, len(parts), 2):
-            (ally, units) = parts[i:i+1]
+            ally = parts[i]
+            units = parts[i+1]
             units = parse_revival_units(units)
             revivals[ally] = units
 
@@ -266,7 +263,7 @@ class EmperorAllyRevival(Action):
     def _check(cls, game_state, faction):
         if not game_state.alliances[faction]:
             raise IllegalAction("You cannot give allies free revivals if you have no allies")
-        if game_State.round_state.emperor_ally_revival_done:
+        if game_state.round_state.emperor_ally_revival_done:
             raise IllegalAction("You already did your special revival")
 
     def __init__(self, faction, revivals):
@@ -282,18 +279,22 @@ class EmperorAllyRevival(Action):
                 max_units=3,
                 single_2=False,
                 title=f))
-        return args.Struct(revivals*)
+        return args.Struct(*revivals)
 
     def _execute(self, game_state):
         new_game_state = deepcopy(game_state)
         new_game_state.round_state.emperor_ally_revival_done = True
-        for ally in revivals:
+        for ally in self.revivals:
             if ally not in new_game_state.alliances[self.faction]:
                 raise BadCommand("You cannot give free revival to non-allies")
-            if len(revivals[ally]) > 3:
+            units = self.revivals[ally]
+            if len(units) > 3:
                 raise BadComand("You can only revive 3 units for your allies")
-            cost = 2 * len(revivals[ally])
-            _execute_revival
+
+            cost = 2 * len(units)
+            spend_spice(new_game_state, self.faction, cost)
+            revive_units(units, ally, new_game_state)
+        new_game_state.round_state.emperor_ally_revival_done = True
         return new_game_state
 
 

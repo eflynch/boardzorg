@@ -10,7 +10,7 @@ export const SpiceLocations = {
     "Cielago-South": {top: 0.90, left: 0.51},
     "Habbanya-Ridge-Flat": {top: 0.80, left: 0.25},
     "Habbanya-Erg": {top: 0.60, left: 0.12},
-    "Great-Flat": {top: 0.475, left: 0.11},
+    "The-Great-Flat": {top: 0.475, left: 0.11},
     "Wind-Pass-North": {top: 0.545, left: 0.41},
     "Rock-Outcroppings": {top: 0.255, left: 0.17},
     "Funeral-Plain": {top: 0.395, left: 0.14}

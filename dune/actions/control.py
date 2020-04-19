@@ -76,7 +76,7 @@ class DoControl(Action):
         if "bene-gesserit" in new_game_state.faction_state:
             faction, turn = new_game_state.faction_state["bene-gesserit"].prediction
             if new_game_state.turn == turn:
-                if faction in a:
+                if winner is not None and faction in winner:
                     winner = ("bene-gesserit",)
 
         if winner is not None:

@@ -25,7 +25,5 @@ def spend_spice(game_state, faction, amount, context=None):
             else:
                 spice_to_spend = game_state.faction_state[faction].spice - game_state.spice_reserve[faction]
     if amount > spice_to_spend:
-        raise IllegalAction("Insufficient spice for this action")
+        raise BadCommand("Insufficient spice for this action")
     game_state.faction_state[faction].spice -= amount
-
-

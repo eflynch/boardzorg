@@ -368,9 +368,10 @@ const RevivalLeader = ({me, args, leaders, setArgs, required}) => {
     }} active={true} canDeselect={!required}/>;
 };
 
-const RevivalUnits = ({me, args, setArgs, units, maxUnits, single2}) => {
-    const hasUnitsSelected = (args.indexOf("1") !== -1) || (args.indexOf("2") !== -1);
-    const unitsSelected = hasUnitsSelected ? args.split(",").map((u)=>parseInt(u)).filter((u)=>u) : [];
+const RevivalUnits = ({me, args, setArgs, units, maxUnits, single2, title}) => {
+    const unitArgs = title ? (args ? args.split(" ")[1] : "") : args;
+    const hasUnitsSelected = (unitArgs.indexOf("1") !== -1) || (unitArgs.indexOf("2") !== -1);
+    const unitsSelected = hasUnitsSelected ? unitArgs.split(",").map((u)=>parseInt(u)).filter((u)=>u) : [];
     const onesSelected = unitsSelected.filter((u)=>u==1).length;
     const twosSelected = unitsSelected.filter((u)=>u==2).length;
 
@@ -391,7 +392,11 @@ const RevivalUnits = ({me, args, setArgs, units, maxUnits, single2}) => {
         oneSelectors.push(<UnitSelect key={i} value={1} active={active} selected={i < onesSelected} setSelected={(s)=>{
             const newSelected = Array(onesSelected + (s ? 1 : -1)).fill("1")
                   .concat(Array(twosSelected).fill("2"));
-            setArgs(newSelected.join(","));
+            if (title) {
+                setArgs([title, newSelected.join(",")].join(" "));
+            } else {
+                setArgs(newSelected.join(","));
+            }
         }}/>);
     }
 
@@ -400,11 +405,16 @@ const RevivalUnits = ({me, args, setArgs, units, maxUnits, single2}) => {
         twoSelectors.push(<UnitSelect key={`2-${i}`} value={2} active={active} selected={i < twosSelected} setSelected={(s)=>{
             const newSelected = Array(onesSelected).fill("1")
                 .concat(Array(twosSelected + (s ? 1 : -1)).fill("2"));
-            setArgs(newSelected.join(","));
+            if (title) {
+                setArgs([title, newSelected.join(",")].join(" "));
+            } else {
+                setArgs(newSelected.join(","));
+            }
         }}/>);
     }
     return (
         <div style={{display:"flex"}}>
+            {title ? title + " " : ""}
             {twoSelectors}
             {oneSelectors}
         </div>
@@ -518,7 +528,7 @@ const Widget = (props) => {
     }
 
     if (type === "revival-units") {
-        return <RevivalUnits args={args} setArgs={setArgs} units={config.units} maxUnits={config.maxUnits} single2={config.single2}/>;
+        return <RevivalUnits args={args} setArgs={setArgs} units={config.units} maxUnits={config.maxUnits} single2={config.single2} title={config.title}/>;
     }
     if (type === "revival-leader") {
         return <RevivalLeader args={args} setArgs={setArgs} leaders={config.leaders} required={config.required}/>;
