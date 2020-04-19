@@ -64,6 +64,7 @@ class BattleStage(StageState):
         self.reveal_entire_is_attacker = False
 
         self.voice_karama_passes = []
+        self.prescience_karama_passes = []
 
         self.karama_sardaukar = False
         self.karama_sardaukar_passes = []

@@ -103,7 +103,7 @@ class AnswerPrescience(Action):
     name = "answer-prescience"
     ck_round = "battle"
     ck_stage = "battle"
-    ck_substage = "karama-prescience"
+    ck_substage = "answer-prescience"
 
     @classmethod
     def parse_args(cls, faction, args):
@@ -171,6 +171,42 @@ class KaramaPrescience(Action):
         new_game_state.round_state.stage_state.substage = "karama-entire"
         discard_karama(new_game_state, self.faction)
         return new_game_state
+
+
+class KaramaPassPrescience(Action):
+    name = "karama-pass-prescience"
+    ck_round = "battle"
+    ck_stage = "battle"
+    ck_substage = "karama-prescience"
+
+    @classmethod
+    def _check(cls, game_state, faction):
+        if faction == "atreides":
+            raise IllegalAction("You cannot karam your own prescience")
+
+    def _execute(self, game_state):
+        new_game_state = deepcopy(game_state)
+        new_game_state.round_state.stage_state.prescience_karama_passes.append(self.faction)
+        return new_game_state
+
+
+class SkipKaramaPrescience(Action):
+    name = "skip-karama-prescience"
+    ck_round = "battle"
+    ck_stage = "battle"
+    ck_substage = "karama-prescience"
+    su = True
+
+    @classmethod
+    def _check(cls, game_state, faction):
+        if len(game_state.round_state.stage_state.prescience_karama_passes) < len(game_state.faction_state) - 1:
+            raise IllegalAction("Waiting for karama passes")
+
+    def _execute(self, game_state):
+        new_game_state = deepcopy(game_state)
+        new_game_state.round_state.stage_state.substage = "answer-prescience"
+        return new_game_state
+
 
 
 class KaramaEntirePlan(Action):
