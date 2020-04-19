@@ -2,7 +2,7 @@ from copy import deepcopy
 import math
 
 from dune.actions.action import Action
-from dune.actions.common import get_faction_order, spend_spice
+from dune.actions.common import get_faction_order, spend_spice, check_no_allies
 from dune.exceptions import IllegalAction, BadCommand
 from dune.state.rounds import movement, battle
 from dune.map.map import MapGraph
@@ -11,6 +11,7 @@ from dune.actions.karama import discard_karama
 
 
 def ship_units(game_state, faction, units, space, sector):
+    check_no_allies(game_state, faction, space)
     if "stronghold" in space.type:
         if len(space.forces) > 1:
             if faction not in space.forces:
@@ -45,6 +46,8 @@ def ship_units(game_state, faction, units, space, sector):
 
 
 def move_units(game_state, faction, units, space_a, sector_a, space_b, sector_b):
+    check_no_allies(game_state, faction, space_b)
+
     if "stronghold" in space_b.type:
         total_forces = len(space_b.forces)
         if "bene-gesserit" in space_b.forces and space_b.coexist:
@@ -295,6 +298,8 @@ class Ship(Action):
         if new_game_state.storm_position == self.sector:
             if self.faction != "fremen":
                 raise BadCommand("Only the Fremen can ship into the storm")
+
+        check_no_allies(game_state, self.faction, space) 
 
         # WEIRD PATTERN ALERT
         class LocalException(Exception):
@@ -711,6 +716,8 @@ class CrossShip(Action):
         if new_game_state.faction_state[self.faction].spice < cost:
             raise BadCommand("You don't have enough spice")
         spend_spice(new_game_state, self.faction, cost)
+
+        check_no_allies(game_state, self.faction, space_b)
 
         if self.faction != "guild":
             if "guild" in new_game_state.faction_state:

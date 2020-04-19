@@ -3,6 +3,7 @@ from copy import deepcopy
 from dune.actions.action import Action
 from dune.exceptions import IllegalAction, BadCommand
 from dune.actions import args
+from dune.actions.common import check_no_allies
 
 
 class ActivateAdvisors(Action):
@@ -38,7 +39,10 @@ class ActivateAdvisors(Action):
 
     def _execute(self, game_state):
         new_game_state = deepcopy(game_state)
+
         space = new_game_state.map_state[self.space]
+        check_no_allies(game_state, self.faction, space)
+
         if "bene-gesserit" not in space.forces:
             raise BadCommand("No forces to activate")
         if not space.coexist:

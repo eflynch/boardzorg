@@ -1,4 +1,6 @@
 
+from dune.exceptions import IllegalAction, BadCommand
+
 TOKEN_SECTORS = [1, 4, 7, 10, 13, 16]
 
 
@@ -27,3 +29,12 @@ def spend_spice(game_state, faction, amount, context=None):
     if amount > spice_to_spend:
         raise BadCommand("Insufficient spice for this action")
     game_state.faction_state[faction].spice -= amount
+
+
+def check_no_allies(game_state, faction, space):
+    for ally in game_state.alliances[faction]:
+        if ally in space.forces:
+            if ally != "bene-gesserit":
+                raise BadCommand("You cannot invade your ally")
+            elif not space.coexist:
+                raise BadCommand("You cannot invade your ally")
