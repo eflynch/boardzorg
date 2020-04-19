@@ -343,7 +343,7 @@ class KaramaStopShipment(Action):
         new_game_state = deepcopy(game_state)
         new_game_state.round_state.stage_state.shipment_used = True
         new_game_state.round_state.stage_state.substage = movement.MainSubStage()
-        discard_karama(game_state, self.faction)
+        discard_karama(new_game_state, self.faction)
         return new_game_state
 
 
