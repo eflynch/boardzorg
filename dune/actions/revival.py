@@ -243,6 +243,60 @@ class FremenBlessing(Action):
         return new_game_state
 
 
+class EmperorAllyRevival(Action):
+    name = "revive-ally-units"
+    ck_round = "revival"
+    ck_faction = "emperor"
+
+    @classmethod
+    def parse_args(cls, faction, args):
+        parts = args.split(" ") if args != "" else []
+        if not len(parts) % 2 == 0:
+            raise BadCommand("Need to specify units and faction per ally")
+
+        revivals = {}
+        for i in range(0, len(parts), 2):
+            (ally, units) = parts[i:i+1]
+            units = parse_revival_units(units)
+            revivals[ally] = units
+
+        return EmperorAllyRevival(faction, revivals)
+
+    @classmethod
+    def _check(cls, game_state, faction):
+        if not game_state.alliances[faction]:
+            raise IllegalAction("You cannot give allies free revivals if you have no allies")
+        if game_State.round_state.emperor_ally_revival_done:
+            raise IllegalAction("You already did your special revival")
+
+    def __init__(self, faction, revivals):
+        self.faction = faction
+        self.revivals = revivals
+
+    @classmethod
+    def get_arg_spec(cls, faction=None, game_state=None):
+        revivals = []
+        for f in game_state.alliances[faction]:
+            revivals.append(args.RevivalUnits(
+                game_state.faction_state[faction].tank_units,
+                max_units=3,
+                single_2=False,
+                title=f))
+        return args.Struct(revivals*)
+
+    def _execute(self, game_state):
+        new_game_state = deepcopy(game_state)
+        new_game_state.round_state.emperor_ally_revival_done = True
+        for ally in revivals:
+            if ally not in new_game_state.alliances[self.faction]:
+                raise BadCommand("You cannot give free revival to non-allies")
+            if len(revivals[ally]) > 3:
+                raise BadComand("You can only revive 3 units for your allies")
+            cost = 2 * len(revivals[ally])
+            _execute_revival
+        return new_game_state
+
+
 class Revive(Action):
     name = "revive"
     ck_round = "revival"
