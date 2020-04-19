@@ -2,13 +2,12 @@ from copy import deepcopy
 import math
 
 from dune.actions.action import Action
-from dune.actions.common import get_faction_order
+from dune.actions.common import get_faction_order, spend_spice
 from dune.exceptions import IllegalAction, BadCommand
 from dune.state.rounds import movement, battle
 from dune.map.map import MapGraph
 from dune.actions import args
 from dune.actions.karama import discard_karama
-from dune.actions.spice import spend_spice
 
 
 def ship_units(game_state, faction, units, space, sector):

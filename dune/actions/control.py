@@ -85,4 +85,5 @@ class DoControl(Action):
             return new_game_state
 
         new_game_state.round_state = StormRound()
+        new_game_state.turn += 1
         return new_game_state

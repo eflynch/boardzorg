@@ -10,6 +10,7 @@ import Battle from './rounds/battle';
 import Movement from './rounds/movement';
 import Revival from './rounds/revival';
 import Nexus from './rounds/nexus';
+import Spice from './rounds/spice';
 import Deck from './components/deck';
 import update from 'immutability-helper';
 
@@ -63,6 +64,9 @@ const RoundState = ({roundState, stormPosition, logoPositions, interaction, sele
     }
     if (roundState && roundState.round == "revival") {
         stateDiv = <Revival factionOrder={factionOrder} roundState={roundState} />;
+    }
+    if (roundState && roundState.round == "spice") {
+        stateDiv = <Spice roundState={roundState} />;
     }
     if (roundState == "end") {
         stateDiv = <div className="winner">{winner} Wins!!</div>;
