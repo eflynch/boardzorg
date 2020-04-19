@@ -22,7 +22,7 @@ def discard_karama(game_state, faction):
 class KaramaStealTreachery(Action):
     name = "karama-steal-treachery"
     ck_karama = True
-    ck_faction = "harkonnen"
+    ck_faction_karama = "harkonnen"
 
     def __init__(self, faction, target_faction, number):
         self.faction = faction
@@ -55,6 +55,7 @@ class KaramaStealTreachery(Action):
         new_game_state.treachery_to_return = real_number
         new_game_state.treachery_to_return_faction = self.target_faction
         discard_karama(new_game_state, self.faction)
+        new_game_state.faction_state[self.faction].used_faction_karama = True
         return new_game_state
 
 

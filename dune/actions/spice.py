@@ -168,7 +168,7 @@ class SkipFremenWormKarama(Action):
 
     @classmethod
     def _check(cls, game_state, faction):
-        if "fremen" in game_state.faction_state:
+        if "fremen" in game_state.faction_state and not game_state.faction_state["fremen"].used_faction_karama:
             raise IllegalAction("Fremen need the opportunity to karama a worm")
         if game_state.turn <= 1:
             raise IllegalAction("Cannot karama worm on round 1")
@@ -188,7 +188,7 @@ class PassFremenWormKarama(Action):
     name = "pass-fremen-worm-karama"
     ck_round = "spice"
     ck_stage = "fremen-worm-karama"
-    ck_faction = "fremen"
+    ck_faction_karama = "fremen"
 
     @classmethod
     def _check(cls, game_state, faction):
@@ -210,7 +210,7 @@ class FremenWormKarama(Action):
     name = "fremen-worm-karama"
     ck_round = "spice"
     ck_stage = "fremen-worm-karama"
-    ck_faction = "fremen"
+    ck_faction_karama = "fremen"
     ck_karama = True
 
     @classmethod
@@ -234,6 +234,7 @@ class FremenWormKarama(Action):
         new_game_state = deepcopy(game_state)
         _shai_hulud(new_game_state, self.space)
         discard_karama(new_game_state, self.faction)
+        new_game_state.faction_state[self.faction].used_faction_karama = True
         return new_game_state
 
 

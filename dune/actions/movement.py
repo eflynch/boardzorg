@@ -329,7 +329,7 @@ class KaramaStopShipment(Action):
     ck_round = "movement"
     ck_stage = "turn"
     ck_substage = "ship"
-    ck_faction = "guild"
+    ck_faction_karama = "guild"
     ck_karama = True
 
     @classmethod
@@ -344,6 +344,7 @@ class KaramaStopShipment(Action):
         new_game_state.round_state.stage_state.shipment_used = True
         new_game_state.round_state.stage_state.substage = movement.MainSubStage()
         discard_karama(new_game_state, self.faction)
+        new_game_state.faction_state[self.faction].used_faction_karama = True
         return new_game_state
 
 
@@ -352,7 +353,7 @@ class KaramaPassStopShipment(Action):
     ck_round = "movement"
     ck_stage = "turn"
     ck_substage = "ship"
-    ck_faction = "guild"
+    ck_faction_karama = "guild"
 
     @classmethod
     def _check(cls, game_state, faction):
@@ -379,7 +380,7 @@ class SkipStopShipment(Action):
         if game_state.round_state.stage_state.substage_state.subsubstage != "halt":
             raise IllegalAction("Wrong subsubstage yo")
         if game_state.round_state.faction_turn != "guild":
-            if "guild" in game_state.faction_state:
+            if "guild" in game_state.faction_state and not game_state.faction_state["guild"].used_faction_karama:
                 raise IllegalAction("Waiting to see if guild stops it")
 
     def _execute(self, game_state):

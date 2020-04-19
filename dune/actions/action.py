@@ -91,6 +91,11 @@ class Action(object, metaclass=ActionMeta):
         return None
 
     @classmethod
+    def check_faction_karama(cls, game_state, faction):
+        if game_state.faction_state[faction].used_faction_karama:
+            raise IllegalAction(f"{faction} must have not used their faction karama power")
+
+    @classmethod
     def check(cls, game_state, faction):
         if game_state.round == "end":
             raise IllegalAction("There are no actions left")
@@ -108,6 +113,10 @@ class Action(object, metaclass=ActionMeta):
                 raise IllegalAction("Only {} can {}".format(cls.ck_faction, cls.name))
         if hasattr(cls, "ck_karama"):
             cls.check_karama(game_state, faction) 
+        if hasattr(cls, "ck_faction_karama"):
+            if faction != cls.ck_faction_karama:
+                raise IllegalAction("Only {} can {}".format(cls.ck_faction_karama, cls.name))
+            cls.check_faction_karama(game_state, faction)
         if hasattr(cls, "ck_treachery"):
             if faction not in game_state.faction_state:
                 raise IllegalAction("You can't be doing that")

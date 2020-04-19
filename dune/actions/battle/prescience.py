@@ -178,7 +178,7 @@ class KaramaEntirePlan(Action):
     ck_round = "battle"
     ck_stage = "battle"
     ck_substage = "karama-entire"
-    ck_faction = "atreides"
+    ck_faction_karama = "atreides"
     ck_karama = True
 
     @classmethod
@@ -193,6 +193,7 @@ class KaramaEntirePlan(Action):
         new_game_state = deepcopy(game_state)
         new_game_state.round_state.stage_state.substage = "reveal-entire"
         discard_karama(new_game_state, self.faction)
+        new_game_state.faction_state[self.faction].used_faction_karama = True
         return new_game_state
 
 
@@ -201,7 +202,7 @@ class KaramaPassEntirePlan(Action):
     ck_round = "battle"
     ck_stage = "battle"
     ck_substage = "karama-entire"
-    ck_faction = "atreides"
+    ck_faction_karama = "atreides"
 
     @classmethod
     def _check(cls, game_state, faction):
@@ -226,7 +227,7 @@ class SkipKaramaEntirePlan(Action):
 
     @classmethod
     def _check(cls, game_state, faction):
-        if "atreides" in game_state.faction_state:
+        if "atreides" in game_state.faction_state and not game_state.faction_state["atreides"].used_faction_karama:
             if "atreides" in game_state.round_state.stage_state.battle:
                 raise IllegalAction("Cannot skip since atreides are in the battle")
             attacker, defender, _, _ = game_state.round_state.stage_state.battle
