@@ -10,7 +10,6 @@ export default History = ({state, error, actions, sendCommand, commandLog, me, i
     const [showSu, setShowSu] = useState(false);
     return (    
         <div className="history">
-            <b>Available Actions</b>
             <Actions me={me} state={state} interaction={interaction} setInteraction={setInteraction} error={error} actions={actions} sendCommand={sendCommand} setInteractionFlow={setInteractionFlow} updateSelection={updateSelection} clearSelection={clearSelection}/>
             <br/>
             <div style={{position:"relative"}}>

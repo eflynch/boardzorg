@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import update from 'immutability-helper';
 
 import Widget from './widget';
@@ -137,11 +137,43 @@ to ensure that all $interaction props will be present at submit time.
 
 */
 
+
+const passStubs = [
+    "karama-pass-",
+    "pass-"
+];
+
 const Actions = (props) => {
     const [args, setArgs] = useState("");
     const [selectedAction, setSelectedAction] = useState(null);
+    const [autoPass, setAutoPass] = useState(false);
 
-    let {me, state, error, actions, sendCommand, setInteraction, setInteractionFlow, interaction, updateSelection, clearSelection} = props;
+    let {me, state, error, actions, sendCommand, setInteraction, setInteractionFlow,
+         interaction, updateSelection, clearSelection} = props;
+
+    const actionNames = Object.keys(actions);
+    useEffect(()=> {
+        let timeoutID = false;
+        if (autoPass) {
+            actionNames.forEach((action) => {
+                passStubs.forEach((stub) => {
+                    if (action.startsWith(stub)) {
+                        if (actionNames.indexOf(action.replace(stub, "")) === -1) {
+                            timeoutID = setTimeout(()=>{
+                                sendCommand(action);
+                            }, 1000);
+                        }
+                    }
+                });
+            });
+        }
+        return () => {
+            if (timeoutID) {
+                clearTimeout(timeoutID);
+            }
+        }
+    });
+
     let errordiv = <div/>;
     if (error !== null && error !== undefined){
         if (error.BadCommand !== undefined){
@@ -154,7 +186,6 @@ const Actions = (props) => {
             errordiv = <div className="error">{error.UnhandledError}</div>;
         }
     }
-    const actionNames = Object.keys(actions);
     const actionButtons = actionNames.map((actionName, i) => {
         return (
             <li className={selectedAction === actionName ? "selected" : ""} key={i} onClick={()=>{
@@ -172,12 +203,18 @@ const Actions = (props) => {
         actionArgs = <ActionArgs me={me} state={state} args={args} setArgs={setArgs} interaction={interaction} setInteraction={setInteraction} sendCommand={sendCommand} actionName={selectedAction} argSpec={actions[selectedAction]} updateSelection={updateSelection} clearSelection={clearSelection} setSelectedAction={setSelectedAction}/>
     }
     return (
-        <div className="actions-wrapper">
-            <div className="actions">
-                {actionButtons}
+        <div>
+            <div style={{position:"relative"}}>
+                <b>Available Actions</b>
+                <button className="su-button" onClick={()=>{setAutoPass(!autoPass);}}>{autoPass ? "✅ auto pass" : "⬛️ auto pass"}</button>
             </div>
-            {actionArgs}
-            {errordiv}
+            <div className="actions-wrapper">
+                <div className="actions">
+                    {actionButtons}
+                </div>
+                {actionArgs}
+                {errordiv}
+            </div>
         </div>
     );
 }
