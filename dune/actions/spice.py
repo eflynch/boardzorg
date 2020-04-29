@@ -440,11 +440,8 @@ class FirstTurnSpiceBlow(Action):
             if card == "Shai-Hulud":
                 continue
 
-            space = game_state.map_state[card]
+            space = new_game_state.map_state[card]
             if new_game_state.storm_position != space.spice_sector:
                 space.spice = space.spice_amount
             new_game_state.round_state = bidding.BiddingRound()
             return new_game_state
-
-
-
