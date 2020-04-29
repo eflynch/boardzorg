@@ -25,7 +25,7 @@ LEADERS = {
     "fremen": [
         ("Chani", 6),
         ("Jamis", 2),
-        ("Otheym", 6),
+        ("Otheym", 5),
         ("Shadout-Mapes", 3),
         ("Stilgar", 7)
     ],
