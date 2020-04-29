@@ -360,6 +360,7 @@ img.alive {
 }
 
 .storm {
+    pointer-events: none;
 }
 
 .picker {
