@@ -367,10 +367,12 @@ class AutoResolve(Action):
     @classmethod
     def _check(cls, game_state, faction):
         # Check for Lasgun-Shield Explosion
+        stage_state = game_state.round_state.stage_state
         has_lasgun = "Lasgun" in stage_state.attacker_plan.values() or "Lasgun" in stage_state.defender_plan.values()
         has_shield = "Shield" in stage_state.attacker_plan.values() or "Shield" in stage_state.defender_plan.values()
         if has_lasgun and has_shield:
             raise IllegalAction("Cannot auto resolve with a lasgun shield explosion")
+
         if game_state.round_state.stage_state.traitor_revealers:
             raise IllegalAction("Cannot auto resolve with a traitor in the mix")
 
