@@ -79,6 +79,7 @@ a {
     padding: 10px;
     border: 2px black solid;
     text-align: center;
+    min-width: 350px;
 }
 
 .session .history .stage-title {

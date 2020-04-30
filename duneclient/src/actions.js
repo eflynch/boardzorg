@@ -146,7 +146,7 @@ const passStubs = [
 const Actions = (props) => {
     const [args, setArgs] = useState("");
     const [selectedAction, setSelectedAction] = useState(null);
-    const [autoPass, setAutoPass] = useState(false);
+    const [autoPass, setAutoPass] = useState(true);
 
     let {me, state, error, actions, sendCommand, setInteraction, setInteractionFlow,
          interaction, updateSelection, clearSelection} = props;

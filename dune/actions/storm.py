@@ -7,6 +7,7 @@ from dune.actions.treachery import discard_treachery
 from dune.exceptions import IllegalAction
 from dune.state.rounds import spice
 
+
 def destroy_in_path(game_state, sectors):
     for space in game_state.map_state.values():
         if not set(space.sectors).isdisjoint(set(sectors)):
@@ -17,10 +18,12 @@ def destroy_in_path(game_state, sectors):
 
 
 def do_storm_round(game_state, advance):
+    previous_storm_position = game_state.storm_position
     game_state.storm_position = (game_state.storm_position + advance) % 18
 
-    destroy_in_path(game_state,
-                    range(game_state.storm_position, game_state.storm_position + 1))
+    sectors_to_destroy = list(range(previous_storm_position, game_state.storm_position + 1))
+
+    destroy_in_path(game_state, sectors_to_destroy)
 
     game_state.round_state = spice.SpiceRound()
 
