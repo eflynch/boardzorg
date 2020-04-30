@@ -303,7 +303,7 @@ class AutoResolveDisaster(Action):
         has_lasgun = "Lasgun" in stage_state.attacker_plan.values() or "Lasgun" in stage_state.defender_plan.values()
         has_shield = "Shield" in stage_state.attacker_plan.values() or "Shield" in stage_state.defender_plan.values()
 
-        if not double_traitor or not (has_lasgun and has_shield):
+        if not (double_traitor or (has_lasgun and has_shield)):
             raise IllegalAction("No auto resolve if we don't have a bang")
 
     def _execute(self, game_state):
