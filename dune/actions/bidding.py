@@ -56,7 +56,7 @@ class ChoamCharity(Action):
     def _execute(self, game_state):
         new_game_state = deepcopy(game_state)
         new_game_state.faction_state[self.faction].spice += game_state.round_state.choam_claimers[self.faction]
-        del new_game_state.round_state.choam_claimers
+        del new_game_state.round_state.choam_claimers[self.faction]
         return new_game_state
 
 
