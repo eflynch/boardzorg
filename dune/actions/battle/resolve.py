@@ -390,8 +390,9 @@ class AutoResolve(Action):
                 return 0
 
             if ops.clash_weapons(plan_a["weapon"], plan_b["defense"]):
-                ops.tank_leader(new_game_state, faction_b, plan_b["leader"])
-                dead_leaders.append(plan_b["leader"])
+                if plan_b["leader"][0] != "Cheap-Hero/Heroine":
+                    ops.tank_leader(new_game_state, faction_b, plan_b["leader"])
+                    dead_leaders.append(plan_b["leader"])
                 return 0
 
             if plan_b["leader"][0] != "Cheap-Hero/Heroine":
