@@ -42,7 +42,7 @@ class Gift(Action):
 
         new_game_state = deepcopy(game_state)
         spend_spice(new_game_state, self.faction, self.spice)
-        new_game_state.faction_state[self.other_faction].bribe_spice += self.spice
+        new_game_state.faction_state[self.other_faction].spice += self.spice
 
         return new_game_state
 
@@ -402,6 +402,7 @@ class FremenRedirectWorm(Action):
     name = "fremen-redirect-worm"
     ck_round = "spice"
     ck_stage = "fremen-redirect-worm"
+    ck_faction = "fremen"
 
     @classmethod
     def parse_args(cls, faction, args):
