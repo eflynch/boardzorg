@@ -215,6 +215,7 @@ export default function Session({state, actions, history, me, error, sendCommand
         futureSpice = state.spice_deck.next;
     }
     const logoPositions = GetLogoPositions(state.faction_state);
+
     return (
         <div className="session">
             <div>

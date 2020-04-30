@@ -16,6 +16,7 @@ class Gift(Action):
     name = "gift"
     ck_faction = "emperor"
     ck_pause_context = ["steal-treachery"]
+    non_blocking = True
 
     @classmethod
     def parse_args(cls, faction, args):
@@ -50,6 +51,7 @@ class Gift(Action):
 class Bribe(Action):
     name = "bribe"
     ck_pause_context = ["steal-treachery"]
+    non_blocking = True
 
     @classmethod
     def parse_args(cls, faction, args):

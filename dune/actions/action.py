@@ -85,6 +85,12 @@ class Action(object, metaclass=ActionMeta):
         return valid_actions
 
     @classmethod
+    def get_is_blocking(cls):
+        if hasattr(cls, "non_blocking"):
+            return False
+        return True
+
+    @classmethod
     def get_action(cls, action_name):
         if action_name in cls.registry:
             return cls.registry[action_name]

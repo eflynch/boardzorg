@@ -151,7 +151,7 @@ const Actions = (props) => {
     let {me, state, error, actions, sendCommand, setInteraction, setInteractionFlow,
          interaction, updateSelection, clearSelection} = props;
 
-    const actionNames = Object.keys(actions);
+    const actionNames = actions.map((action)=>action.name); 
     useEffect(()=> {
         let timeoutID = false;
         if (autoPass) {
@@ -186,21 +186,22 @@ const Actions = (props) => {
             errordiv = <div className="error">{error.UnhandledError}</div>;
         }
     }
-    const actionButtons = actionNames.map((actionName, i) => {
+    const actionButtons = actions.map(({name, spec, blocking}, i) => {
         return (
-            <li className={selectedAction === actionName ? "selected" : ""} key={i} onClick={()=>{
-                setSelectedAction(actionName);
+            <li className={selectedAction === name ? "selected" : ""} key={i} onClick={()=>{
+                setSelectedAction(name);
                 clearSelection();
-                setArgs(defaultArgsForAction(state, me, actionName, actions[actionName]));
-                setInteractionFlow(getFlowForWidget(actions[actionName].widget, actions[actionName].args, setArgs, updateSelection));
+                setArgs(defaultArgsForAction(state, me, name, spec));
+                setInteractionFlow(getFlowForWidget(spec.widget, spec.args, setArgs, updateSelection));
             }} key={i}>
-                {actionName}
+                {name}
             </li>
         );
     });
     let actionArgs = <span/>;
     if (actionNames.indexOf(selectedAction) != -1) {
-        actionArgs = <ActionArgs me={me} state={state} args={args} setArgs={setArgs} interaction={interaction} setInteraction={setInteraction} sendCommand={sendCommand} actionName={selectedAction} argSpec={actions[selectedAction]} updateSelection={updateSelection} clearSelection={clearSelection} setSelectedAction={setSelectedAction}/>
+        const argSpec = actions[actionNames.indexOf(selectedAction)].spec;
+        actionArgs = <ActionArgs me={me} state={state} args={args} setArgs={setArgs} interaction={interaction} setInteraction={setInteraction} sendCommand={sendCommand} actionName={selectedAction} argSpec={argSpec} updateSelection={updateSelection} clearSelection={clearSelection} setSelectedAction={setSelectedAction}/>
     }
     return (
         <div>

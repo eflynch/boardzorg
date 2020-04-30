@@ -83,12 +83,10 @@ def command(session_id):
         role = rolewrapper.look_up(roles, role_id)
         session.handle_cmd(role, cmd)
 
-        actions = session.get_valid_actions(role)
-
         ret = {
             "role": role,
             "state": session.get_visible_state(role),
-            "actions": {a: actions[a].get_arg_spec(faction=role, game_state=session.game_log[-1]).to_dict() for a in actions},
+            "actions": session.get_valid_actions(role),
             "history": session.get_visible_command_log(role)
         }
 
@@ -112,10 +110,9 @@ def state(session_id):
     role_id = request.args.get("role_id")
     with SessionWrapper(session_id) as (session, roles):
         role = rolewrapper.look_up(roles, role_id)
-        actions = session.get_valid_actions(role)
         return jsonify({
             "role": role,
             "state": session.get_visible_state(role),
-            "actions": {a: actions[a].get_arg_spec(faction=role, game_state=session.game_log[-1]).to_dict() for a in actions},
+            "actions": get_valid_actions(role),
             "history": session.get_visible_command_log(role)
         })

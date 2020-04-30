@@ -1,9 +1,29 @@
 body {
     font-family: Optima, Monospace, sans-serif;
+    margin: 0;
 }
 
 a {
     text-decoration: none;
+}
+
+/* The animation code */
+@keyframes backgroundflash {
+  0%   {background-color: rgba(255, 255, 180, 1.0);}
+  40%  {background-color: yellow;}
+  80%  {background-color: orange;}
+  100% {background-color: red;}
+}
+
+#wrapper.blocking {
+  padding: 5;
+  background-color: rgba(255, 255, 180, 1.0);
+  animation-name: backgroundflash;
+  animation-delay: 10s;
+  animation-duration: 10s;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+  animation-direction: alternate;
 }
 
 .main-header {
@@ -70,6 +90,11 @@ a {
     font-family: Optima;
     font-size: 20px;
 }
+
+.session.blocking {
+    background-color: red;
+}
+
 .session {
     display: flex;
     flex-wrap: wrap;
@@ -80,6 +105,7 @@ a {
     border: 2px black solid;
     text-align: center;
     min-width: 350px;
+    background-color: white;
 }
 
 .session .history .stage-title {

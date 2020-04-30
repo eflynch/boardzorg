@@ -52,6 +52,8 @@ function renderSession(sessionID, roleID, data, error){
     }
     last_data = data;
     let {state, actions, history, role} = data;
+    const actionSetIsBlocking = actions.filter((action)=>action.blocking).length > 0;
+    document.getElementById("wrapper").className = actionSetIsBlocking ? "blocking" : "";
     render(<Header sessionTitle={sessionID} role={role} />, document.getElementById("header"));
     render(<Session me={role} state={state} actions={actions} history={history} error={error} sendCommand={function(cmd){
         sendCommand(sessionID, roleID, cmd);

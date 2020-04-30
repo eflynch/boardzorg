@@ -82,10 +82,22 @@ class Session:
         return self.game_log[-1].visible(role)
 
     def get_valid_actions(self, role):
-        if role in ('host',):
-            return {a: HostAction() for a in HOST_ACTIONS}
-        faction = role
-        return Action.get_valid_actions(self.game_log[-1], faction)
+        def _get_action_dict(role):
+            if role in ('host',):
+                return {a: HostAction() for a in HOST_ACTIONS}
+            faction = role
+            return Action.get_valid_actions(self.game_log[-1], faction)
+        action_dict = _get_action_dict(role)
+        action_list = []
+        for (name, action) in action_dict.items():
+            action_list.append({
+                "name": name,
+                "spec": action.get_arg_spec(
+                    faction=role,
+                    game_state=self.game_log[-1]).to_dict(),
+                "blocking": action.get_is_blocking()
+            })
+        return action_list
 
     def get_factions_in_play(self):
         return list(self.game_log[0].faction_state.keys())

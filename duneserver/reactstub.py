@@ -14,7 +14,9 @@ def reactstub(title, stylesheets=[], scripts=[], bootstrap="{}", copyright="© E
     {}
 </head>
 <body>
-    <div id="header"></div>
-    <div id="content"></div>
+    <div id="wrapper">
+        <div id="header"></div>
+        <div id="content"></div>
+    </div>
 </body>
 """.format(copyright, title, bootstrap, "\n".join(css), "\n".join(js))

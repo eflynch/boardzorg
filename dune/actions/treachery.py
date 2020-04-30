@@ -18,6 +18,7 @@ def discard_treachery(game_state, faction, treachery):
 class TruthTrance(Action):
     name = "truth-trance"
     ck_treachery = "Truth-Trance"
+    non_blocking = True
 
     def _execute(self, game_state):
         new_game_state = deepcopy(game_state)
@@ -29,6 +30,7 @@ class TruthTrance(Action):
 class TleilaxuGhola(Action):
     name = "tleilaxu-ghola"
     ck_treachery = "Tleilaxu-Ghola"
+    non_blocking = True
 
     @classmethod
     def parse_args(cls, faction, args):
@@ -84,6 +86,7 @@ class FamilyAtomics(Action):
     name = "family-atomics"
     ck_treachery = "Family-Atomics"
     ck_round = "control"
+    non_blocking = True
 
     @classmethod
     def _check(cls, game_state, faction):
@@ -118,6 +121,7 @@ class Hajr(Action):
     ck_stage = "turn"
     ck_substage = "main"
     ck_treachery = "Hajr"
+    non_blocking = True
 
     @classmethod
     def parse_args(cls, faction, args):
