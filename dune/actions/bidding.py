@@ -76,7 +76,7 @@ class StartAuction(Action):
         for faction in new_game_state.faction_state:
             if faction == "bene-gesserit":
                 new_game_state.round_state.choam_claimers[faction] = 2
-            elif new_game_state.faction_state[faction].spice <= 2:
+            elif new_game_state.faction_state[faction].spice < 2:
                 new_game_state.round_state.choam_claimers[faction] = 2 - new_game_state.faction_state[faction].spice
 
         new_game_state.round_state.total_for_auction = len(new_game_state.round_state.up_for_auction)
