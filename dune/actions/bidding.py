@@ -55,7 +55,7 @@ class ChoamCharity(Action):
 
     def _execute(self, game_state):
         new_game_state = deepcopy(game_state)
-        new_game_state.faction_state[self.faction].spice = 2
+        new_game_state.faction_state[self.faction].spice += game_state.round_state.choam_claimers[self.faction]
         new_game_state.round_state.choam_claimers.remove(self.faction)
         return new_game_state
 
@@ -74,8 +74,11 @@ class StartAuction(Action):
                 new_game_state.round_state.up_for_auction.append(c)
 
         for faction in new_game_state.faction_state:
-            if faction == "bene-gesserit" or new_game_state.faction_state[faction].spice <= 2:
-                new_game_state.round_state.choam_claimers.append(faction)
+            if faction == "bene-gesserit":
+                new_game_state.round_state.choam_claimers[faction] = 2
+            elif new_game_state.faction_state[faction].spice <= 2:
+                new_game_state.round_state.choam_claimers[faction] = 2 - new_game_state.faction_state[faction].spice
+
 
         new_game_state.round_state.total_for_auction = len(new_game_state.round_state.up_for_auction)
         new_game_state.round_state.stage_state = bidding.AuctionStage()

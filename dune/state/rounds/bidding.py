@@ -61,7 +61,7 @@ class BiddingRound(RoundState):
         self.total_for_auction = 0
         self.stage_state = SetupStage()
         self.up_for_auction = []
-        self.choam_claimers = []
+        self.choam_claimers = dict()
 
     def visible(self, game_state, faction):
         visible = super().visible(game_state, faction)
