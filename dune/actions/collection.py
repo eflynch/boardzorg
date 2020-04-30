@@ -34,6 +34,8 @@ class DoCollection(Action):
                 continue
 
             for faction in space.forces:
+                if faction == "bene-gesserit" and space.coexist:
+                    continue
                 collection_rate = 2
                 if faction in new_game_state.ornithopters:
                     collection_rate = 3
