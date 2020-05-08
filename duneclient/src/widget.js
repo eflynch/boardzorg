@@ -64,12 +64,32 @@ const UnitSelect = ({value, selected, active, setSelected}) => {
         borderRadius: 10,
         backgroundColor: selected ? "red" : "white",
         opacity: selected || active ? 1 : 0.2,
-        color: selected? "white" : "black"
+        color: selected? "white" : "black",
+        userSelect: "none",
     }} onClick={()=>{
         if (selected) {setSelected(false);}
         else if (active){setSelected(true);}
     }}>{value}</div>;
 }
+
+const UnitPicker = ({available, selected, setSelected, canAddMore}) => {
+  const unitSelectors = []
+  for (const type of Object.keys(available)) {
+    for (const index of Array(available[type]).keys()) {
+      const isSelected = selected[type] && index < selected[type];
+      unitSelectors.push(<UnitSelect
+           key={`${type}-${index}`}
+           value={type}
+           active={isSelected || canAddMore}
+           selected={isSelected}
+           setSelected={(s)=>{
+             setSelected(update(selected, {[type]: {$set: selected[type] + (s ? 1 : -1)}}));
+           }}
+          />);
+    }
+  }
+  return <div style={{display:"flex"}}>{unitSelectors}</div>;
+};
 
 const TankUnits = ({me, state, args, setArgs}) => {
     const selectedUnits = {};
@@ -81,8 +101,8 @@ const TankUnits = ({me, state, args, setArgs}) => {
             const numOnes = unitsParsed.filter((i)=>i===1).length;
             const numTwos = unitsParsed.filter((i)=>i===2).length;
             selectedUnits[sector] = {
-                ones: numOnes,
-                twos: numTwos
+                1: numOnes,
+                2: numTwos
             };
             totalSelected += numOnes + (2*numTwos);
         });
@@ -95,7 +115,7 @@ const TankUnits = ({me, state, args, setArgs}) => {
 
     sectors.forEach((sector)=> {
         if (selectedUnits[sector] === undefined) {
-            selectedUnits[sector] = {ones: 0, twos: 0};
+            selectedUnits[sector] = {1: 0, 2: 0};
         }
     });
 
@@ -106,42 +126,34 @@ const TankUnits = ({me, state, args, setArgs}) => {
     const _formatArgs = (selectedUnits) => {
         const sectors = Object.keys(selectedUnits);
         return sectors.map((s)=>{
-            return `${s}:${Array(selectedUnits[s].ones).fill("1").join(",")}${Array(selectedUnits[s].twos).fill("2").join(",")}`;
+            return `${s}:${Array(selectedUnits[s][1]).fill("1").concat(Array(selectedUnits[s][2]).fill("2")).join(",")}`;
         }).join(" ");
     };
 
     return (
         <div>
+            <div style={{textAlign: "left"}}><span>Select {toTank - totalSelected} more power:</span></div>
             {sectors.map((sector)=>{
-                const availableForces = forces[sector].slice().sort();  
+                const availableForcesFlat = forces[sector].slice().sort();
+                const availableForces = {};
+                for (const force of availableForcesFlat) {
+                  if (!availableForces[force]) {
+                    availableForces[force] = 1;
+                  } else {
+                    availableForces[force] += 1;
+                  }
+                }
                 const selectedForces = selectedUnits[sector];
-                let oneCount = 0;
-                let twoCount = 0;
                 return (
                     <div key={"sector" + sector} style={{display:"flex", alignItems:"center", justifyContent:"space-between"}}>
                         <span>Sector {sector}:</span>
-                        <div style={{display:"flex", alignItems:"center", flexWrap:"wrap"}}>
-                            {availableForces.map((v) => {
-                                if (v === 1) {
-                                    oneCount += 1;
-                                    return <UnitSelect key={"one" + oneCount} value={1} active={active} selected={oneCount <= selectedForces.ones} setSelected={(s)=>{
-                                        const newSelectedUnits = update(selectedUnits, {
-                                            [sector]: {ones: {$set: selectedForces.ones + (s ? 1 : -1)}}
-                                        });
-                                        setArgs(_formatArgs(newSelectedUnits));
-                                    }}/>
-                                }
-                                if (v === 2){
-                                    twoCount += 1;
-                                    return <UnitSelect key={"two" + twoCount} value={2} active={active} selected={twoCount <= selectedForces.twos} setSelected={(s)=>{
-                                        const newSelectedUnits = update(selectedUnits, {
-                                            [sector]: {twos: {$set: selectedForces.twos + (s ? 2 : -2)}}
-                                        });
-                                        setArgs(_formatArgs(newSelectedUnits));
-                                    }}/>
-                                }
-                            })}
-                        </div>
+                        <UnitPicker selected={selectedForces}
+                                    available={availableForces}
+                                    canAddMore={active}
+                                    setSelected={(newSelected) => {
+                                      setArgs(_formatArgs(update(selectedUnits, {[sector]: {$set: newSelected}})));
+                                    }}
+                        />
                     </div>
                 );
             })}
