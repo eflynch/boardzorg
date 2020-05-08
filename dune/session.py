@@ -16,6 +16,10 @@ class HostAction:
     def get_arg_spec(cls, faction=None, game_state=None):
         return Args()
 
+    @classmethod
+    def get_is_blocking(cls):
+        return False
+
 
 def handle_host_actions(session, cmd):
     if cmd == "undo":
