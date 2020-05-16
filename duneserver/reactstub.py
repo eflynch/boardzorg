@@ -8,6 +8,7 @@ def reactstub(title, stylesheets=[], scripts=[], bootstrap="{}", copyright="© E
 <head>
     <title>{}</title>
     <meta charset="UTF-8">
+    <meta name="robots" content="noindex">
     <link rel="shortcut icon" href="/static/app/favicon.ico" />
     <script>window.bootstrap = JSON.parse('{}'); </script>
     {}
