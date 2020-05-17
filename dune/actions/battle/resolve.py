@@ -9,18 +9,13 @@ from dune.actions.battle import ops
 from dune.actions.battle.winner import DiscardTreachery, TankUnits
 
 
-def discard_treachery_from_hand(game_state, faction, treachery):
-    game_state.faction_state[faction].treachery.remove(treachery)
-    game_state.treachery_discard.insert(0, treachery)
-
-
 def discard_cheap_heroine(game_state):
     ss = game_state.round_state.stage_state
     [attacker, defender, _, _] = ss.battle
     if ss.defender_plan["leader"] is not None and ss.defender_plan["leader"][0] == "Cheap-Hero/Heroine":
-        discard_treachery_from_hand(game_state, defender, "Cheap-Hero/Heroine")
+        ops.discard_treachery(game_state, "Cheap-Hero/Heroine")
     if ss.attacker_plan["leader"] is not None and ss.attacker_plan["leader"][0] == "Cheap-Hero/Heroine":
-        discard_treachery_from_hand(game_state, attacker, "Cheap-Hero/Heroine")
+        ops.discard_treachery(game_state, "Cheap-Hero/Heroine")
 
 
 class CommitPlan(Action):

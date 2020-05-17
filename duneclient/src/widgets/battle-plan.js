@@ -42,7 +42,7 @@ export function PlanLeader({leaders, treachery, selectedLeader, active, setLeade
                 onClick={onClick} />);
     }
     return (
-        <div style={{display:"flex"}}>
+        <div style={{display:"flex", alignItems:"center"}}>
             {meLeaders}
         </div>
     );

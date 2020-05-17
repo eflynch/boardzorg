@@ -22,7 +22,7 @@ a {
 #wrapper.blocking {
   background-color: rgba(255, 255, 180, 1.0);
   animation-name: backgroundflash;
-  animation-delay: 10s;
+  animation-delay: 15s;
   animation-duration: 10s;
   animation-timing-function: linear;
   animation-iteration-count: infinite;

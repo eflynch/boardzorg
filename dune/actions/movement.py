@@ -22,7 +22,6 @@ def ship_units(game_state, faction, units, space, sector):
                 raise BadCommand("The bene-gesserit cannot ship in here because of occupation constraints")
     if sector not in space.sectors:
         raise BadCommand("You ain't going nowhere")
-
     if game_state.storm_position == sector:
         if faction == "fremen":
             surviving_units = sorted(units)[:math.floor(len(units)/2)]
@@ -312,6 +311,12 @@ class Ship(Action):
         if new_game_state.storm_position == self.sector:
             if self.faction != "fremen":
                 raise BadCommand("Only the Fremen can ship into the storm")
+
+        reserve_units_copy = deepcopy(game_state.faction_state[self.faction].reserve_units)
+        for unit in self.units:
+            if unit not in reserve_units_copy:
+                raise BadCommand("You don't have enough units to ship those")
+            reserve_units_copy.remove(unit)
 
         check_no_allies(game_state, self.faction, space) 
 
