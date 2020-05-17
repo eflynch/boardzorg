@@ -3,6 +3,7 @@ import json
 
 from flask import Flask
 from flask_socketio import SocketIO
+from flask_basicauth import BasicAuth
 
 from reactstub import reactstub
 
@@ -19,9 +20,13 @@ if os.path.exists('/etc/config.json'):
         config = json.load(config_file)
 
     app.config['SECRET_KEY'] = config.get('SECRET_KEY')
+    app.config['BASIC_AUTH_USERNAME'] = config.get('BASIC_AUTH_USERNAME')
+    app.config['BASIC_AUTH_PASSWORD'] = config.get('BASIC_AUTH_PASSWORD')
 else:
     print("Warning, running without a secret")
 
+
+back_auth = BasicAuth(app)
 
 @app.route("/", methods=['GET'])
 def index():

@@ -5,3 +5,4 @@ flask-socketio
 eventlet
 dataclasses
 cachetools
+Flask-BasicAuth
