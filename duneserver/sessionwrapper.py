@@ -1,8 +1,14 @@
-from dune.session import Session
 import os
+import json
+from threading import RLock
+
+from cachetools import LRUCache, cached
+import psycopg2 as psql
+
+from dune.session import Session
+
 import rolewrapper
 
-import psycopg2 as psql
 
 
 class SessionConflict(Exception):
@@ -21,6 +27,20 @@ def _connect():
 
 session_change_subscriptions = {}
 
+cache = LRUCache(maxsize=64)
+lock = RLock()
+
+
+@cached(cache, lock=lock)
+def realize_session(serialized):
+    print("Cache miss")
+    return Session.realize(serialized)
+
+def serialize_session(session):
+    serialized = Session.serialize(session)
+    with lock:
+        cache[serialized] = session
+    return serialized
 
 def subscribe(session_id, callback):
     """Calls `callback` with (session, roles) after any change"""
@@ -66,7 +86,7 @@ class SessionWrapper:
         ret = self.cursor.fetchone()
         if not ret:
             raise SessionConflict("No session found with name {}".format(self.session_id))
-        self.session = Session.realize(ret[0])
+        self.session = realize_session(json.dumps(ret[0]))
         self.roles = ret[1]
         return self.session, self.roles
 
@@ -78,7 +98,7 @@ class SessionWrapper:
             self.cursor.execute(
                 "UPDATE sessions SET serialized=%(serialized)s, roles=%(roles)s WHERE name=%(name)s",
                 {
-                    'serialized': Session.serialize(self.session),
+                    'serialized': serialize_session(self.session),
                     'roles': rolewrapper.serialize(self.roles),
                     'name': self.session_id
                 })
