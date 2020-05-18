@@ -22,6 +22,7 @@ if os.path.exists('/etc/config.json'):
     app.config['SECRET_KEY'] = config.get('SECRET_KEY')
     app.config['BASIC_AUTH_USERNAME'] = config.get('BASIC_AUTH_USERNAME')
     app.config['BASIC_AUTH_PASSWORD'] = config.get('BASIC_AUTH_PASSWORD')
+    app.config['BASIC_AUTH_FORCE'] = True
 else:
     print("Warning, running without a secret")
 
