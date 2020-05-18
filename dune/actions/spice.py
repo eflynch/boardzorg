@@ -12,6 +12,24 @@ from dune.actions.movement import move_units
 from dune.actions.battle import ops
 
 
+class Chat(Action):
+    name = "chat"
+    non_blocking = True
+    _execute = None
+
+    @classmethod
+    def parse_args(cls, faction, args):
+        return Chat(faction, args)
+
+    @classmethod
+    def get_arg_spec(cls, faction=None, game_state=None):
+        return args.String()
+
+    def __init__(self, faction, message):
+        self.faction = faction
+        self.message = message
+
+
 class Gift(Action):
     name = "gift"
     ck_faction = "emperor"

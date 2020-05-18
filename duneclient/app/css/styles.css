@@ -157,7 +157,7 @@ a {
 .session .log {
     margin: 5px;
     text-align: left;
-    max-height: 500px;
+    max-height: 200px;
     overflow-y: scroll;
     border: 1px solid red;
     padding: 10px;
@@ -511,6 +511,16 @@ img.alive {
 
 .history-item.mine {
     font-weight: bold;
+}
+
+.history-item.chat span {
+    font-size: 12px;
+    color: white;
+}
+
+.history-item.chat {
+    font-size: 18px;
+    color: #feffbe;
 }
 
 .shai-hulud {
