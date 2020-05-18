@@ -1,60 +1,78 @@
 body {
     font-family: Optima, Monospace, sans-serif;
     margin: 0;
+    background-color: black;
 }
 
 a {
     text-decoration: none;
 }
 
-/* The animation code */
-@keyframes backgroundflash {
-  0%   {background-color: rgba(255, 255, 180, 1.0);}
-  40%  {background-color: yellow;}
-  80%  {background-color: orange;}
-  100% {background-color: red;}
+@-webkit-keyframes AnimationName {
+    0%{background-position:0% 0%}
+    50%{background-position:0% 100%}
+    100%{background-position:0% 0%}
+}
+@-moz-keyframes AnimationName {
+    0%{background-position:0% 0%}
+    50%{background-position:0% 100%}
+    100%{background-position:0% 0%}
+}
+@keyframes AnimationName {
+    0%{background-position:0% 0%}
+    50%{background-position:0% 100%}
+    100%{background-position:0% 0%}
+}
+#wrapper.blocking {
+    background: linear-gradient(0deg, #000000, #000000, #521c00);
+    background-size: 100% 200%;
+
+    -webkit-animation: AnimationName 3s ease infinite;
+    -moz-animation: AnimationName 3s ease infinite;
+    animation: AnimationName 3s ease infinite;
+    animation-delay: 10s;
 }
 
 #wrapper {
-  padding: 5;
+    background-color: black;
+    height: 100%;
+    width: 100%;
 }
 
-#wrapper.blocking {
-  background-color: rgba(255, 255, 180, 1.0);
-  animation-name: backgroundflash;
-  animation-delay: 15s;
-  animation-duration: 10s;
-  animation-timing-function: linear;
-  animation-iteration-count: infinite;
-  animation-direction: alternate;
+#header {
+    position:absolute;
+    height: 40px;
+    width: 100%;
+    background-color: #521c00;
+    color: white;
+}
+
+#content {
+    position:absolute;
+    top: 40px;
+    width: 100%;
 }
 
 .main-header {
+    position:absolute;
     display: flex;
     width: 100%;
     align-items: center;
+    z-index: 3;
 }
 
 .main-header .site-title {
     font-size: 30px;
     font-family: Optima;
+    font-weight: bold;
     margin-left: 10px;
     margin-right: 20px;
     color: #b14f14;
 }
 
 .main-header .session-title {
-    font-size: 16px;
-}
-
-.main-header .header-button {
-    margin: 10px;
-    color: red;
-    cursor: pointer;
-}
-
-.main-header .header-button:hover {
-    color: black;
+    font-size: 18px;
+    text-transform: uppercase;
 }
 
 .sessioncreator {
@@ -94,30 +112,34 @@ a {
     font-size: 20px;
 }
 
-.session.blocking {
-    background-color: red;
+.session {
+    position: relative;
 }
 
-.session {
+.session .board-layer {
+    position: static;
+    top: 0;
+    left: 0;
+    width: calc(100% - 20px);
+    height: 100%;
     display: flex;
     flex-wrap: wrap;
+    justify-content: flex-start;
+    margin: 20px;
+    z-index: 1;
 }
 
-.session .history {
-    padding: 10px;
-    border: 2px black solid;
-    text-align: center;
-    min-width: 350px;
-    background-color: white;
+.session .over-layer {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 2;
 }
 
-.session .history .stage-title {
-    text-align: left;
-    margin: 10px;
-}
-
-.session .history .log {
-    margin-top: 5px;
+.session .log {
+    margin: 5px;
     text-align: left;
     max-height: 500px;
     overflow-y: scroll;
@@ -125,13 +147,13 @@ a {
     padding: 10px;
 }
 
-.session .history .log ul {
+.session .log ul {
     margin: 0px;
     padding: 0px;
     font-size: 12px;
 }
 
-.session .history .log li {
+.session .log li {
     list-style: none;
 }
 
@@ -201,7 +223,10 @@ a {
 
 
 .board {
-    background-color: black;
+    max-width: 800;
+    max-height: 800;
+    min-height: 500;
+    min-width: 500;
     cursor: default;
     user-select: none;
     user-drag: none;
@@ -231,7 +256,6 @@ img.alive {
 
 .roundstate {
     padding: 10px;
-    background-color: black;
     color: white;
     min-height: 50px;
     cursor: default;
@@ -244,37 +268,46 @@ img.alive {
 }
 
 .roundstate h4 {
+    color: black;
     margin: 0;
     margin-bottom: 5px;
 }
 
 
 .factions {
+    position:fixed;
+    top: 40px;
+    right: 0;
     display: flex;
+    align-items: flex-end;
     flex-direction: column;
     flex-wrap: wrap;
 }
 
-.faction:not(:last-child) {
-    border-bottom: 1px black solid;
-}
-
 .faction h2 {
+    cursor: pointer;
+    user-select: none;
     margin: 0;
     writing-mode: vertical-rl;
     transform: rotate(-180deg);
-    margin-right: 10px;
-    border-left: 1px black solid;
     font-size: 18px;
-    align-self: center;
+    width: 18px;
 }
 
 .faction {
-    padding-top: 5px;
-    padding-bottom: 5px;
-    padding-right: 5px;
+    background-color: #521c00;
+    color: white;
+    border-radius: 4px;
+    padding: 10px;
     display: flex;
-    align-items: flex-end;
+    align-items: flex-start;
+}
+
+.faction .faction-content {
+    display: flex;
+    align-items:flex-end;
+    justify-content: center;
+    flex-wrap: wrap;
 }
 
 .faction svg {
@@ -289,7 +322,7 @@ img.alive {
 
 .faction.me {
     background-color: #feffbe;
-    flex-wrap: wrap;
+    color: black;
 }
 
 .select-on-map.on {
@@ -437,6 +470,23 @@ img.alive {
 
 .spice-pile {
     pointer-events: none;
+}
+
+.history {
+    width: 340px;
+    border-radius: 4px;
+    background-color: #521c00;
+    padding: 10px;
+    border: 1px solid white;
+    color: white;
+    position: fixed;
+    bottom: 0;
+    right: 10;
+}
+
+.history b {
+    cursor: pointer;
+    user-select: none;
 }
 
 .history-item {

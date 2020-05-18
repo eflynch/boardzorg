@@ -4,6 +4,7 @@ import ReactDOM from 'react-dom';
 import Board from './board';
 import Faction from './faction';
 import History from './history';
+import Actions from './actions';
 
 import Bidding from './rounds/bidding';
 import Battle from './rounds/battle';
@@ -81,7 +82,9 @@ const RoundState = ({roundState, stormPosition, logoPositions, interaction, sele
     return (
         <div className="roundstate">
             <h4>{titleCase(text)}</h4>
-            {stateDiv}
+            <div style={{backgroundColor: "black", padding: 5}}>
+                {stateDiv}
+            </div>
         </div>
     );
 };
@@ -95,13 +98,10 @@ const Decks = ({state}) => {
             flexWrap: "wrap",
             flexGrow: 1,
             alignSelf: "stretch",
-            backgroundColor: "black",
             alignItems: "center",
             justifyContent: "space-around",
             paddingRight: 10
         }}>
-            <Deck type="Treachery" facedown={state.treachery_deck} faceup={state.treachery_discard} />
-            <Deck type="Spice" facedown={state.spice_deck} faceup={state.spice_discard} />
         </div>
     );
 };
@@ -186,6 +186,7 @@ export default function Session({state, actions, history, me, error, sendCommand
     };
 
     const [errorState, setErrorState] = useState(error);
+    const [showLog, setShowLog] = useState(false);
 
     useEffect(()=>{
         if (error !== undefined) {
@@ -218,15 +219,28 @@ export default function Session({state, actions, history, me, error, sendCommand
 
     return (
         <div className="session">
-            <div>
-                <div style={{display:"flex", alignItems:"flex-start"}}>
+            <div className="board-layer">
+                <div style={{
+                    padding: 10,
+                    borderRadius: 4,
+                    textAlign: "center",
+                    minWidth: 350,
+                    backgroundColor: "white",
+                    margin: 20
+                }}>
+                    <RoundState interaction={interaction} selection={selection} roundState={state.round_state} logoPositions={logoPositions} stormPosition={state.storm_position} winner={state.winner} />
+                    <Actions me={me} state={state} interaction={interaction} setInteraction={setInteraction} error={error} actions={actions} sendCommand={sendCommand} setInteractionFlow={setInteractionFlow} updateSelection={updateSelection} clearSelection={clearSelection}/>
+                </div>
+                <div style={{display:"flex"}}>
                     <Board me={me} interaction={interaction} selection={selection} logoPositions={logoPositions}
                            stormSector={state.storm_position} futureStorm={futureStorm} futureSpice={futureSpice} state={state} />
-                    <Decks state={state} />
+                    <div style={{display:"flex", flexDirection:"column", justifyContent:"space-between"}}>
+                        <Deck type="Treachery" facedown={state.treachery_deck} faceup={state.treachery_discard} />
+                        <Deck type="Spice" facedown={state.spice_deck} faceup={state.spice_discard} />
+                    </div>
                 </div>
-                <RoundState interaction={interaction} selection={selection} roundState={state.round_state} logoPositions={logoPositions} stormPosition={state.storm_position} winner={state.winner} />
             </div>
-            <History state={state} me={me} interaction={interaction} setInteraction={setInteraction} error={errorState} actions={actions} sendCommand={sendCommand} commandLog={history} setInteractionFlow={setInteractionFlow} selection={selection} updateSelection={updateSelection} clearSelection={clearSelection}/>
+            <History showLog={showLog} setShowLog={setShowLog} state={state} me={me} interaction={interaction} setInteraction={setInteraction} error={errorState} actions={actions} sendCommand={sendCommand} commandLog={history} setInteractionFlow={setInteractionFlow} selection={selection} updateSelection={updateSelection} clearSelection={clearSelection}/>
             <div className="factions">
                 {factions}
             </div>

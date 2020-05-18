@@ -35,11 +35,8 @@ const BlankLogo = ({diameter, className, x, y, ...props}) => {
 const MapPart = ({className, selected, onClick, paths, ...props}) => {
     return (
         <g {...props} className={className + (selected ? " selected" : "") + (onClick? " active" : "")}
-            onClick={()=>{
-                if (onClick) {
-                    onClick();
-                }
-            }}
+            onClick={onClick ? onClick : undefined}
+            pointerEvents={onClick ? undefined : "none"}
             transform={TRANSFORM}>
             {paths.map((p, i)=><path key={i} d={p}/>)}
         }}
@@ -74,7 +71,10 @@ class Board extends React.Component {
     }
 
     updateWindowDimensions() {
-      this.setState({size: Math.min(window.innerWidth - 100, 800)});
+        const limitingDimension = window.innerWidth;
+        const maxSize = 800;
+        const minSize = 400;
+        this.setState({size: Math.max(Math.min(limitingDimension - 100, maxSize), minSize)});
     }
 
     getTokenPiles () {
@@ -317,7 +317,7 @@ class Board extends React.Component {
         return (
             <div className="board">
                 <svg width={this.state.size} height={this.state.size} viewBox={`0 0 1 1`}>
-                    <text x={0.04} y={0.04} style={{fill: "white", font: "normal 0.02px Optima"}}>Turn {turn} / 10</text>
+                    <text x={0.11} y={0.11} style={{fill: "white", font: "normal 0.1px Optima"}}>{turn}</text>
                     <image xlinkHref="/static/app/png/board.png" x="0" y="0" width="1" height="1"/>
                     {alliances.filter(alliance=>alliance.length > 1).map((alliance, i)=> {
                         return <Alliance factions={alliance} key={alliance.join("-")} diameter={0.04} overlap={0.004} cx={0.08} cy={0.08 + 0.05 * i}/>;
