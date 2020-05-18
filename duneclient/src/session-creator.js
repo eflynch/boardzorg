@@ -30,7 +30,7 @@ export default function SessionCreator({newSession}) {
 
     return (
         <div className="sessioncreator">
-            <input value={name} onChange={(e)=>{
+            <input placeholder="Title" value={name} onChange={(e)=>{
                 setName(e.target.value);
             }}/>
             <div style={{display:"flex", justifyContent:"space-around", flexWrap:"wrap"}}>
