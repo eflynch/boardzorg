@@ -158,10 +158,10 @@ const Actions = (props) => {
             actionNames.forEach((action) => {
                 passStubs.forEach((stub) => {
                     if (action.startsWith(stub)) {
-                        if (actionNames.indexOf(action.replace(stub, "")) === -1) {
+                        if (!actionNames.filter(testAction=>testAction.startsWith(action.replace(stub, ""))).length) {
                             timeoutID = setTimeout(()=>{
                                 sendCommand(action);
-                            }, 1000);
+                            }, 500);
                         }
                     }
                 });

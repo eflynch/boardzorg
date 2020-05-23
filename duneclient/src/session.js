@@ -229,7 +229,7 @@ export default function Session({state, actions, history, me, error, sendCommand
                     margin: 20
                 }}>
                     <RoundState interaction={interaction} selection={selection} roundState={state.round_state} logoPositions={logoPositions} stormPosition={state.storm_position} winner={state.winner} />
-                    <Actions me={me} state={state} interaction={interaction} setInteraction={setInteraction} error={error} actions={actions} sendCommand={sendCommand} setInteractionFlow={setInteractionFlow} updateSelection={updateSelection} clearSelection={clearSelection}/>
+                    <Actions me={me} state={state} interaction={interaction} setInteraction={setInteraction} error={errorState} actions={actions} sendCommand={sendCommand} setInteractionFlow={setInteractionFlow} updateSelection={updateSelection} clearSelection={clearSelection}/>
                 </div>
                 <div style={{display:"flex"}}>
                     <Board me={me} interaction={interaction} selection={selection} logoPositions={logoPositions}
@@ -240,7 +240,7 @@ export default function Session({state, actions, history, me, error, sendCommand
                     </div>
                 </div>
             </div>
-            <History showLog={showLog} setShowLog={setShowLog} state={state} me={me} interaction={interaction} setInteraction={setInteraction} error={errorState} actions={actions} sendCommand={sendCommand} commandLog={history} setInteractionFlow={setInteractionFlow} selection={selection} updateSelection={updateSelection} clearSelection={clearSelection}/>
+            <History showLog={showLog} setShowLog={setShowLog} state={state} me={me} setInteraction={setInteraction} commandLog={history} />
             <div className="factions">
                 {factions}
             </div>

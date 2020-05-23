@@ -11,15 +11,30 @@ from dune.actions.karama import discard_karama
 from dune.actions.battle import ops
 
 
+def spice_cost(game_state, faction, num_units, space):
+    if faction == "guild" or "guild" in game_state.alliances[faction]:
+        if "stronghold" in space.type:
+            spice_cost = math.ceil(num_units/2)
+        else:
+            spice_cost = num_units
+    else:
+        if "stronghold" in space.type:
+            spice_cost = num_units
+        else:
+            spice_cost = 2 * num_units
+
+    return spice_cost
+
+
 def ship_units(game_state, faction, units, space, sector):
     check_no_allies(game_state, faction, space)
     if "stronghold" in space.type:
-        if len(space.forces) > 1:
+        if len(space.forces) == 2:
             if faction not in space.forces:
                 if not ("bene-gesserit" in space.forces and space.coexist):
                     raise BadCommand("Cannot ship into stronghold with 2 enemy factions")
             elif faction == "bene-gesserit" and space.coexist:
-                raise BadCommand("The bene-gesserit cannot ship in here because of occupation constraints")
+                raise BadCommand("The bene-gesserit cannot ship where they have advisors")
     if sector not in space.sectors:
         raise BadCommand("You ain't going nowhere")
     if game_state.storm_position == sector:
@@ -42,226 +57,8 @@ def ship_units(game_state, faction, units, space, sector):
     if faction != "bene-gesserit":
         # Intrusion allows bene-gesserit to flip to advisors if they wish
         if "bene-gesserit" in space.forces and not space.coexist:
-            game_state.round_state.stage_state.query_flip_to_advisors = space.name
-
-
-def move_units(game_state, faction, units, space_a, sector_a, space_b, sector_b):
-    check_no_allies(game_state, faction, space_b)
-
-    if "stronghold" in space_b.type:
-        total_forces = len(space_b.forces)
-        if "bene-gesserit" in space_b.forces and space_b.coexist:
-            total_forces -= 1
-        if total_forces > 1:
-            if faction not in space_b.forces:
-                raise BadCommand("Cannot move into stronghold with 2 enemy factions")
-    if sector_b not in space_b.sectors:
-        raise BadCommand("You ain't going nowhere")
-
-    if sector_a not in space_a.sectors:
-        raise BadCommand("You ain't coming from nowhere")
-
-    if game_state.storm_position == sector_b:
-        if faction == "fremen":
-            surviving_units = sorted(units)[:math.floor(len(units)/2)]
-            tanked_units = sorted(units)[math.floor(len(units)/2):]
-            units = surviving_units
-            game_state.faction_state[faction].tanked_units.extend(tanked_units)
-        else:
-            raise BadCommand("You cannot move into the storm")
-    if game_state.storm_position == sector_a:
-        if faction != "fremen":
-            raise BadCommand("You cannot move from the storm")
-
-    if faction not in space_b.forces:
-        space_b.forces[faction] = {}
-    if sector_b not in space_b.forces[faction]:
-        space_b.forces[faction][sector_b] = []
-
-    if faction not in space_a.forces:
-        raise BadCommand("You don't have anything there")
-    if sector_a not in space_a.forces[faction]:
-        raise BadCommand("You don't have anything there")
-
-    for u in units:
-        if u not in space_a.forces[faction][sector_a]:
-            raise BadCommand("You ain't got the troops")
-        space_a.forces[faction][sector_a].remove(u)
-        space_b.forces[faction][sector_b].append(u)
-
-    if all(space_a.forces[faction][s] == [] for s in space_a.forces[faction]):
-        del space_a.forces[faction]
-
-    # Update Coexist flags
-
-    if faction == "bene-gesserit":
-
-        # Advisors flip to Fighters if fighters join them
-        # Also If bene-gesserit not present or alone, there can be no advisors
-        if not space_a.coexist or len(space_b.forces) == 1:
-            space_b.coexist = False
-
-        # Advisors may flip to fighters if they move somewhere occupied
-        else:
-            game_state.round_state.stage_state.query_flip_to_fighters = space_b.name
-
-    else:
-        # Intrusion allows bene-gesserit to flip to advisors if they wish
-        if "bene-gesserit" in space_b.forces and not space_b.coexist:
-            game_state.round_state.stage_state.query_flip_to_advisors = space_b.name
-
-    # If bene-gesserit not present or alone, there can be no advisors
-    if "bene-gesserit" not in space_a.forces or len(space_a.forces) == 1:
-        space_a.coexist = False
-
-
-def spice_cost(game_state, faction, num_units, space):
-    if faction == "guild" or "guild" in game_state.alliances[faction]:
-        if "stronghold" in space.type:
-            spice_cost = math.ceil(num_units/2)
-        else:
-            spice_cost = num_units
-    else:
-        if "stronghold" in space.type:
-            spice_cost = num_units
-        else:
-            spice_cost = 2 * num_units
-
-    return spice_cost
-
-
-class KaramaBlockGuildTurnChoice(Action):
-    name = "karama-block-guild-turn-choice"
-    ck_round = "movement"
-    ck_stage = "setup"
-    ck_karama = True
-
-    @classmethod
-    def _check(cls, game_state, faction):
-        if faction == "guild":
-            raise IllegalAction("The guild cannot do that")
-        if faction in game_state.round_state.stage_state.karama_passes:
-            raise IllegalAction("You have already passed this option")
-
-    def _execute(self, game_state):
-        new_game_state = deepcopy(game_state)
-        new_game_state.round_state.guild_choice_blocked = True
-        faction_order = get_faction_order(game_state)
-        new_game_state.round_state.faction_turn = faction_order[0]
-        new_game_state.round_state.turn_order = faction_order
-        new_game_state.round_state.stage_state = movement.TurnStage()
-        discard_karama(new_game_state, self.faction)
-        return new_game_state
-
-
-class KaramaPassBlockGuildTurnChoice(Action):
-    name = "karama-pass-block-guild-turn-choice"
-    ck_round = "movement"
-    ck_stage = "setup"
-
-    @classmethod
-    def _check(cls, game_state, faction):
-        if faction == "guild":
-            raise IllegalAction("The guild cannot do that")
-        if faction in game_state.round_state.stage_state.karama_passes:
-            raise IllegalAction("You have already passed this option")
-
-    def _execute(self, game_state):
-        new_game_state = deepcopy(game_state)
-        new_game_state.round_state.stage_state.karama_passes.append(self.faction)
-        return new_game_state
-
-
-class SkipKaramaGuildTurnChoice(Action):
-    name = "skip-karama-block-guild-turn-choice"
-    ck_round = "movement"
-    ck_stage = "setup"
-    su = True
-
-    @classmethod
-    def _check(cls, game_state, faction):
-        if "guild" in game_state.faction_state:
-            if len(game_state.round_state.stage_state.karama_passes) != len(game_state.faction_state) - 1:
-                raise IllegalAction("Waiting for karama passes")
-
-    def _execute(self, game_state):
-        new_game_state = deepcopy(game_state)
-        faction_order = get_faction_order(game_state)
-        if "guild" in faction_order:
-            faction_order.remove("guild")
-            faction_order.insert(0, "guild")
-        new_game_state.round_state.turn_order = faction_order
-        new_game_state.round_state.faction_turn = faction_order[0]
-        new_game_state.round_state.stage_state = movement.TurnStage()
-        return new_game_state
-
-
-class GuildPass(Action):
-    name = "guild-pass-turn"
-    ck_round = "movement"
-    ck_stage = "turn"
-    ck_faction = "guild"
-    ck_substage = "main"
-
-    @classmethod
-    def _check(cls, game_state, faction):
-        cls.check_turn(game_state, faction)
-        if game_state.round_state.guild_choice_blocked:
-            raise IllegalAction("The guild choice has been blocked by karama")
-        if game_state.round_state.stage_state.shipment_used:
-            raise IllegalAction("You have already started your turn")
-        if game_state.round_state.stage_state.movement_used:
-            raise IllegalAction("You have already started your turn")
-        if game_state.round_state.turn_order[-1] == "guild":
-            raise IllegalAction("You last fool")
-
-    def _execute(self, game_state):
-        new_game_state = deepcopy(game_state)
-        idx = new_game_state.round_state.turn_order.index("guild")
-        new_game_state.round_state.turn_order.remove("guild")
-        new_game_state.round_state.turn_order.insert(idx+1, "guild")
-        new_game_state.round_state.faction_turn = new_game_state.round_state.turn_order[idx]
-        return new_game_state
-
-
-class EndMovementTurn(Action):
-    name = "end-movement"
-    ck_round = "movement"
-    ck_stage = "turn"
-    ck_substage = "main"
-
-    @classmethod
-    def _check(cls, game_state, faction):
-        cls.check_turn(game_state, faction)
-
-        if game_state.round_state.stage_state.query_flip_to_advisors:
-            raise IllegalAction("Query advisor flip in progress")
-
-        if game_state.round_state.stage_state.query_flip_to_fighters:
-            raise IllegalAction("Query fighter flip in progress")
-
-    def _execute(self, game_state):
-        new_game_state = deepcopy(game_state)
-        idx = new_game_state.round_state.turn_order.index(self.faction)
-
-        # Edge case - if we're in an alliance, and our alliance partner has
-        # forces in the space as us, and they've moved already, our units get tanked!
-        moved_alliances = (alliance for alliance in new_game_state.alliances[self.faction] if
-                     new_game_state.round_state.turn_order.index(alliance) < idx)
-        for space in new_game_state.map_state.values():
-            if (self.faction in space.forces and
-                any((alliance in space.forces for alliance in moved_alliances))):
-                    sectors = list(space.forces[self.faction].keys())
-                    for sec in sectors:
-                        for u in space.forces[self.faction][sec][:]:
-                            ops.tank_unit(game_state, self.faction, space, sec, u)
-
-        if idx == len(new_game_state.round_state.turn_order) - 1:
-            new_game_state.round_state = battle.BattleRound()
-            return new_game_state
-        new_game_state.round_state.faction_turn = new_game_state.round_state.turn_order[idx + 1]
-        new_game_state.round_state.stage_state = movement.TurnStage()
-        return new_game_state
+            game_state.pause_context = "flip-to-advisors"
+            game_state.query_flip_to_advisors = space.name
 
 
 class Ship(Action):
@@ -329,6 +126,11 @@ class Ship(Action):
             min_cost = spice_cost(new_game_state, "guild", len(self.units), space)
         except LocalException:
             min_cost = spice_cost(new_game_state, self.faction, len(self.units), space)
+
+        # Test shipment
+        test_game_state = deepcopy(game_state)
+        ship_units(test_game_state, self.faction, self.units, space, self.sector)
+
 
         # END ALERT
 
@@ -500,8 +302,6 @@ class SendSpiritualAdvisor(Action):
             raise IllegalAction("You need units to send as advisors")
         space_name = game_state.round_state.stage_state.substage_state.space
         space = game_state.map_state[space_name]
-        if "bene-gesserit" in space.forces and not space.coexist:
-            raise IllegalAction("You cannot send a spiritual advisor where you have fighters") 
 
     def _execute(self, game_state):
         new_game_state = deepcopy(game_state)
@@ -544,10 +344,10 @@ class SkipSendSpiritualAdvisor(Action):
         if "bene-gesserit" in game_state.faction_state:
             if game_state.faction_state["bene-gesserit"].reserve_units:
                 if game_state.round_state.faction_turn != "bene-gesserit":
-                    space_name = game_state.round_state.stage_state.substage_state.space
-                    space = game_state.map_state[space_name]
-                    if ("bene-gesserit" not in space.forces) or space.coexist:
-                        raise IllegalAction("Cannot auto skip spiritual guide")
+                    raise IllegalAction("Cannot auto skip spiritual guide")
+                    # space_name = game_state.round_state.stage_state.substage_state.space
+                    # space = game_state.map_state[space_name]
+                    # if ("bene-gesserit" not in space.forces) or space.coexist:
 
     def _execute(self, game_state):
         new_game_state = deepcopy(game_state)
@@ -594,97 +394,22 @@ class KarmaPassStopSpiritualAdvisor(Action):
         s = new_game_state.round_state.stage_state.substage_state.space
         space = new_game_state.map_state[s]
         sector = new_game_state.round_state.stage_state.substage_state.sector
-        space.coexist = True
+
+        if "bene-gesserit" in space.forces and not space.coexist:
+            space = new_game_state.map_state["Polar-Sink"]
+            sector = -1
+        else:
+            space.coexist = True
+
         if "bene-gesserit" not in space.forces:
             space.forces["bene-gesserit"] = {}
         if sector not in space.forces["bene-gesserit"]:
             space.forces["bene-gesserit"][sector] = []
         u = new_game_state.faction_state["bene-gesserit"].reserve_units.pop(0)
         space.forces["bene-gesserit"][sector].append(u)
+
         new_game_state.round_state.stage_state.shipment_used = True
         new_game_state.round_state.stage_state.substage_state = movement.MainSubStage()
-        return new_game_state
-
-
-def parse_movement_args(args):
-    parts = args.split(" ")
-    if len(parts) == 5:
-        units, space_a, sector_a, space_b, sector_b = parts
-    else:
-        raise BadCommand("wrong number of args")
-
-    if units == "":
-        raise BadCommand("No units selected")
-    units = [int(u) for u in units.split(",")]
-    return (units, space_a, int(sector_a), space_b, int(sector_b))
-
-
-def perform_movement(game_state, faction, units, space_a, sector_a, space_b, sector_b):
-    m = MapGraph()
-    if faction == "fremen":
-        m.deadend_sector(game_state.storm_position)
-    else:
-        m.remove_sector(game_state.storm_position)
-    for space in game_state.map_state.values():
-        if "stronghold" in space.type:
-            if faction not in space.forces:
-                if len(space.forces) - (1 if space.coexist else 0) > 1:
-                    m.remove_space(space.name)
-
-    allowed_distance = 1
-    if faction == "fremen":
-        allowed_distance = 2
-    if faction in game_state.ornithopters:
-        allowed_distance = 3
-    if m.distance(space_a, sector_a, space_b, sector_b) > allowed_distance:
-        raise BadCommand("You cannot move there")
-
-    space_a = game_state.map_state[space_a]
-    space_b = game_state.map_state[space_b]
-    move_units(game_state, faction, units, space_a, sector_a, space_b,
-               sector_b)
-
-
-class Move(Action):
-    name = "move"
-    ck_round = "movement"
-    ck_stage = "turn"
-    ck_substage = "main"
-
-    @classmethod
-    def parse_args(cls, faction, args):
-        return Move(faction, *parse_movement_args(args))
-
-    @classmethod
-    def get_arg_spec(cls, faction=None, game_state=None):
-        return args.Struct(args.Units(faction), args.SpaceSectorStart(), args.SpaceSectorEnd())
-
-    def __init__(self, faction, units, space_a, sector_a, space_b, sector_b):
-        self.faction = faction
-        self.units = units
-        self.space_a = space_a
-        self.space_b = space_b
-        self.sector_a = sector_a
-        self.sector_b = sector_b
-
-    @classmethod
-    def _check(cls, game_state, faction):
-        cls.check_turn(game_state, faction)
-        if game_state.round_state.stage_state.movement_used:
-            raise IllegalAction("You have already moved this turn")
-
-    def _execute(self, game_state):
-
-        new_game_state = deepcopy(game_state)
-        perform_movement(new_game_state,
-                         self.faction,
-                         self.units,
-                         self.space_a,
-                         self.sector_a,
-                         self.space_b,
-                         self.sector_b)
-        new_game_state.round_state.stage_state.movement_used = True
-
         return new_game_state
 
 
@@ -859,4 +584,4 @@ class Deploy(Action):
 
         new_game_state.round_state.stage_state.shipment_used = True
 
-        return new_game_state
+        return new_game_stat

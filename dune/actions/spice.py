@@ -33,7 +33,7 @@ class Chat(Action):
 class Gift(Action):
     name = "gift"
     ck_faction = "emperor"
-    ck_pause_context = ["steal-treachery"]
+    ck_pause_context = ["steal-treachery", "query-flip-advisors", "query-flip-fighters"]
     non_blocking = True
 
     @classmethod
@@ -68,7 +68,7 @@ class Gift(Action):
 
 class Bribe(Action):
     name = "bribe"
-    ck_pause_context = ["steal-treachery"]
+    ck_pause_context = ["steal-treachery", "flip-to-advisors", "flip-to-fighters"]
     non_blocking = True
 
     @classmethod
@@ -162,7 +162,7 @@ def _shai_hulud(game_state, space_name):
 def _draw_spice_card(game_state):
     card = game_state.spice_deck.pop(0)
     if card == "Shai-Hulud":
-        if game_state.round_state.fremen_can_redirect_worm:
+        if game_state.round_state.fremen_can_redirect_worm and "fremen" in game_state.faction_state:
             game_state.round_state.stage = "fremen-redirect-worm"
         else:
             previous_space = None

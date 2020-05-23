@@ -53,76 +53,71 @@ class ActivateAdvisors(Action):
 
 class AdviseIntruders(Action):
     name = "advise-intruders"
-    ck_round = "movement"
-    ck_stage = "turn"
-    ck_substage = "main"
+    ck_pause_context = ["flip-to-advisors"]
     ck_faction = "bene-gesserit"
 
     @classmethod
     def _check(cls, game_state, faction):
-        if game_state.round_state.stage_state.query_flip_to_advisors is None:
+        if game_state.query_flip_to_advisors is None:
             raise IllegalAction("No intruders to advise")
 
     def _execute(self, game_state):
         new_game_state = deepcopy(game_state)
-        space_name = new_game_state.round_state.stage_state.query_flip_to_advisors
+        space_name = new_game_state.query_flip_to_advisors
         new_game_state.map_state[space_name].coexist = True
-        new_game_state.round_state.stage_state.query_flip_to_advisors = None
+        new_game_state.query_flip_to_advisors = None
+        new_game_state.pause_context = None
         return new_game_state
 
 
 class PassAdviseIntruders(Action):
     name = "remain-hostile-to-intruders"
-    ck_round = "movement"
-    ck_stage = "turn"
-    ck_substage = "main"
+    ck_pause_context = ["flip-to-advisors"]
     ck_faction = "bene-gesserit"
 
     @classmethod
     def _check(cls, game_state, faction):
-        if game_state.round_state.stage_state.query_flip_to_advisors is None:
+        if game_state.query_flip_to_advisors is None:
             raise IllegalAction("No intruders to advise")
 
     def _execute(self, game_state):
         new_game_state = deepcopy(game_state)
-        new_game_state.round_state.stage_state.query_flip_to_advisors = None
+        new_game_state.query_flip_to_advisors = None
+        new_game_state.pause_context = None
         return new_game_state
 
 
 class SneakyActivateFighters(Action):
     name = "become-hostile"
-    ck_round = "movement"
-    ck_stage = "turn"
-    ck_substage = "main"
+    ck_pause_context = ["flip-to-fighters"]
     ck_faction = "bene-gesserit"
 
     @classmethod
     def _check(cls, game_state, faction):
-        if game_state.round_state.stage_state.query_flip_to_fighters is None:
+        if game_state.query_flip_to_fighters is None:
             raise IllegalAction("No hostility is coming your way")
 
     def _execute(self, game_state):
         new_game_state = deepcopy(game_state)
-        space_name = new_game_state.round_state.stage_state.query_flip_to_fighters
+        space_name = new_game_state.query_flip_to_fighters
         new_game_state.map_state[space_name].coexist = False
-        new_game_state.round_state.stage_state.query_flip_to_fighters = None
+        new_game_state.query_flip_to_fighters = None
+        new_game_state.pause_context = None
         return new_game_state
 
 
 class PassSneakyActivateFighters(Action):
-    name = "remain-advisorial"
-    ck_round = "movement"
-    ck_stage = "turn"
-    ck_substage = "main"
+    name = "remain-advisors"
+    ck_pause_context = ["flip-to-fighters"]
     ck_faction = "bene-gesserit"
 
     @classmethod
     def _check(cls, game_state, faction):
-        if game_state.round_state.stage_state.query_flip_to_fighters is None:
+        if game_state.query_flip_to_fighters is None:
             raise IllegalAction("No hostility is coming your way anyway")
 
     def _execute(self, game_state):
         new_game_state = deepcopy(game_state)
-        new_game_state.round_state.stage_state.query_flip_to_fighters = None
+        new_game_state.query_flip_to_fighters = None
+        new_game_state.pause_context = None
         return new_game_state
-

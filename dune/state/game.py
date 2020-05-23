@@ -67,6 +67,9 @@ class GameState(State):
         self.treachery_to_return = None
         self.treachery_to_return_faction = None
 
+        self.query_flip_to_advisors = None
+        self.query_flip_to_fighters = None
+
         self.treachery_reference = {
             "worthless": WORTHLESS,
             "weapons": WEAPONS,

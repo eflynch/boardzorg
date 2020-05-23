@@ -23,6 +23,7 @@ class KaramaStealTreachery(Action):
     name = "karama-steal-treachery"
     ck_karama = True
     ck_faction_karama = "harkonnen"
+    non_blocking = True
 
     def __init__(self, faction, target_faction, number):
         self.faction = faction

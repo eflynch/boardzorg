@@ -43,7 +43,7 @@ def get_min_sector_map(game_state, space, faction):
     min_sectors = {}
     for s in force_sector_list:
         for msec in space.sectors:
-            if m.distance(space, msec, space, s) == 0:
+            if m.distance(space.name, msec, space.name, s) == 0:
                 if msec not in min_sectors:
                     min_sectors[msec] = []
                 min_sectors[msec].append(s)
@@ -76,10 +76,10 @@ def find_battles(game_state):
                 f_map = get_min_sector_map(game_state, space, f)
                 g_map = get_min_sector_map(game_state, space, g)
                 for f_msec in f_map:
-                    if f_msec in g_map:
+                    for f_msec in g_map:
                         if (g, f, s, f_msec) not in battles:
                             battles.append((f, g, s, f_msec))
-    battles.sort(key=lambda b:faction_order.index(b[0]))
+    battles.sort(key=lambda b: faction_order.index(b[0]))
     return battles
 
 
