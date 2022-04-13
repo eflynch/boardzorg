@@ -1,7 +1,5 @@
 import os
 
-NAMES_FILE = "names.txt"
-
 RENAME_DIR = "."
 
 
@@ -36,7 +34,7 @@ TRANSFORMATIONS = [
 
 def get_config(names_file):
     config = {}
-    with open(NAMES_FILE, "r") as names:
+    with open(names_file, "r") as names:
         for line in names:
             old, new = line.strip().split(":")
             config[old] = new
@@ -58,7 +56,7 @@ def modify_line(line, config):
     return line
 
 
-def execute_reskin(file_path, config):
+def execute_reskin_on_file(file_path, config):
     all_lines = []
     with open(file_path, "r") as reskin_file:
         for line in reskin_file:
@@ -68,12 +66,16 @@ def execute_reskin(file_path, config):
             reskin_file.write(modify_line(line, config))
 
 
+def execute_reskin(rename_dir, config):
+    file_list = get_file_list(rename_dir)
+    for file in file_list:
+        execute_reskin_on_file(file, config)
 
 def main():
     # file_list = get_file_list(RENAME_DIR)
     # for file_path in file_list:
-    config = get_config(NAMES_FILE)
-    execute_reskin("test.txt", config)
+    config = get_config("names.skin")
+    execute_reskin_on_file("test.txt", config)
 
 
 if __name__ == "__main__":
