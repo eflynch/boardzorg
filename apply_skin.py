@@ -76,7 +76,8 @@ def get_rename_file_list(directory, repo_root):
     return [ f for f in file_list if f.endswith( ('.js', '.py', '.css', '.png', '.svg') ) ]
 
 def modify_line(line, config):
-    for old, new in reversed(sorted(config.items())):
+    for old in reversed(sorted(config, key=str.casefold)):
+        new = config[old]
         for transformation in TRANSFORMATIONS:
             if transformation(old) in line:
                 line = line.replace(transformation(old), transformation(new))
@@ -94,7 +95,8 @@ def execute_reskin_on_file(file_path, config):
 
 def execute_rename_on_file(file_path, config):
     new_file_path = file_path
-    for old, new in reversed(sorted(config.items())):
+    for old in reversed(sorted(config, key=str.casefold)):
+        new = config[old]
         for transformation in TRANSFORMATIONS:
             if transformation(old) in new_file_path:
                 new_file_path = new_file_path.replace(transformation(old), transformation(new))
