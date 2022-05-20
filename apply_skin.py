@@ -81,19 +81,22 @@ def execute_reskin(rename_dir, config):
     for file in file_list:
         execute_reskin_on_file(file, config)
 
-def main():
+def main(skin_file):
     repo_root = os.path.dirname(os.path.abspath(__file__))
+    config = get_config(skin_file)
     for directory in [
         os.path.join(repo_root, "boardzorg"),
         os.path.join(repo_root, "client"),
         os.path.join(repo_root, "server"),
     ]:
         file_list = get_file_list(directory)
-        skin_file = "pooh.skin"
-        config = get_config(skin_file)
         for file_path in file_list:
             execute_reskin_on_file(file_path, config)
+        rename_file_list = get_rename_file_list(directory)
+        for file_path in rename_file_list:
+            pass
 
 
 if __name__ == "__main__":
-    main()
+    skin_file = "pooh.skin"
+    main(skin_file)
