@@ -3,10 +3,13 @@ import os
 def upper_camel(key):
     return key.replace("-", " ").title().replace(" ", "")
 
+def camel(key):
+    return key.lower()[0] + upper_camel(key)[1:]
+
 def upper_snake(key):
     return key.replace("-", "_").upper()
 
-def upper(key):
+def upper_spaces(key):
     return key.replace("-", " ").upper()
 
 def snake(key):
@@ -15,17 +18,26 @@ def snake(key):
 def spaces(key):
     return key.replace("-", " ")
 
-def title_hyphens(key):
+def upper_train(key):
     words = key.split("-")
     return "-".join(" ".join(words).title().split(" "))
 
+def train(key):
+    return key
+
+
+# If the key is a single word, we can't tell if it
+# should be translated to snake, camel, train, or spaces
+# so we do our best to pick the right one first and then
+# manual edits will have to be made
 TRANSFORMATIONS = [
     upper_camel,
-    title_hyphens,
+    upper_train,
     upper_snake,
-    upper,
+    upper_spaces,
     snake,
-    lambda key: key,
+    camel,
+    train,
     spaces,
 ]
 
