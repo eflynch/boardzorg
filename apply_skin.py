@@ -1,15 +1,16 @@
 import os
 
-def title(key):
-    return key.title()
+def upper_camel(key):
+    return key.replace("-", " ").title().replace(" ", "")
+
+def upper_snake(key):
+    return key.replace("-", "_").upper()
 
 def upper(key):
-    return key.upper()
-
+    return key.replace("-", " ").upper()
 
 def snake(key):
     return key.replace("-", "_")
-
 
 def spaces(key):
     return key.replace("-", " ")
@@ -20,11 +21,12 @@ def title_hyphens(key):
 
 TRANSFORMATIONS = [
     lambda key: key,
-    title,
+    upper_camel,
+    title_hyphens,
+    upper_snake,
     upper,
     snake,
     spaces,
-    title_hyphens
 ]
 
 
