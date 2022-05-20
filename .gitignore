@@ -100,5 +100,6 @@ Icon
 Network Trash Folder
 Temporary Items
 
-duneclient/app/main.js
+client/app/main.js
 postgres-data
+.venv

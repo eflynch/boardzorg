@@ -3,18 +3,8 @@
 ## Ready For Dev
 
 ### Needed For a game
-* Support ANY TIME Karama powers
-  * Harkonnen: steal treachery cards
-  * Emperor: revive 3 or a leader
-  * Fremen: make worm show up (Restricted to SPICE and MOVEMENT)
-  * block B worthless Karama
 * Support Special Treachery Cards
-  * Tleilaxu Ghola
   * Truthtrance
-  * Weather Control
-  * Family Atomics
-  * Harj
-* Support Harkonnen Leader Capture mechanic
 
 ### Nice for a Game
 * Support new Emperor alliance rule (allows emperor to revive 3 units on behalf of each of his allies)
