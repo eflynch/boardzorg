@@ -16,6 +16,11 @@ voice:cleverness
 sardaukar:very-sad-boys
 fedaykin:woozles
 
+# ornithopters etc
+ornithopters:balloons
+harvesters:bee-keeping-suits
+
+
 # turns rounds and such
 battle:
 bidding:
