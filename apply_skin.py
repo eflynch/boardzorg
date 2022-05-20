@@ -39,6 +39,8 @@ def get_config(names_file):
             if line == "\n":
                 continue
             old, new = line.strip().split(":")
+            if not new:
+                continue
             config[old] = new
     return config
 
@@ -65,9 +67,7 @@ def modify_line(line, config):
     for old, new in reversed(sorted(config.items())):
         for transformation in TRANSFORMATIONS:
             if transformation(old) in line:
-                print("     ", line,)
                 line = line.replace(transformation(old), transformation(new))
-                print(line)
     return line
 
 
@@ -96,7 +96,6 @@ def main(skin_file):
     ]:
         file_list = get_file_list(directory)
         for file_path in file_list:
-            print(f"working on {file_path}")
             execute_reskin_on_file(file_path, config)
         rename_file_list = get_rename_file_list(directory)
         for file_path in rename_file_list:
