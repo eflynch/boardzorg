@@ -36,6 +36,11 @@ def get_config(names_file):
     config = {}
     with open(names_file, "r") as names:
         for line in names:
+            if line[0] == "#":
+                continue
+            if line == "\n":
+                continue
+            print(repr(line))
             old, new = line.strip().split(":")
             config[old] = new
     return config
@@ -46,7 +51,16 @@ def get_file_list(directory):
     for root, _, files in os.walk(directory):
         for name in files:
             file_list.append(os.path.join(root, name))
+    
+    return [ f for f in file_list if f.endswith( ('.js', '.py', '.css') ) ]
 
+def get_rename_file_list(directory):
+    file_list = []
+    for root, _, files in os.walk(directory):
+        for name in files:
+            file_list.append(os.path.join(root, name))
+    
+    return [ f for f in file_list if f.endswith( ('.js', '.py', '.css', '.png', '.svg') ) ]
 
 def modify_line(line, config):
     for old, new in reversed(sorted(config.items())):
@@ -73,8 +87,9 @@ def execute_reskin(rename_dir, config):
 
 def main():
     file_list = get_file_list(RENAME_DIR)
-    config = get_config("pooh.skin")
-    for file_path in filter(lambda f: not f.contains("pooh.skin"), file_list):
+    skin_file = "pooh.skin"
+    config = get_config(skin_file)
+    for file_path in filter(lambda f: f.find(skin_file) == -1, file_list):
         execute_reskin_on_file(file_path, config)
 
 

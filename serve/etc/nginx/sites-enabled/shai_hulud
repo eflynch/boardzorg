@@ -8,7 +8,7 @@ server {
     }
 
     location /static {
-	alias /home/shai-hulud/duneserver/static;
+	alias /home/shai-hulud/server/static;
         expires 30d;
     }
 

@@ -23,9 +23,9 @@ services:
     ports:
       - 5005:5000
     volumes:
-      - ./duneserver:/app
+      - ./server:/app
       - ./dune:/dune
-      - ./duneclient:/duneclient
+      - ./client:/client
     depends_on:
       - postgres
     entrypoint: ["python", "app.py"]
