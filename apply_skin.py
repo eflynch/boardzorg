@@ -36,7 +36,6 @@ def get_config(names_file):
                 continue
             if line == "\n":
                 continue
-            print(repr(line))
             old, new = line.strip().split(":")
             config[old] = new
     return config
@@ -45,16 +44,18 @@ def get_config(names_file):
 def get_file_list(directory):
     file_list = []
     for root, _, files in os.walk(directory):
-        for name in files:
-            file_list.append(os.path.join(root, name))
+        if root.find("node_modules") == -1:
+            for name in files:
+                file_list.append(os.path.join(root, name))
     
     return [ f for f in file_list if f.endswith( ('.js', '.py', '.css') ) ]
 
 def get_rename_file_list(directory):
     file_list = []
     for root, _, files in os.walk(directory):
-        for name in files:
-            file_list.append(os.path.join(root, name))
+        if root.find("node_modules") == -1:
+            for name in files:
+                file_list.append(os.path.join(root, name))
     
     return [ f for f in file_list if f.endswith( ('.js', '.py', '.css', '.png', '.svg') ) ]
 
@@ -62,7 +63,9 @@ def modify_line(line, config):
     for old, new in reversed(sorted(config.items())):
         for transformation in TRANSFORMATIONS:
             if transformation(old) in line:
+                print("     ", line,)
                 line = line.replace(transformation(old), transformation(new))
+                print(line)
     return line
 
 
@@ -91,6 +94,7 @@ def main(skin_file):
     ]:
         file_list = get_file_list(directory)
         for file_path in file_list:
+            print(f"working on {file_path}")
             execute_reskin_on_file(file_path, config)
         rename_file_list = get_rename_file_list(directory)
         for file_path in rename_file_list:

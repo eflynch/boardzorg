@@ -8,7 +8,7 @@ server {
     }
 
     location /static {
-	alias /home/shai-hulud/server/static;
+	alias /home/heffalump/server/static;
         expires 30d;
     }
 

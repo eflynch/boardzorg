@@ -8,7 +8,7 @@ services:
     environment:
       - POSTGRES_USER=boardzorg
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-      - POSTGRES_DB=shai-hulud
+      - POSTGRES_DB=heffalump
     volumes:
       - ./postgres-data/postgres:/var/lib/postgresql/data
     ports:
@@ -19,7 +19,7 @@ services:
     environment:
       - POSTGRES_USER=boardzorg
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-      - POSTGRES_DB=shai-hulud
+      - POSTGRES_DB=heffalump
     ports:
       - 5005:5000
     volumes:
