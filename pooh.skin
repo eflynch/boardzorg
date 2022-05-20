@@ -7,7 +7,7 @@ storm:bees
 tank:lost
 
 # faction specific
-kwizatz-haderach:winnie-the-pooh
+kwisatz-haderach:winnie-the-pooh
 advisors:frends-and-raletions
 advisor:frend-or-raletion
 coexist:chill-out
@@ -20,7 +20,7 @@ fedaykin:woozles
 battle:
 bidding:
 movement:
-nexus:tea-party
+nexus:picnick
 revival:retrieval
 setup:
 storm:bees
