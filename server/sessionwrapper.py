@@ -22,7 +22,7 @@ def _connect():
                             user=os.getenv("POSTGRES_USER"),
                             password=os.getenv("POSTGRES_PASSWORD"),)
     else:
-        return psql.connect("dbname=shai-hulud")
+        return psql.connect("dbname=heffalump")
 
 
 session_change_subscriptions = {}
