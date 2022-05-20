@@ -1,4 +1,4 @@
-# SpiceBlow (--> Bidding or Nexu)
+# SpiceBlow (--> Bidding or Nexus)
 
 from copy import deepcopy
 
