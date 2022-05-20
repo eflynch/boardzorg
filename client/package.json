@@ -21,7 +21,6 @@
     "react": "16.13.1",
     "react-dom": "16.13.1",
     "react-select": "3.1.0",
-    "socket-io": "^1.0.0",
     "socket.io-client": "^4.5.1",
     "webpack": "^5.72.1",
     "webpack-cli": "^4.9.2",

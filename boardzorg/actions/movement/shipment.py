@@ -129,7 +129,8 @@ class Ship(Action):
 
         # Test shipment
         test_game_state = deepcopy(game_state)
-        ship_units(test_game_state, self.faction, self.units, space, self.sector)
+        test_space = test_game_state.map_state[self.space]
+        ship_units(test_game_state, self.faction, self.units, test_space, self.sector)
 
 
         # END ALERT
