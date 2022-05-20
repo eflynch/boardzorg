@@ -102,3 +102,4 @@ Temporary Items
 
 client/app/main.js
 postgres-data
+.venv
