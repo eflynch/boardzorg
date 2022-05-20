@@ -49,7 +49,7 @@ def get_file_list(directory):
 
 
 def modify_line(line, config):
-    for old, new in config.items():
+    for old, new in reversed(sorted(config.items())):
         for transformation in TRANSFORMATIONS:
             if transformation(old) in line:
                 line = line.replace(transformation(old), transformation(new))
@@ -72,10 +72,10 @@ def execute_reskin(rename_dir, config):
         execute_reskin_on_file(file, config)
 
 def main():
-    # file_list = get_file_list(RENAME_DIR)
-    # for file_path in file_list:
-    config = get_config("names.skin")
-    execute_reskin_on_file("test.txt", config)
+    file_list = get_file_list(RENAME_DIR)
+    config = get_config("pooh.skin")
+    for file_path in filter(lambda f: not f.contains("pooh.skin"), file_list):
+        execute_reskin_on_file(file_path, config)
 
 
 if __name__ == "__main__":
