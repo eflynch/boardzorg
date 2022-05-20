@@ -32,9 +32,9 @@ def train(key):
 # manual edits will have to be made
 TRANSFORMATIONS = [
     upper_camel,
-    upper_train,
-    upper_spaces,
     upper_snake,
+    upper_spaces,
+    upper_train,
     snake,
     camel,
     train,
