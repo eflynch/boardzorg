@@ -6,7 +6,7 @@ services:
       context: .
       dockerfile: Dockerfile.db
     environment:
-      - POSTGRES_USER=dune
+      - POSTGRES_USER=boardzorg
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
       - POSTGRES_DB=shai-hulud
     volumes:
@@ -17,14 +17,14 @@ services:
     restart: always
     build: .
     environment:
-      - POSTGRES_USER=dune
+      - POSTGRES_USER=boardzorg
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
       - POSTGRES_DB=shai-hulud
     ports:
       - 5005:5000
     volumes:
       - ./server:/app
-      - ./dune:/dune
+      - ./boardzorg:/boardzorg
       - ./client:/client
     depends_on:
       - postgres

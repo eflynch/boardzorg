@@ -1,11 +1,7 @@
 import os
 
-RENAME_DIR = "."
-
-
 def title(key):
     return key.title()
-
 
 def upper(key):
     return key.upper()
@@ -86,11 +82,17 @@ def execute_reskin(rename_dir, config):
         execute_reskin_on_file(file, config)
 
 def main():
-    file_list = get_file_list(RENAME_DIR)
-    skin_file = "pooh.skin"
-    config = get_config(skin_file)
-    for file_path in filter(lambda f: f.find(skin_file) == -1, file_list):
-        execute_reskin_on_file(file_path, config)
+    repo_root = os.path.dirname(os.path.abspath(__file__))
+    for directory in [
+        os.path.join(repo_root, "boardzorg"),
+        os.path.join(repo_root, "client"),
+        os.path.join(repo_root, "server"),
+    ]:
+        file_list = get_file_list(directory)
+        skin_file = "pooh.skin"
+        config = get_config(skin_file)
+        for file_path in file_list:
+            execute_reskin_on_file(file_path, config)
 
 
 if __name__ == "__main__":
