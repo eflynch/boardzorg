@@ -20,12 +20,12 @@ def title_hyphens(key):
     return "-".join(" ".join(words).title().split(" "))
 
 TRANSFORMATIONS = [
-    lambda key: key,
     upper_camel,
     title_hyphens,
     upper_snake,
     upper,
     snake,
+    lambda key: key,
     spaces,
 ]
 
