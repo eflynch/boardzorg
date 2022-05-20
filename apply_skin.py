@@ -99,10 +99,7 @@ def execute_rename_on_file(file_path, config):
             if transformation(old) in new_file_path:
                 new_file_path = new_file_path.replace(transformation(old), transformation(new))
     if new_file_path != file_path:
-        with open(new_file_path, "w") as new_file:
-            with open(file_path, "r") as old_file:
-                new_file.write(old_file.read())
-        os.remove(file_path)
+        os.rename(file_path, new_file_path)
 
 
 def execute_reskin(rename_dir, config):
