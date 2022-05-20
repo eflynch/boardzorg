@@ -27,7 +27,7 @@ def _connect():
 
 session_change_subscriptions = {}
 
-cache = LRUCache(maxsize=64)
+cache = LRUCache(maxsize=12)
 lock = RLock()
 
 
