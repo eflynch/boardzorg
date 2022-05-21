@@ -41,6 +41,10 @@ class CommitPlan(Action):
             defense = None
         if leader == "-":
             leader = None
+        
+        if weapon and defense and weapon == defense:
+            raise BadCommand("You cannot use the same card as both attack and defense")
+
         number = int(number)
         return CommitPlan(faction, leader, number, weapon, defense, kwisatz_haderach)
 
@@ -124,7 +128,7 @@ class RevealPlans(Action):
 
         if (new_game_state.round_state.stage_state.attacker_plan["kwisatz_haderach"] or
             new_game_state.round_state.stage_state.defender_plan["kwisatz_haderach"]):
-            game_state.round_state.kwisatz_haderach_leader_revealed = True
+            new_game_state.round_state.kwisatz_haderach_leader_revealed = True
 
         _maybe_remove_item(new_game_state, new_game_state.round_state.stage_state.attacker_plan,
                            attacker, "weapon")

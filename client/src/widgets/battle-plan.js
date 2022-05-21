@@ -126,18 +126,26 @@ export default function BattlePlan({me, state, args, setArgs, maxPower}) {
 
     const meWeapons = meFactionState.treachery.filter(
         (t)=>state.treachery_reference.weapons.indexOf(t) !== -1);
+
     const meDefenses = meFactionState.treachery.filter(
         (t)=>state.treachery_reference.defenses.indexOf(t) !== -1);
-    const meWorthless = meFactionState.treachery.filter(
-        (t)=>state.treachery_reference.worthless.indexOf(t) !== -1);
 
+    const meWeaponWorthless = meFactionState.treachery.filter(
+        (t)=> {
+            return (state.treachery_reference.worthless.indexOf(t) !== -1) && (selected.defense !== t);
+        });
 
-    const weapons = <PlanTreachery title="Weapon" cards={meWeapons.concat(meWorthless)} active={mePlan.weapon === undefined} selectedCard={selected.weapon} setSelectedCard={(selectedCard)=>{
+    const meDefenseWorthless = meFactionState.treachery.filter(
+        (t)=> {
+            return (state.treachery_reference.worthless.indexOf(t) !== -1) && (selected.weapon !== t);
+        });
+
+    const weapons = <PlanTreachery title="Weapon" cards={meWeapons.concat(meWeaponWorthless)} active={mePlan.weapon === undefined} selectedCard={selected.weapon} setSelectedCard={(selectedCard)=>{
         const newArgs = [selected.leader ? selected.leader : "-", selected.number, selectedCard, selected.defense ? selected.defense : "-", selected.kwisatz].join(" ");
         setArgs(newArgs);
     }} />;
 
-    const defenses = <PlanTreachery title="Defenses" cards={meDefenses.concat(meWorthless)} active={mePlan.defense === undefined} selectedCard={selected.defense} setSelectedCard={(selectedCard)=>{
+    const defenses = <PlanTreachery title="Defenses" cards={meDefenses.concat(meDefenseWorthless)} active={mePlan.defense === undefined} selectedCard={selected.defense} setSelectedCard={(selectedCard)=>{
         const newArgs = [selected.leader ? selected.leader : "-", selected.number, selected.weapon ? selected.weapon : "-", selectedCard, selected.kwisatz].join(" ");
         setArgs(newArgs);
     }} />;
