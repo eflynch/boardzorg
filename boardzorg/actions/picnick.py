@@ -1,7 +1,7 @@
-# StartNexus
+# StartPicnick
 # ProposeAlliance (alliances are consistent -->)
 # ResolveAlliances
-# Exit Nexus
+# Exit Picnick
 
 from copy import deepcopy
 
@@ -37,7 +37,7 @@ def alliances_work(game_state):
 
 class ProposeAlliance(Action):
     name = "propose"
-    ck_round = "nexus"
+    ck_round = "picnick"
 
     @classmethod
     def parse_args(cls, faction, args):
@@ -78,7 +78,7 @@ class ProposeAlliance(Action):
 
 class ResolveAlliance(Action):
     name = "resolve-alliances"
-    ck_round = "nexus"
+    ck_round = "picnick"
     su = True
 
     @classmethod
@@ -95,9 +95,9 @@ class ResolveAlliance(Action):
         return new_game_state
 
 
-class EndNexus(Action):
-    name = "end-nexus"
-    ck_round = "nexus"
+class EndPicnick(Action):
+    name = "end-picnick"
+    ck_round = "picnick"
     su = True
 
     @classmethod
@@ -108,5 +108,5 @@ class EndNexus(Action):
     def _execute(self, game_state):
         new_game_state = deepcopy(game_state)
         new_game_state.round_state = bidding.BiddingRound()
-        new_game_state.shai_hulud = None
+        new_game_state.heffalump = None
         return new_game_state

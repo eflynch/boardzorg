@@ -7,48 +7,48 @@
 # Place tokens (PlaceToken .... (all tokens placed))
 # Deal Traitors
 # Traitor Selection (ChooseTraitor .... (all traitors chosen))
-# Deal Treachery
-# Fremen placement (Fremen Placement -->)
-# Bene-gesserit placement (Bene-Gesserit Placement -->)
-# Storm Placement
+# Deal Provisions
+# ChristopherRobbin placement (ChristopherRobbin Placement -->)
+# Bene-gesserit placement (Rabbit Placement -->)
+# Bees Placement
 
 from copy import deepcopy
 
 from boardzorg.actions.common import TOKEN_SECTORS
-from boardzorg.actions.storm import destroy_in_path
+from boardzorg.actions.bees import destroy_in_path
 from boardzorg.actions import movement, args
 from boardzorg.actions.action import Action
 from boardzorg.exceptions import IllegalAction, BadCommand
-from boardzorg.state.leaders import parse_leader
-from boardzorg.state.rounds import spice
+from boardzorg.state.characters import parse_character
+from boardzorg.state.rounds import hunny
 
 
 def all_traitors_selected(game_state):
-    return all([len(game_state.faction_state[f].traitors) == 1 for f in game_state.faction_state if f != "harkonnen"])
+    return all([len(game_state.faction_state[f].traitors) == 1 for f in game_state.faction_state if f != "piglet"])
 
 
 def all_tokens_placed(game_state):
     return all([game_state.faction_state[f].token_position is not None for f in game_state.faction_state])
 
 
-class BeneGesseritPrediction(Action):
+class RabbitPrediction(Action):
     name = "predict"
     ck_round = "setup"
-    ck_faction = "bene-gesserit"
-    ck_stage = "bene-gesserit-prediction"
+    ck_faction = "rabbit"
+    ck_stage = "rabbit-prediction"
 
     def __repr__(self):
-        return "BeneGesseritPrediction: {} {}".format(self.other_faction, self.turn)
+        return "RabbitPrediction: {} {}".format(self.other_faction, self.turn)
 
     @classmethod
     def parse_args(cls, faction, args):
         parts = args.split(" ")
         if len(parts) != 2:
-            raise BadCommand("Bene-Gesserit prediction requires a faction and a turn")
+            raise BadCommand("Rabbit prediction requires a faction and a turn")
 
         other_faction, turn = parts
         turn = int(turn)
-        return BeneGesseritPrediction(faction, other_faction, turn)
+        return RabbitPrediction(faction, other_faction, turn)
 
     @classmethod
     def get_arg_spec(cls, faction=None, game_state=None):
@@ -61,21 +61,21 @@ class BeneGesseritPrediction(Action):
 
     def _execute(self, game_state):
         new_game_state = deepcopy(game_state)
-        new_game_state.faction_state["bene-gesserit"].prediction = (self.other_faction, self.turn)
+        new_game_state.faction_state["rabbit"].prediction = (self.other_faction, self.turn)
         new_game_state.round_state.stage = "token-placement"
         return new_game_state
 
 
-class SkipBeneGesseritPrediction(Action):
+class SkipRabbitPrediction(Action):
     name = "skip-predict"
     ck_round = "setup"
-    ck_stage = "bene-gesserit-prediction"
+    ck_stage = "rabbit-prediction"
     su = True
 
     @classmethod
     def _check(cls, game_state, faction):
-        if "bene-gesserit" in game_state.faction_state:
-            raise IllegalAction("Bene-Gesserit are in the game so this cannot be skipped")
+        if "rabbit" in game_state.faction_state:
+            raise IllegalAction("Rabbit are in the game so this cannot be skipped")
 
     def _execute(self, game_state):
         new_game_state = deepcopy(game_state)
@@ -146,12 +146,12 @@ class SelectTraitor(Action):
     ck_stage = "traitor"
 
     def parse_args(faction, args):
-        traitor = parse_leader(args)
+        traitor = parse_character(args)
         return SelectTraitor(faction, traitor)
 
     @classmethod
     def get_arg_spec(cls, faction=None, game_state=None):
-        return args.TraitorLeader()
+        return args.TraitorCharacter()
 
     def __init__(self, faction, traitor):
         self.faction = faction
@@ -159,8 +159,8 @@ class SelectTraitor(Action):
 
     @classmethod
     def _check(cls, game_state, faction):
-        if faction == "harkonnen":
-            raise IllegalAction("The Harkonnen keep all traitors")
+        if faction == "piglet":
+            raise IllegalAction("The Piglet keep all traitors")
 
         if len(game_state.faction_state[faction].traitors) == 1:
             raise IllegalAction("Traitor has already been selected")
@@ -179,113 +179,113 @@ class SelectTraitor(Action):
         return new_game_state
 
 
-class DealTreachery(Action):
-    name = "deal-treachery"
+class DealProvisions(Action):
+    name = "deal-provisions"
     ck_round = "setup"
     ck_stage = "traitor"
     su = True
 
     def _deal_card(self, game_state, faction):
-        card = game_state.treachery_deck.pop(0)
-        game_state.faction_state[faction].treachery.append(card)
+        card = game_state.provisions_deck.pop(0)
+        game_state.faction_state[faction].provisions.append(card)
 
     @classmethod
     def _check(cls, game_state, faction):
         if not all_traitors_selected(game_state):
-            raise IllegalAction("Deal Treachery after leaders are selected")
+            raise IllegalAction("Deal Provisions after characters are selected")
 
     def _execute(self, game_state):
         new_game_state = deepcopy(game_state)
         for f in new_game_state.faction_state:
             self._deal_card(new_game_state, f)
-            if f == "harkonnen":
+            if f == "piglet":
                 self._deal_card(new_game_state, f)
-        new_game_state.round_state.stage = "fremen-placement"
+        new_game_state.round_state.stage = "christopher_robbin-placement"
         return new_game_state
 
 
-class FremenPlacement(Action):
-    name = "fremen-placement"
-    ck_faction = "fremen"
+class ChristopherRobbinPlacement(Action):
+    name = "christopher_robbin-placement"
+    ck_faction = "christopher_robbin"
     ck_round = "setup"
-    ck_stage = "fremen-placement"
+    ck_stage = "christopher_robbin-placement"
 
     def parse_args(faction, args):
         ops = args.split(":")
 
-        def _parse_units(op):
+        def _parse_minions(op):
             if op:
                 return list(map(int, op.split(",")))
             else:
                 return []
 
-        tabr_units = _parse_units(ops[0])
-        west_units = _parse_units(ops[1])
-        south_units = _parse_units(ops[2])
+        tabr_minions = _parse_minions(ops[0])
+        west_minions = _parse_minions(ops[1])
+        south_minions = _parse_minions(ops[2])
         west_sector = int(ops[3])
         south_sector = int(ops[4])
 
-        return FremenPlacement(faction, tabr_units, west_units, south_units, west_sector, south_sector)
+        return ChristopherRobbinPlacement(faction, tabr_minions, west_minions, south_minions, west_sector, south_sector)
 
     @classmethod
     def get_arg_spec(cls, faction=None, game_state=None):
-        return args.FremenPlacementSelector()
+        return args.ChristopherRobbinPlacementSelector()
 
-    def __init__(self, faction, tabr_units, west_units, south_units, west_sector, south_sector):
+    def __init__(self, faction, tabr_minions, west_minions, south_minions, west_sector, south_sector):
         self.faction = faction
-        self.tabr_units = tabr_units
-        self.west_units = west_units
-        self.south_units = south_units
+        self.tabr_minions = tabr_minions
+        self.west_minions = west_minions
+        self.south_minions = south_minions
         self.west_sector = west_sector
         self.south_sector = south_sector
 
     def _execute(self, game_state):
-        if len(self.tabr_units) + len(self.west_units) + len(self.south_units) != 10:
-            raise BadCommand("Requires 10 units to be placed")
+        if len(self.tabr_minions) + len(self.west_minions) + len(self.south_minions) != 10:
+            raise BadCommand("Requires 10 minions to be placed")
 
         new_game_state = deepcopy(game_state)
-        tabr = new_game_state.map_state["Sietch-Tabr"]
-        west_wall = new_game_state.map_state["False-Wall-West"]
-        south_wall = new_game_state.map_state["False-Wall-South"]
-        if self.tabr_units:
-            movement.ship_units(new_game_state, self.faction, self.tabr_units, tabr, tabr.sectors[0])
-        if self.west_units:
-            movement.ship_units(new_game_state, self.faction, self.west_units, west_wall, self.west_sector)
-        if self.south_units:
-            movement.ship_units(new_game_state, self.faction, self.south_units, south_wall, self.south_sector)
-        new_game_state.round_state.stage = "bene-gesserit-placement"
+        tabr = new_game_state.map_state["Rabbits-House"]
+        west_wall = new_game_state.map_state["Where-The-Woozle-Wasnt"]
+        south_wall = new_game_state.map_state["Leftern-Woods"]
+        if self.tabr_minions:
+            movement.imagine_minions(new_game_state, self.faction, self.tabr_minions, tabr, tabr.sectors[0])
+        if self.west_minions:
+            movement.imagine_minions(new_game_state, self.faction, self.west_minions, west_wall, self.west_sector)
+        if self.south_minions:
+            movement.imagine_minions(new_game_state, self.faction, self.south_minions, south_wall, self.south_sector)
+        new_game_state.round_state.stage = "rabbit-placement"
 
         return new_game_state
 
 
-class SkipFremenPlacement(Action):
-    name = "skip-fremen-placement"
+class SkipChristopherRobbinPlacement(Action):
+    name = "skip-christopher_robbin-placement"
     ck_round = "setup"
-    ck_stage = "fremen-placement"
+    ck_stage = "christopher_robbin-placement"
     su = True
 
     @classmethod
     def _check(cls, game_state, faction):
-        if "fremen" in game_state.faction_state:
-            raise IllegalAction("Fremen are playing so placement cannot be skipped")
+        if "christopher_robbin" in game_state.faction_state:
+            raise IllegalAction("ChristopherRobbin are playing so placement cannot be skipped")
 
     def _execute(self, game_state):
         new_game_state = deepcopy(game_state)
-        new_game_state.round_state.stage = "bene-gesserit-placement"
+        new_game_state.round_state.stage = "rabbit-placement"
         return new_game_state
 
 
-class BeneGesseritPlacement(Action):
-    name = "bene-gesserit-placement"
-    ck_faction = "bene-gesserit"
+class RabbitPlacement(Action):
+    name = "rabbit-placement"
+    ck_faction = "rabbit"
     ck_round = "setup"
-    ck_stage = "bene-gesserit-placement"
+    ck_stage = "rabbit-placement"
 
     @classmethod
     def parse_args(cls, faction, args):
         space, sector = args.split(" ")
         sector = int(sector)
-        return BeneGesseritPlacement(faction, space, sector)
+        return RabbitPlacement(faction, space, sector)
 
     @classmethod
     def get_arg_spec(cls, faction=None, game_state=None):
@@ -299,39 +299,39 @@ class BeneGesseritPlacement(Action):
     def _execute(self, game_state):
         new_game_state = deepcopy(game_state)
         space = new_game_state.map_state[self.space]
-        space.coexist = True
-        space.was_coexist = True
-        movement.ship_units(new_game_state, self.faction, [1], space, self.sector)
-        new_game_state.round_state.stage = "storm-placement"
+        space.chill_out = True
+        space.was_chill_out = True
+        movement.imagine_minions(new_game_state, self.faction, [1], space, self.sector)
+        new_game_state.round_state.stage = "bees-placement"
         return new_game_state
 
 
-class SkipBeneGesseritPlacement(Action):
-    name = "skip-bene-gesserit-placement"
+class SkipRabbitPlacement(Action):
+    name = "skip-rabbit-placement"
     ck_round = "setup"
-    ck_stage = "bene-gesserit-placement"
+    ck_stage = "rabbit-placement"
     su = True
 
     @classmethod
     def _check(cls, game_state, faction):
-        if "bene-gesserit" in game_state.faction_state:
-            raise IllegalAction("Bene-Gesserit are playing so placement cannot be skipped")
+        if "rabbit" in game_state.faction_state:
+            raise IllegalAction("Rabbit are playing so placement cannot be skipped")
 
     def _execute(self, game_state):
         new_game_state = deepcopy(game_state)
-        new_game_state.round_state.stage = "storm-placement"
+        new_game_state.round_state.stage = "bees-placement"
         return new_game_state
 
 
-class StormPlacement(Action):
-    name = "storm-placement"
+class BeesPlacement(Action):
+    name = "bees-placement"
     ck_round = "setup"
-    ck_stage = "storm-placement"
+    ck_stage = "bees-placement"
     su = True
 
     def _execute(self, game_state):
         new_game_state = deepcopy(game_state)
-        new_game_state.storm_position = new_game_state.storm_deck.pop(0)
-        destroy_in_path(new_game_state, [new_game_state.storm_position])
-        new_game_state.round_state = spice.SpiceRound()
+        new_game_state.bees_position = new_game_state.bees_deck.pop(0)
+        destroy_in_path(new_game_state, [new_game_state.bees_position])
+        new_game_state.round_state = hunny.HunnyRound()
         return new_game_state

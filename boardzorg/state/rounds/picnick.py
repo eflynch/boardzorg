@@ -1,9 +1,9 @@
 from boardzorg.state.rounds import RoundState
 
 
-class NexusRound(RoundState):
+class PicnickRound(RoundState):
     def __init__(self):
-        self.round = "nexus"
+        self.round = "picnick"
         self.proposals = {}
         self.proposals_done = False
 

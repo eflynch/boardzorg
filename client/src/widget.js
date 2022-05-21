@@ -2,10 +2,10 @@ import React, {useState} from 'react';
 import Slider, { Range } from 'rc-slider';
 import update from 'immutability-helper';
 
-import BattlePlan, {PlanLeader, PlanNumber, PlanTreachery} from './widgets/battle-plan';
+import BattlePlan, {PlanCharacter, PlanNumber, PlanProvisions} from './widgets/battle-plan';
 import TraitorSelect from './widgets/traitor-select';
 import Integer from './widgets/integer';
-import Units from './widgets/units';
+import Minions from './widgets/minions';
 import Card from './components/card';
 import Logo from './components/logo';
 
@@ -15,7 +15,7 @@ const humanReadable = {
     "space-sector-select-start": "From",
     "space-sector-select-end": "To",
     "traitor-select": "Traitor",
-    "leader-input": "Leader",
+    "character-input": "Character",
     "space-select": "Space",
 };
 
@@ -32,30 +32,30 @@ const Options = ({args, setArgs, options}) => {
 };
 
 
-const PrescienceAnswer = ({me, state, args, setArgs, maxPower}) => {
+const FlightAnswer = ({me, state, args, setArgs, maxPower}) => {
     const stageState = state.round_state.stage_state;
-    const query = stageState.prescience;
-    if (query === "leader") {
+    const query = stageState.flight;
+    if (query === "character") {
         const fs = state.faction_state[me];
-        return <PlanLeader leaders={fs.leaders} treachery={fs.treachery} selectedLeader={args} setLeader={setArgs} active={true} />;
+        return <PlanCharacter characters={fs.characters} provisions={fs.provisions} selectedCharacter={args} setCharacter={setArgs} active={true} />;
     } else if (query === "number") {
         const [space, sector] = stageState.battle.slice(2);
         return <PlanNumber maxNumber={maxPower} number={parseInt(args)} setNumber={(number)=>{
             setArgs("" +number);
         }} active={true} />;
     } else if (query === "weapon") {
-        const meWeapons = state.faction_state[me].treachery.filter(
-            (t)=>state.treachery_reference.weapons.indexOf(t) !== -1);
-        return <PlanTreachery title="Weapon" cards={meWeapons} selectedCard={args} setSelectedCard={setArgs} active={true} />;
+        const meWeapons = state.faction_state[me].provisions.filter(
+            (t)=>state.provisions_reference.weapons.indexOf(t) !== -1);
+        return <PlanProvisions title="Weapon" cards={meWeapons} selectedCard={args} setSelectedCard={setArgs} active={true} />;
     } else if (query === "defense") {
-        const meDefenses = state.faction_state[me].treachery.filter(
-            (t)=>state.treachery_reference.defenses.indexOf(t) !== -1);
-        return <PlanTreachery title="Defense" cards={meDefenses} selectedCard={args} setSelectedCard={setArgs} active={true} />;
+        const meDefenses = state.faction_state[me].provisions.filter(
+            (t)=>state.provisions_reference.defenses.indexOf(t) !== -1);
+        return <PlanProvisions title="Defense" cards={meDefenses} selectedCard={args} setSelectedCard={setArgs} active={true} />;
     }
 };
 
 
-const UnitSelect = ({value, selected, active, setSelected}) => {
+const MinionSelect = ({value, selected, active, setSelected}) => {
     return <div style={{
         cursor:"pointer",
         width: 20,
@@ -72,12 +72,12 @@ const UnitSelect = ({value, selected, active, setSelected}) => {
     }}>{value}</div>;
 }
 
-const UnitPicker = ({available, selected, setSelected, canAddMore}) => {
-  const unitSelectors = []
+const MinionPicker = ({available, selected, setSelected, canAddMore}) => {
+  const minionSelectors = []
   for (const type of Object.keys(available)) {
     for (const index of Array(available[type]).keys()) {
       const isSelected = selected[type] && index < selected[type];
-      unitSelectors.push(<UnitSelect
+      minionSelectors.push(<MinionSelect
            key={`${type}-${index}`}
            value={type}
            active={isSelected || canAddMore}
@@ -88,19 +88,19 @@ const UnitPicker = ({available, selected, setSelected, canAddMore}) => {
           />);
     }
   }
-  return <div style={{display:"flex"}}>{unitSelectors}</div>;
+  return <div style={{display:"flex"}}>{minionSelectors}</div>;
 };
 
-const TankUnits = ({me, state, args, setArgs}) => {
-    const selectedUnits = {};
+const LostMinions = ({me, state, args, setArgs}) => {
+    const selectedMinions = {};
     let totalSelected = 0;
     if (args !== "") {
         args.split(" ").forEach((a)=>{
-            const [sector, units] = a.split(":");
-            const unitsParsed = units.split(",").map((i)=>parseInt(i));
-            const numOnes = unitsParsed.filter((i)=>i===1).length;
-            const numTwos = unitsParsed.filter((i)=>i===2).length;
-            selectedUnits[sector] = {
+            const [sector, minions] = a.split(":");
+            const minionsParsed = minions.split(",").map((i)=>parseInt(i));
+            const numOnes = minionsParsed.filter((i)=>i===1).length;
+            const numTwos = minionsParsed.filter((i)=>i===2).length;
+            selectedMinions[sector] = {
                 1: numOnes,
                 2: numTwos
             };
@@ -114,25 +114,25 @@ const TankUnits = ({me, state, args, setArgs}) => {
     const sectors = Object.keys(forces);
 
     sectors.forEach((sector)=> {
-        if (selectedUnits[sector] === undefined) {
-            selectedUnits[sector] = {1: 0, 2: 0};
+        if (selectedMinions[sector] === undefined) {
+            selectedMinions[sector] = {1: 0, 2: 0};
         }
     });
 
 
-    const toTank = me === attacker ? state.round_state.stage_state.attacker_plan.number : state.round_state.stage_state.defender_plan.number;
-    const active = totalSelected < toTank;
+    const toLost = me === attacker ? state.round_state.stage_state.attacker_plan.number : state.round_state.stage_state.defender_plan.number;
+    const active = totalSelected < toLost;
 
-    const _formatArgs = (selectedUnits) => {
-        const sectors = Object.keys(selectedUnits);
+    const _formatArgs = (selectedMinions) => {
+        const sectors = Object.keys(selectedMinions);
         return sectors.map((s)=>{
-            return `${s}:${Array(selectedUnits[s][1]).fill("1").concat(Array(selectedUnits[s][2]).fill("2")).join(",")}`;
+            return `${s}:${Array(selectedMinions[s][1]).fill("1").concat(Array(selectedMinions[s][2]).fill("2")).join(",")}`;
         }).join(" ");
     };
 
     return (
         <div>
-            <div style={{textAlign: "left"}}><span>Select {toTank - totalSelected} more power:</span></div>
+            <div style={{textAlign: "left"}}><span>Select {toLost - totalSelected} more power:</span></div>
             {sectors.map((sector)=>{
                 const availableForcesFlat = forces[sector].slice().sort();
                 const availableForces = {};
@@ -143,15 +143,15 @@ const TankUnits = ({me, state, args, setArgs}) => {
                     availableForces[force] += 1;
                   }
                 }
-                const selectedForces = selectedUnits[sector];
+                const selectedForces = selectedMinions[sector];
                 return (
                     <div key={"sector" + sector} style={{display:"flex", alignItems:"center", justifyContent:"space-between"}}>
                         <span>Sector {sector}:</span>
-                        <UnitPicker selected={selectedForces}
+                        <MinionPicker selected={selectedForces}
                                     available={availableForces}
                                     canAddMore={active}
                                     setSelected={(newSelected) => {
-                                      setArgs(_formatArgs(update(selectedUnits, {[sector]: {$set: newSelected}})));
+                                      setArgs(_formatArgs(update(selectedMinions, {[sector]: {$set: newSelected}})));
                                     }}
                         />
                     </div>
@@ -161,7 +161,7 @@ const TankUnits = ({me, state, args, setArgs}) => {
     );
 };
 
-const DiscardTreachery = ({state, me, args, setArgs}) => {
+const DiscardProvisions = ({state, me, args, setArgs}) => {
     let weaponSelected = false;
     let defenseSelected = false;
     if (args !== "") {
@@ -174,7 +174,7 @@ const DiscardTreachery = ({state, me, args, setArgs}) => {
 
     const _option = (maybeCard, selected, kind) => {
         if (maybeCard) {
-            return <Card type="Treachery" name={maybeCard} selected={selected} width={100} onClick={()=>{
+            return <Card type="Provisions" name={maybeCard} selected={selected} width={100} onClick={()=>{
                 if (kind === "weapon"){
                     setArgs([!weaponSelected ? "weapon" : "", defenseSelected ? "defense" : ""].join(" "))
                 } else {
@@ -192,16 +192,16 @@ const DiscardTreachery = ({state, me, args, setArgs}) => {
 };
 
 
-const ReturnTreachery = ({state, me, args, setArgs, number}) => {
+const ReturnProvisions = ({state, me, args, setArgs, number}) => {
     const selectedCards = args ? args.split(" ") : [];
     const numSelected = selectedCards.length;
-    const treachery = state.faction_state[me].treachery;
+    const provisions = state.faction_state[me].provisions;
 
     return (
         <div style={{display:"flex"}}>
-            {treachery.map((card, i)=> {
+            {provisions.map((card, i)=> {
                 const selected = selectedCards.indexOf(card) !== -1;
-                return <Card key={card + i} type="Treachery" name={card} selected={selected} width={100} onClick={()=>{
+                return <Card key={card + i} type="Provisions" name={card} selected={selected} width={100} onClick={()=>{
                     if (selected) {
                         const index = selectedCards.indexOf(card)
                         selectedCards.splice(index, 1);
@@ -342,26 +342,26 @@ const FactionSelect = ({args, setArgs, factionsAvailable, allowMulti}) => {
     );
 };
 
-const FremenPlacementSelect = ({args, setArgs, config}) => {
+const ChristopherRobbinPlacementSelect = ({args, setArgs, config}) => {
     const [tabr, west, south, westSector, southSector] = args.split(":");
     return (
         <div>
-            <h3>Sietch Tabr</h3>
-            <Units args={tabr} setArgs={(args)=>{
+            <h3>Rabbits House</h3>
+            <Minions args={tabr} setArgs={(args)=>{
                 setArgs([args, west, south, westSector, southSector].join(":"));
-            }} fedaykin={true} />
-            <h3>False Wall West</h3>
-            <Units args={west} setArgs={(args)=>{
+            }} woozles={true} />
+            <h3>Where The Woozle Wasnt</h3>
+            <Minions args={west} setArgs={(args)=>{
                 setArgs([tabr, args, south, westSector, southSector].join(":"));
-            }} fedaykin={true} />
+            }} woozles={true} />
             Sector:
             <Integer min={15} max={17} args={westSector} setArgs={(args)=>{
                 setArgs([tabr, west, south, args, southSector].join(":"));
             }}/>
-            <h3>False Wall South</h3>
-            <Units args={south} setArgs={(args)=>{
+            <h3>Leftern Woods</h3>
+            <Minions args={south} setArgs={(args)=>{
                 setArgs([tabr, west, args, westSector, southSector].join(":"));
-            }} fedaykin={true} />
+            }} woozles={true} />
             Sector:
             <Integer min={3} max={4} args={southSector} setArgs={(args)=>{
                 setArgs([tabr, west, south, westSector, args].join(":"));
@@ -370,42 +370,42 @@ const FremenPlacementSelect = ({args, setArgs, config}) => {
     );
 };
 
-const RevivalLeader = ({me, args, leaders, setArgs, required}) => {
-    return <PlanLeader leaders={leaders} treachery={[]} selectedLeader={args} setLeader={(leader)=>{
-        if (leader) {
-            setArgs(leader);
+const RetrievalCharacter = ({me, args, characters, setArgs, required}) => {
+    return <PlanCharacter characters={characters} provisions={[]} selectedCharacter={args} setCharacter={(character)=>{
+        if (character) {
+            setArgs(character);
         } else {
             setArgs('-');
         }
     }} active={true} canDeselect={!required}/>;
 };
 
-const RevivalUnits = ({me, args, setArgs, units, maxUnits, single2, title}) => {
-    const unitArgs = title ? (args ? args.split(" ")[1] : "") : args;
-    const hasUnitsSelected = (unitArgs.indexOf("1") !== -1) || (unitArgs.indexOf("2") !== -1);
-    const unitsSelected = hasUnitsSelected ? unitArgs.split(",").map((u)=>parseInt(u)).filter((u)=>u) : [];
-    const selectedUnits = {
-      1: unitsSelected.filter((u)=>u==1).length,
-      2: unitsSelected.filter((u)=>u==2).length,
+const RetrievalMinions = ({me, args, setArgs, minions, maxMinions, single2, title}) => {
+    const minionArgs = title ? (args ? args.split(" ")[1] : "") : args;
+    const hasMinionsSelected = (minionArgs.indexOf("1") !== -1) || (minionArgs.indexOf("2") !== -1);
+    const minionsSelected = hasMinionsSelected ? minionArgs.split(",").map((u)=>parseInt(u)).filter((u)=>u) : [];
+    const selectedMinions = {
+      1: minionsSelected.filter((u)=>u==1).length,
+      2: minionsSelected.filter((u)=>u==2).length,
     };
 
     const numTwosAvailable = (() => {
-        const numTwosAvailable = Math.min(units.filter((u)=>u==2).length, maxUnits);
+        const numTwosAvailable = Math.min(minions.filter((u)=>u==2).length, maxMinions);
         if (single2 && numTwosAvailable) {
              return 1;
         }
         return numTwosAvailable;
     })();
 
-    const numOnesAvailable = Math.min(units.filter((u)=>u==1).length, maxUnits);
-    const availableUnits = {
+    const numOnesAvailable = Math.min(minions.filter((u)=>u==1).length, maxMinions);
+    const availableMinions = {
       1: numOnesAvailable,
       2: numTwosAvailable,
     };
-    const active = unitsSelected.length < maxUnits;
+    const active = minionsSelected.length < maxMinions;
 
-    return <UnitPicker available={availableUnits}
-                       selected={selectedUnits}
+    return <MinionPicker available={availableMinions}
+                       selected={selectedMinions}
                        setSelected={(newSelected) => {
                          const newSelectedString = `${Array(newSelected[1]).fill("1").concat(Array(newSelected[2]).fill("2")).join(",")}`;
                          if (title) {
@@ -451,8 +451,8 @@ const Widget = (props) => {
         return <Constant value={config} setArgs={setArgs} />;
     }
 
-    if (type === "units") {
-        return <Units args={args} setArgs={setArgs} fedaykin={config.fedaykin} sardaukar={config.sardaukar}/>;
+    if (type === "minions") {
+        return <Minions args={args} setArgs={setArgs} woozles={config.woozles} very_sad_boys={config.very_sad_boys}/>;
     }
 
     if (type === "token-select") {
@@ -463,8 +463,8 @@ const Widget = (props) => {
         return <ArrayWidget args={args} setArgs={setArgs} config={config} state={state} me={me} />;
     }
 
-    if (type === "fremen-placement-select") {
-        return <FremenPlacementSelect args={args} setArgs={setArgs} config={config} />;
+    if (type === "christopher_robbin-placement-select") {
+        return <ChristopherRobbinPlacementSelect args={args} setArgs={setArgs} config={config} />;
     }
 
     if (type === "integer") {
@@ -495,39 +495,39 @@ const Widget = (props) => {
         return <BattlePlan me={me} state={state} args={args} setArgs={setArgs} maxPower={config.max_power} />;
     }
 
-    if (type === "prescience") {
-        return <Options options={["leader", "number", "weapon", "defense"]} args={args} setArgs={setArgs} />;
+    if (type === "flight") {
+        return <Options options={["character", "number", "weapon", "defense"]} args={args} setArgs={setArgs} />;
     }
 
-    if (type === "prescience-answer") {
-        return <PrescienceAnswer state={state} me={me} args={args} setArgs={setArgs} maxPower={config.max_power} />;
+    if (type === "flight-answer") {
+        return <FlightAnswer state={state} me={me} args={args} setArgs={setArgs} maxPower={config.max_power} />;
     }
 
-    if (type === "tank-units") {
-        return <TankUnits state={state} me={me} args={args} setArgs={setArgs} />;
+    if (type === "lost-minions") {
+        return <LostMinions state={state} me={me} args={args} setArgs={setArgs} />;
     }
 
-    if (type === "discard-treachery") {
-        return <DiscardTreachery state={state} me={me} args={args} setArgs={setArgs} />;
+    if (type === "discard-provisions") {
+        return <DiscardProvisions state={state} me={me} args={args} setArgs={setArgs} />;
     }
 
-    if (type === "return-treachery") {
-        return <ReturnTreachery state={state} me={me} args={args} setArgs={setArgs} number={config.number} />;
+    if (type === "return-provisions") {
+        return <ReturnProvisions state={state} me={me} args={args} setArgs={setArgs} number={config.number} />;
     }
 
-    if (type === "voice") {
+    if (type === "cleverness") {
         return <Options options={[
-            "poison-weapon", "poison-defense", "projectile-weapon", "projectile-defense",
-            "no poison-weapon", "no poison-defense", "no projectile-weapon", "no projectile-defense",
-            "lasgun", "no lasgun", "worthless", "no worthless", "cheap-hero-heroine", "no cheap-hero-heroine",
+            "bee_trouble-weapon", "bee_trouble-defense", "projectile-weapon", "projectile-defense",
+            "no bee_trouble-weapon", "no bee_trouble-defense", "no projectile-weapon", "no projectile-defense",
+            "anti_umbrella", "no anti_umbrella", "worthless", "no worthless", "cheap-hero-heroine", "no cheap-hero-heroine",
         ]} args={args} setArgs={setArgs} />;
     }
 
-    if (type === "revival-units") {
-        return <RevivalUnits args={args} setArgs={setArgs} units={config.units} maxUnits={config.maxUnits} single2={config.single2} title={config.title}/>;
+    if (type === "retrieval-minions") {
+        return <RetrievalMinions args={args} setArgs={setArgs} minions={config.minions} maxMinions={config.maxMinions} single2={config.single2} title={config.title}/>;
     }
-    if (type === "revival-leader") {
-        return <RevivalLeader args={args} setArgs={setArgs} leaders={config.leaders} required={config.required}/>;
+    if (type === "retrieval-character") {
+        return <RetrievalCharacter args={args} setArgs={setArgs} characters={config.characters} required={config.required}/>;
     }
     console.warn(type);
 

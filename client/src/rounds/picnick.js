@@ -5,7 +5,7 @@ import FactionOrder from '../components/faction-order';
 
 
 
-export default function Nexus({roundState}) {
+export default function Picnick({roundState}) {
     const factions = Object.keys(roundState.proposals);
     return (
         <div style={{display:"flex", flexDirection:"column"}}>

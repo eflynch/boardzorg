@@ -2,13 +2,13 @@ import React, {useState} from 'react';
 import Slider, { Range } from 'rc-slider';
 
 
-export default function Units({args, setArgs, fedaykin, sardaukar, maxOnes}) {
-    const units = args.split(",").map((i)=>parseInt(i));
-    const numOnes = units.filter((i)=>i===1).length;
-    const numTwos = units.filter((i)=>i===2).length;
+export default function Minions({args, setArgs, woozles, very_sad_boys, maxOnes}) {
+    const minions = args.split(",").map((i)=>parseInt(i));
+    const numOnes = minions.filter((i)=>i===1).length;
+    const numTwos = minions.filter((i)=>i===2).length;
 
     let bonus = <div/>;
-    if (fedaykin || sardaukar) {
+    if (woozles || very_sad_boys) {
         let onChange = undefined;
         if (setArgs !== undefined) {
             onChange = (value)=>{
@@ -23,8 +23,8 @@ export default function Units({args, setArgs, fedaykin, sardaukar, maxOnes}) {
         }
         bonus = (
             <div style={{display: "flex"}}>
-                <div className="label">{fedaykin ? "Fedaykin: " : "Sardaukar: "}{numTwos}</div>
-                <Slider min={0} max={fedaykin ? 3 : 5} step={1} dots={true} value={numTwos}
+                <div className="label">{woozles ? "Woozles: " : "VerySadBoys: "}{numTwos}</div>
+                <Slider min={0} max={woozles ? 3 : 5} step={1} dots={true} value={numTwos}
                     onChange={onChange} />
             </div>
         );
@@ -44,9 +44,9 @@ export default function Units({args, setArgs, fedaykin, sardaukar, maxOnes}) {
     }
 
     return (
-        <div className="unit-select">
+        <div className="minion-select">
             <div style={{display: "flex"}}>
-                <div className="label">Units: {numOnes}</div>
+                <div className="label">Minions: {numOnes}</div>
                 <Slider min={0} max={maxOnes || 20} step={1} dots={true} value={numOnes}
                     onChange={onChange} />
             </div>

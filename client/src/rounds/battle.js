@@ -2,46 +2,46 @@ import React from 'react';
 import update from 'immutability-helper';
 
 import FactionOrder from '../components/faction-order';
-import LeaderToken from '../components/leader-token';
+import CharacterToken from '../components/character-token';
 import Card from '../components/card';
 
 const Logo = ({faction, diameter, ...props}) => {
     return <img {...props} src={`/static/app/png/${faction}_logo.png`} width={diameter} height={diameter}/>;
 };
 
-const Plan = ({faction, traitor, isAttacker, leader, number, weapon, defense, dead, kwisatz_haderach}) => {
-    let leaderToken;
-    let leaderValue = 0;
-    if (leader !== undefined) {
-        if (leader !== null) {
-            if (leader[0] === "Cheap-Hero/Heroine") {
-                leaderToken = <Card key="Cheap-Hero/Heroine"
-                        type="Treachery"
-                        name="Cheap-Hero/Heroine"
+const Plan = ({faction, traitor, isAttacker, character, number, weapon, defense, dead, winnie_the_pooh}) => {
+    let characterToken;
+    let characterValue = 0;
+    if (character !== undefined) {
+        if (character !== null) {
+            if (character[0] === "Stuffed-Animal") {
+                characterToken = <Card key="Stuffed-Animal"
+                        type="Provisions"
+                        name="Stuffed-Animal"
                         width={cardWidth}/>;
             } else {
-                leaderToken = <LeaderToken traitor={traitor} name={leader[0]}/>;
-                leaderValue = leader[1];
+                characterToken = <CharacterToken traitor={traitor} name={character[0]}/>;
+                characterValue = character[1];
             }
         } else {
-            leaderToken = <span className="question-leader">X</span>;
+            characterToken = <span className="question-character">X</span>;
         }
     } else {
-        leaderToken = <span className="question-leader">?</span>;
+        characterToken = <span className="question-character">?</span>;
     }
     const cardWidth = 100;
     const numberText = number !== undefined ? number : <span>?</span>;
-    const resultText = (number !== undefined && leader !== undefined) ? <span>{number + (dead ? 0 : leaderValue + (kwisatz_haderach ? 2 : 0))}</span> : <span>?</span>;
-    const weaponShow = weapon !== undefined ? <Card type="Treachery" name={weapon ? weapon : "Reverse"} width={cardWidth} /> : <span className="question-card">?</span>;
-    const defenseShow = defense !== undefined ? <Card type="Treachery" name={defense ? defense : "Reverse"} width={cardWidth} /> : <span className="question-card">?</span>;
+    const resultText = (number !== undefined && character !== undefined) ? <span>{number + (dead ? 0 : characterValue + (winnie_the_pooh ? 2 : 0))}</span> : <span>?</span>;
+    const weaponShow = weapon !== undefined ? <Card type="Provisions" name={weapon ? weapon : "Reverse"} width={cardWidth} /> : <span className="question-card">?</span>;
+    const defenseShow = defense !== undefined ? <Card type="Provisions" name={defense ? defense : "Reverse"} width={cardWidth} /> : <span className="question-card">?</span>;
     return (
         <div style={{display:"flex", alignItems: "center"}}>
             <div style={{display:"flex", alignItems: "center"}}>
                 <div style={{display:"flex", flexDirection:"column", alignItems:"center"}}>
-                    {leaderToken}
-                    {kwisatz_haderach ? <LeaderToken name="Kwisatz-Haderach"/> : null}
+                    {characterToken}
+                    {winnie_the_pooh ? <CharacterToken name="Winnie-The-Pooh"/> : null}
                 </div>
-                    <div className="big-unit"> + {numberText} = {resultText} : </div>
+                    <div className="big-minion"> + {numberText} = {resultText} : </div>
             </div><div style={{width:5, height:1}}/>{weaponShow} {defenseShow}
         </div>
     );
@@ -161,18 +161,18 @@ export default function Battle({roundstate, factionOrder, interaction, selection
             );
         }
 
-        let voiceText = "";
-        if (stage_state.voice) {
-            const [no, proj_pois, weap_def] = stage_state.voice;
-            voiceText = [no ? "no" : "yes", proj_pois, weap_def].join(" ")
+        let clevernessText = "";
+        if (stage_state.cleverness) {
+            const [no, proj_pois, weap_def] = stage_state.cleverness;
+            clevernessText = [no ? "no" : "yes", proj_pois, weap_def].join(" ")
         }
         
         return (
             <div style={{display:"flex", flexWrap:"wrap", alignItems:"center", justifyContent:"center"}}>
-                {stage_state.voice ? <LogoMarker faction="bene-gesserit" name={voiceText}/> : ""}
-                {stage_state.karama_sardaukar ? <LogoMarker faction="emperor" name={"No Sardaukar"}/> : ""}
-                {stage_state.karama_fedakin ? <LogoMarker faction="fremen" name={"No Fedaykin"}/> : ""}
-                {stage_state.karama_kwisatz_haderach ? <LogoMarker faction="atreides" name={"No Kwisatz Haderach"}/> : ""}
+                {stage_state.cleverness ? <LogoMarker faction="rabbit" name={clevernessText}/> : ""}
+                {stage_state.author_very_sad_boys ? <LogoMarker faction="eeyore" name={"No VerySadBoys"}/> : ""}
+                {stage_state.author_fedakin ? <LogoMarker faction="christopher_robbin" name={"No Woozles"}/> : ""}
+                {stage_state.author_winnie_the_pooh ? <LogoMarker faction="owl" name={"No Kwisatz Haderach"}/> : ""}
             </div>
         );
     };

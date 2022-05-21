@@ -5,7 +5,7 @@ const Logo = ({faction, diameter, ...props}) => {
     return <img {...props} src={`/static/app/png/${faction}_logo.png`} width={diameter} height={diameter}/>;
 }; 
 
-const ALL_FACTIONS = {"atreides": true, "harkonnen": true, "fremen": true, "bene-gesserit": true, "emperor": true, "guild": true};
+const ALL_FACTIONS = {"owl": true, "piglet": true, "christopher_robbin": true, "rabbit": true, "eeyore": true, "kanga": true};
 
 
 const FactionSelector = ({faction, selected, diameter, onSelect}) => {

@@ -58,7 +58,7 @@ def assign_role(session_id):
     pay_load = request.get_json()
     role = pay_load["role"]
 
-    if role not in ('host', 'fremen', 'bene-gesserit', 'guild', 'harkonnen', 'emperor', 'atreides'):
+    if role not in ('host', 'christopher_robbin', 'rabbit', 'kanga', 'piglet', 'eeyore', 'owl'):
         raise rolewrapper.RoleException("{} is not a valid role".format(role))
 
     with SessionWrapper(session_id) as (session, roles):

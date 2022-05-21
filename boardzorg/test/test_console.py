@@ -9,23 +9,23 @@ logger = logging.getLogger(__name__)
 
 def translate_faction(faction):
     return {
-        "b": "bene-gesserit",
-        "a": "atreides",
-        "f": "fremen",
-        "h": "harkonnen",
-        "e": "emperor",
-        "g": "guild"
+        "b": "rabbit",
+        "a": "owl",
+        "f": "christopher_robbin",
+        "h": "piglet",
+        "e": "eeyore",
+        "g": "kanga"
     }[faction]
 
 
-def run_console(seed=0, treachery_cards=None, factions_playing=None, output_file=None, log_level=logging.INFO):
+def run_console(seed=0, provisions_cards=None, factions_playing=None, output_file=None, log_level=logging.INFO):
     logging.basicConfig(level=log_level)
     random.seed(seed)
 
-    session = Session.new_session(treachery_deck=treachery_cards, factions=factions_playing)
+    session = Session.new_session(provisions_deck=provisions_cards, factions=factions_playing)
 
     while True:
-        parts = input("dune > ").split("! ")
+        parts = input("100_aker_wood > ").split("! ")
         if "quit!" in parts:
             with open(output_file, "w") as f:
                 f.write(session.serialize(session))

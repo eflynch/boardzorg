@@ -121,8 +121,8 @@ class Session:
         return redacted_commands
 
     @staticmethod
-    def new_session(factions=None, treachery_deck=None, seed=None):
-        init_state = GameState.new_shuffle(factions, treachery_deck, seed)
+    def new_session(factions=None, provisions_deck=None, seed=None):
+        init_state = GameState.new_shuffle(factions, provisions_deck, seed)
         return Session(init_state=init_state, seed=seed)
 
     @staticmethod
@@ -131,10 +131,10 @@ class Session:
         to_json = {
             "seed": session.seed,
             "factions": init_state.factions,
-            "treachery_deck": init_state.treachery_deck,
-            "spice_deck": init_state.spice_deck,
+            "provisions_deck": init_state.provisions_deck,
+            "hunny_deck": init_state.hunny_deck,
             "traitor_deck": init_state.traitor_deck,
-            "storm_deck": init_state.storm_deck,
+            "bees_deck": init_state.bees_deck,
             "random_choice_deck": init_state.random_choice_deck,
             "command_log": session.command_log
         }
@@ -148,10 +148,10 @@ class Session:
             from_json = json.loads(serialized_session)
         init_state = GameState(
             factions=from_json["factions"],
-            treachery_deck=from_json["treachery_deck"],
-            spice_deck=from_json["spice_deck"],
+            provisions_deck=from_json["provisions_deck"],
+            hunny_deck=from_json["hunny_deck"],
             traitor_deck=list(map(tuple, from_json["traitor_deck"])),
-            storm_deck=from_json["storm_deck"],
+            bees_deck=from_json["bees_deck"],
             random_choice_deck=from_json.get("random_choice_deck", None)
         )
         session = Session(init_state, from_json["seed"])

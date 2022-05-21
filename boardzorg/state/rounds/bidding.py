@@ -47,11 +47,11 @@ class CollectSubStage(SubStageState):
     substage = "collect"
 
     def __init__(self):
-        self.karama_passes = []
+        self.author_passes = []
 
     def visible(self, game_state, faction):
         visible = super().visible(game_state, faction)
-        visible["karama_passes"] = self.karama_passes
+        visible["author_passes"] = self.author_passes
         return visible
 
 
@@ -68,7 +68,7 @@ class BiddingRound(RoundState):
         visible["total_for_auction"] = self.total_for_auction
         visible["stage_state"] = self.stage_state.visible(game_state, faction)
         visible["up_for_auction"] = {"length": len(self.up_for_auction)}
-        if faction == "atreides" and self.up_for_auction:
+        if faction == "owl" and self.up_for_auction:
             visible["up_for_auction"]["next"] = self.up_for_auction[0]
 
         return visible

@@ -1,15 +1,15 @@
 from boardzorg.state.rounds import RoundState, StageState, SubStageState
 
 
-class HandleWormForces(SubStageState):
+class HandleHeffalumpForces(SubStageState):
     substage = "forces"
 
     def __init__(self):
-        self.karama_passes = []
+        self.author_passes = []
 
 
-class ResolveWormStage(StageState):
-    stage = "worm"
+class ResolveHeffalumpStage(StageState):
+    stage = "heffalump"
 
     def __init__(self, factions):
         self.factions = factions
@@ -22,14 +22,14 @@ class ResolveWormStage(StageState):
         return visible
 
 
-class SpiceRound(RoundState):
-    round = "spice"
+class HunnyRound(RoundState):
+    round = "hunny"
 
     def __init__(self):
-        self.stage = "fremen-worm-karama"
+        self.stage = "christopher_robbin-heffalump-author"
         self.drawn_card = False
-        self.needs_nexus = False
-        self.fremen_can_redirect_worm = False
+        self.needs_picnick = False
+        self.christopher_robbin_can_redirect_heffalump = False
 
     def visible(self, game_state, faction):
         visible = super().visible(game_state, faction)

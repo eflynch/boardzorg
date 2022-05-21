@@ -6,9 +6,9 @@ TOKEN_SECTORS = [1, 4, 7, 10, 13, 16]
 
 def get_faction_order(game_state):
     faction_order = []
-    storm_position = game_state.storm_position
+    bees_position = game_state.bees_position
     for i in range(18):
-        sector = (storm_position + i + 1) % 18
+        sector = (bees_position + i + 1) % 18
         if sector in TOKEN_SECTORS:
             for f in game_state.faction_state:
                 faction_state = game_state.faction_state[f]
@@ -17,24 +17,24 @@ def get_faction_order(game_state):
     return faction_order
 
 
-def spend_spice(game_state, faction, amount, context=None):
-    spice_to_spend = game_state.faction_state[faction].spice
-    if game_state.spice_context[faction] is not None:
-        if game_state.spice_reserve[faction] is not None:
-            if context == game_state.spice_context[faction]:
-                game_state.spice_reserve[faction] = None
-                game_state.spice_context[faction] = None
+def spend_hunny(game_state, faction, amount, context=None):
+    hunny_to_spend = game_state.faction_state[faction].hunny
+    if game_state.hunny_context[faction] is not None:
+        if game_state.hunny_reserve[faction] is not None:
+            if context == game_state.hunny_context[faction]:
+                game_state.hunny_reserve[faction] = None
+                game_state.hunny_context[faction] = None
             else:
-                spice_to_spend = game_state.faction_state[faction].spice - game_state.spice_reserve[faction]
-    if amount > spice_to_spend:
-        raise BadCommand("Insufficient spice for this action")
-    game_state.faction_state[faction].spice -= amount
+                hunny_to_spend = game_state.faction_state[faction].hunny - game_state.hunny_reserve[faction]
+    if amount > hunny_to_spend:
+        raise BadCommand("Insufficient hunny for this action")
+    game_state.faction_state[faction].hunny -= amount
 
 
 def check_no_allies(game_state, faction, space):
     for ally in game_state.alliances[faction]:
         if ally in space.forces:
-            if ally != "bene-gesserit":
+            if ally != "rabbit":
                 raise BadCommand("You cannot invade your ally")
-            elif not space.coexist:
+            elif not space.chill_out:
                 raise BadCommand("You cannot invade your ally")

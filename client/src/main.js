@@ -98,7 +98,7 @@ function getSession(sessionID, roleID){
         });
     });
     socket.on('sessions', (data) => {
-        document.title = `Shai-Hulud: ${data.role}`;
+        document.title = `Heffalump: ${data.role}`;
         renderSession(sessionID, roleID, data);
     });
     socket.on('error', () => {

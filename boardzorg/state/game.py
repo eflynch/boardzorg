@@ -2,75 +2,75 @@ import random
 import math
 
 from boardzorg.state import State
-from boardzorg.state.treachery_cards import TREACHERY_CARDS, WORTHLESS, WEAPONS, DEFENSES
+from boardzorg.state.provisions_cards import PROVISIONS_CARDS, WORTHLESS, WEAPONS, DEFENSES
 from boardzorg.state.spaces import SPACES, SpaceState
-from boardzorg.state.spice_cards import SPICE_CARDS
+from boardzorg.state.hunny_cards import HUNNY_CARDS
 from boardzorg.state.rounds.setup import SetupRound
 from boardzorg.state.factions import FactionState
-from boardzorg.state.leaders import LEADERS
+from boardzorg.state.characters import CHARACTERS
 
 MAX_CHOICE_SIZE = 5
 
 
 class GameState(State):
     @staticmethod
-    def new_shuffle(factions=None, treachery_cards=None, seed=None):
-        if treachery_cards is None:
-            treachery_deck = TREACHERY_CARDS[:]
+    def new_shuffle(factions=None, provisions_cards=None, seed=None):
+        if provisions_cards is None:
+            provisions_deck = PROVISIONS_CARDS[:]
         else:
-            treachery_deck = treachery_cards[:]
+            provisions_deck = provisions_cards[:]
         if factions is None:
             factions = FactionState.ALL_FACTIONS
 
         traitor_deck = []
         for f in factions:
-            traitor_deck.extend(LEADERS[f])
+            traitor_deck.extend(CHARACTERS[f])
 
         # Introduce Non-Determinism here only
         if seed is not None:
             random.seed(seed)
 
-        spice_deck = SPICE_CARDS[:]
-        random.shuffle(spice_deck)
-        while spice_deck[0] == "Shai-Hulud":
-            random.shuffle(spice_deck)
+        hunny_deck = HUNNY_CARDS[:]
+        random.shuffle(hunny_deck)
+        while hunny_deck[0] == "Heffalump":
+            random.shuffle(hunny_deck)
 
-        random.shuffle(treachery_deck)
+        random.shuffle(provisions_deck)
         random.shuffle(traitor_deck)
-        storm_deck = [random.randint(1, 6) for i in range(20)]
-        storm_deck.insert(0, random.randint(0, 17))
+        bees_deck = [random.randint(1, 6) for i in range(20)]
+        bees_deck.insert(0, random.randint(0, 17))
 
         random_choice_deck = [random.randint(0, math.factorial(MAX_CHOICE_SIZE)) for i in range(50)]
 
         return GameState(
-            factions, treachery_deck, spice_deck, traitor_deck, storm_deck, random_choice_deck)
+            factions, provisions_deck, hunny_deck, traitor_deck, bees_deck, random_choice_deck)
 
-    def __init__(self, factions, treachery_deck, spice_deck, traitor_deck, storm_deck,
+    def __init__(self, factions, provisions_deck, hunny_deck, traitor_deck, bees_deck,
                  random_choice_deck=None):
         self.factions = factions
-        self.treachery_deck = treachery_deck
-        self.spice_deck = spice_deck
+        self.provisions_deck = provisions_deck
+        self.hunny_deck = hunny_deck
         self.traitor_deck = traitor_deck
-        self.storm_deck = storm_deck
+        self.bees_deck = bees_deck
         if not random_choice_deck:
             random_choice_deck = [random.randint(0, math.factorial(MAX_CHOICE_SIZE)) for i in range(50)]
         self.random_choice_deck = random_choice_deck
-        self.spice_discard = []
-        self.treachery_discard = []
+        self.hunny_discard = []
+        self.provisions_discard = []
         self.pause = []
         self.pause_context = None
-        self.karama_context = {f: None for f in factions}
+        self.author_context = {f: None for f in factions}
 
-        self.spice_context = {f: None for f in factions}
-        self.spice_reserve = {f: None for f in factions}
+        self.hunny_context = {f: None for f in factions}
+        self.hunny_reserve = {f: None for f in factions}
 
-        self.treachery_to_return = None
-        self.treachery_to_return_faction = None
+        self.provisions_to_return = None
+        self.provisions_to_return_faction = None
 
-        self.query_flip_to_advisors = None
+        self.query_flip_to_frends_and_raletions = None
         self.query_flip_to_fighters = None
 
-        self.treachery_reference = {
+        self.provisions_reference = {
             "worthless": WORTHLESS,
             "weapons": WEAPONS,
             "defenses": DEFENSES
@@ -81,19 +81,19 @@ class GameState(State):
         self._round = None
         self.alliances = {f: set([]) for f in factions}
         self.turn = 1
-        self.storm_position = 0
-        self.shield_wall = True
-        self.ornithopters = ["atreides", "harkonnen"]
+        self.bees_position = 0
+        self.umbrella_wall = True
+        self.balloons = ["owl", "piglet"]
         self.map_state = {s[0]: SpaceState(*s) for s in SPACES}
-        if "atreides" in factions:
-            self.map_state["Arrakeen"].forces["atreides"] = {9: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]}
-        if "harkonnen" in factions:
-            self.map_state["Carthag"].forces["harkonnen"] = {10: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]}
-        if "guild" in factions:
-            self.map_state["Tueks-Sietch"].forces["guild"] = {4: [1, 1, 1, 1, 1]}
+        if "owl" in factions:
+            self.map_state["OwlsHouse"].forces["owl"] = {9: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]}
+        if "piglet" in factions:
+            self.map_state["PigletsHouse"].forces["piglet"] = {10: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]}
+        if "kanga" in factions:
+            self.map_state["Kangas-House"].forces["kanga"] = {4: [1, 1, 1, 1, 1]}
 
         self.winner = None
-        self.shai_hulud = None
+        self.heffalump = None
 
     @property
     def round(self):
@@ -117,14 +117,14 @@ class GameState(State):
 
     def visible(self, faction):
         visible = super().visible(self, faction)
-        visible["treachery_deck"] = {"length": len(self.treachery_deck)}
-        visible["treachery_discard"] = self.treachery_discard
-        visible["treachery_reference"] = self.treachery_reference
+        visible["provisions_deck"] = {"length": len(self.provisions_deck)}
+        visible["provisions_discard"] = self.provisions_discard
+        visible["provisions_reference"] = self.provisions_reference
 
-        visible["spice_deck"] = {"length": len(self.spice_deck)}
-        if faction == "atreides" and self.spice_deck:
-            visible["spice_deck"]["next"] = self.spice_deck[0]
-        visible["spice_discard"] = self.spice_discard
+        visible["hunny_deck"] = {"length": len(self.hunny_deck)}
+        if faction == "owl" and self.hunny_deck:
+            visible["hunny_deck"]["next"] = self.hunny_deck[0]
+        visible["hunny_discard"] = self.hunny_discard
 
         visible["faction_state"] = {
             f: self.faction_state[f].visible(self, faction)
@@ -142,16 +142,16 @@ class GameState(State):
 
         visible["alliances"] = list(set(visible_alliances))
         visible["turn"] = self.turn
-        visible["shield_wall"] = self.shield_wall
-        visible["storm_position"] = self.storm_position
-        visible["storm_deck"] = {"length": len(self.storm_deck)}
-        visible["ornithopters"] = self.ornithopters
+        visible["umbrella_wall"] = self.umbrella_wall
+        visible["bees_position"] = self.bees_position
+        visible["bees_deck"] = {"length": len(self.bees_deck)}
+        visible["balloons"] = self.balloons
 
-        if faction == "fremen" or self.round == "control":
-            visible["storm_deck"]["next"] = self.storm_deck[0]
+        if faction == "christopher_robbin" or self.round == "control":
+            visible["bees_deck"]["next"] = self.bees_deck[0]
 
         visible["map_state"] = [self.map_state[s].visible(self, faction) for s in self.map_state]
         visible["winner"] = self.winner
-        visible["shai_hulud"] = self.shai_hulud
+        visible["heffalump"] = self.heffalump
 
         return visible

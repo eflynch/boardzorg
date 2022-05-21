@@ -1,0 +1,23 @@
+HUNNY_CARDS = [
+    "Broken-Land",
+    "Big-Stones-And-Rox",
+    "Cielago-South",
+    "Funeral-Plain",
+    "My-House",
+    "Habbanya-Erg",
+    "Pooh-Trap-For-Heffalumps",
+    "Rather-Boggy-And-Sad",
+    "Nice-For-Picnick",
+    "Old-Gap",
+    "Red-Chasm",
+    "Woods-Outcroppings",
+    "Sihaya-Ridge",
+    "Meadowy-Pit-Where-Roo-Plays",
+    "Crosstern-River-North",
+    "Heffalump",
+    "Heffalump",
+    "Heffalump",
+    "Heffalump",
+    "Heffalump",
+    "Heffalump"
+]

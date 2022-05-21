@@ -3,7 +3,7 @@ from copy import deepcopy
 from boardzorg.actions.action import Action
 from boardzorg.actions import args
 from boardzorg.exceptions import IllegalAction, BadCommand
-from boardzorg.actions.karama import discard_karama
+from boardzorg.actions.author import discard_author
 from boardzorg.actions.battle import ops
 
 
@@ -12,80 +12,80 @@ def get_loser(game_state):
     return [faction for faction in game_state.round_state.stage_state.battle[:2] if faction != winner][0]
 
 
-def get_capturable_leaders(game_state):
+def get_capturable_characters(game_state):
     winner = game_state.round_state.stage_state.winner
-    if winner != "harkonnen":
+    if winner != "piglet":
         return []
 
     loser = get_loser(game_state)
 
     return list(filter(
-        lambda leader: leader not in game_state.round_state.leaders_used,
-        game_state.faction_state[loser].leaders))
+        lambda character: character not in game_state.round_state.characters_used,
+        game_state.faction_state[loser].characters))
 
 
-class LeaderCapture(Action):
-    name = "leader-capture"
+class CharacterCapture(Action):
+    name = "character-capture"
     ck_round = "battle"
     ck_stage = "battle"
-    ck_substage = "leader-capture"
-    ck_faction = "harkonnen"
+    ck_substage = "character-capture"
+    ck_faction = "piglet"
 
     @classmethod
     def _check(cls, game_state, faction):
-        if not get_capturable_leaders(game_state):
-            raise IllegalAction("There must be a capturable leader")
+        if not get_capturable_characters(game_state):
+            raise IllegalAction("There must be a capturable character")
 
     def _execute(self, game_state):
         new_game_state = deepcopy(game_state)
         loser = get_loser(new_game_state)
         choice = new_game_state.random_choice_deck.pop(0)
-        capturable_leaders = get_capturable_leaders(new_game_state)
-        leader_to_capture = capturable_leaders[choice % len(capturable_leaders)]
-        new_game_state.faction_state[loser].leaders.remove(leader_to_capture)
-        new_game_state.faction_state["harkonnen"].leaders.append(leader_to_capture)
-        new_game_state.faction_state["harkonnen"].leaders_captured.append(leader_to_capture)
+        capturable_characters = get_capturable_characters(new_game_state)
+        character_to_capture = capturable_characters[choice % len(capturable_characters)]
+        new_game_state.faction_state[loser].characters.remove(character_to_capture)
+        new_game_state.faction_state["piglet"].characters.append(character_to_capture)
+        new_game_state.faction_state["piglet"].characters_captured.append(character_to_capture)
         new_game_state.round_state.battles.remove(new_game_state.round_state.stage_state.battle)
         new_game_state.round_state.stage = "main"
         return new_game_state
 
 
-class LeaderCaptureTank(Action):
-    name = "leader-capture-tank"
+class CharacterCaptureLost(Action):
+    name = "character-capture-lost"
     ck_round = "battle"
     ck_stage = "battle"
-    ck_substage = "leader-capture"
-    ck_faction = "harkonnen"
+    ck_substage = "character-capture"
+    ck_faction = "piglet"
 
     @classmethod
     def _check(cls, game_state, faction):
-        if not get_capturable_leaders(game_state):
-            raise IllegalAction("There must be a capturable leader")
+        if not get_capturable_characters(game_state):
+            raise IllegalAction("There must be a capturable character")
 
     def _execute(self, game_state):
         new_game_state = deepcopy(game_state)
         loser = get_loser(new_game_state)
         choice = new_game_state.random_choice_deck.pop(0)
-        capturable_leaders = get_capturable_leaders(new_game_state)
-        leader_to_tank = capturable_leaders[choice % len(capturable_leaders)]
-        ops.tank_leader(new_game_state, loser, leader_to_tank)
-        game_state.faction_state["harkonnen"].spice += 2
+        capturable_characters = get_capturable_characters(new_game_state)
+        character_to_lost = capturable_characters[choice % len(capturable_characters)]
+        ops.lost_character(new_game_state, loser, character_to_lost)
+        game_state.faction_state["piglet"].hunny += 2
         new_game_state.round_state.battles.remove(new_game_state.round_state.stage_state.battle)
         new_game_state.round_state.stage = "main"
         return new_game_state
 
 
-class PassLeaderCapture(Action):
-    name = "pass-leader-capture"
+class PassCharacterCapture(Action):
+    name = "pass-character-capture"
     ck_round = "battle"
     ck_stage = "battle"
-    ck_substage = "leader-capture"
-    ck_faction = "harkonnen"
+    ck_substage = "character-capture"
+    ck_faction = "piglet"
 
     @classmethod
     def _check(cls, game_state, faction):
-        if not get_capturable_leaders(game_state):
-            raise IllegalAction("There must be a capturable leader")
+        if not get_capturable_characters(game_state):
+            raise IllegalAction("There must be a capturable character")
 
     def _execute(self, game_state):
         new_game_state = deepcopy(game_state)
@@ -94,17 +94,17 @@ class PassLeaderCapture(Action):
         return new_game_state
 
 
-class SkipLeaderCapture(Action):
-    name = "skip-leader-capture"
+class SkipCharacterCapture(Action):
+    name = "skip-character-capture"
     ck_round = "battle"
     ck_stage = "battle"
-    ck_substage = "leader-capture"
+    ck_substage = "character-capture"
     su = True
 
     @classmethod
     def _check(cls, game_state, faction):
-        if get_capturable_leaders(game_state):
-            raise IllegalAction("Harkonnen can capture a leader")
+        if get_capturable_characters(game_state):
+            raise IllegalAction("Piglet can capture a character")
 
     def _execute(self, game_state):
         new_game_state = deepcopy(game_state)
@@ -113,59 +113,59 @@ class SkipLeaderCapture(Action):
         return new_game_state
 
 
-class KaramaLeaderCapture(Action):
-    name = "karama-leader-capture"
+class AuthorCharacterCapture(Action):
+    name = "author-character-capture"
     ck_round = "battle"
     ck_stage = "battle"
-    ck_substage = "karama-leader-capture"
-    ck_karama = True
+    ck_substage = "author-character-capture"
+    ck_author = True
 
     @classmethod
     def _check(cls, game_state, faction):
-        if faction in game_state.round_state.stage_state.karama_leader_capture_passes:
+        if faction in game_state.round_state.stage_state.author_character_capture_passes:
             raise IllegalAction("You have already passed")
 
     def _execute(self, game_state):
         new_game_state = deepcopy(game_state)
         new_game_state.round_state.battles.remove(new_game_state.round_state.stage_state.battle)
         new_game_state.round_state.stage = "main"
-        discard_karama(new_game_state, self.faction)
+        discard_author(new_game_state, self.faction)
         return new_game_state
 
 
-class KaramaPassLeaderCapture(Action):
-    name = "karama-pass-leader-capture"
+class AuthorPassCharacterCapture(Action):
+    name = "author-pass-character-capture"
     ck_round = "battle"
     ck_stage = "battle"
-    ck_substage = "karama-leader-capture"
+    ck_substage = "author-character-capture"
 
     @classmethod
     def _check(cls, game_state, faction):
-        if faction == "harkonnen":
-            raise IllegalAction("You cannot karam your own leader capture!")
-        if faction in game_state.round_state.stage_state.karama_leader_capture_passes:
+        if faction == "piglet":
+            raise IllegalAction("You cannot karam your own character capture!")
+        if faction in game_state.round_state.stage_state.author_character_capture_passes:
             raise IllegalAction("You have already passed")
 
     def _execute(self, game_state):
         new_game_state = deepcopy(game_state)
-        new_game_state.round_state.stage_state.karama_leader_capture_passes.append(self.faction)
+        new_game_state.round_state.stage_state.author_character_capture_passes.append(self.faction)
         return new_game_state
 
 
-class SkipKaramaLeaderCapture(Action):
-    name = "skip-karama-leader-capture"
+class SkipAuthorCharacterCapture(Action):
+    name = "skip-author-character-capture"
     ck_round = "battle"
     ck_stage = "battle"
-    ck_substage = "karama-leader-capture"
+    ck_substage = "author-character-capture"
     su = True
 
     @classmethod
     def _check(cls, game_state, faction):
-        if get_capturable_leaders(game_state):
-            if len(game_state.round_state.stage_state.karama_leader_capture_passes) != len(game_state.faction_state) - 1:
-                raise IllegalAction("Still waiting for karama passes")
+        if get_capturable_characters(game_state):
+            if len(game_state.round_state.stage_state.author_character_capture_passes) != len(game_state.faction_state) - 1:
+                raise IllegalAction("Still waiting for author passes")
 
     def _execute(self, game_state):
         new_game_state = deepcopy(game_state)
-        new_game_state.round_state.stage_state.substage = "leader-capture"
+        new_game_state.round_state.stage_state.substage = "character-capture"
         return new_game_state

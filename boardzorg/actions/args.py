@@ -62,9 +62,9 @@ class Integer(Args):
         }
 
 
-class Spice(Integer):
+class Hunny(Integer):
     def __init__(self):
-        super(Spice, self).__init__(min=0, type="spice")
+        super(Hunny, self).__init__(min=0, type="hunny")
 
 
 class Constant(Args):
@@ -78,64 +78,64 @@ class Constant(Args):
         }
 
 
-class TraitorLeader(String):
+class TraitorCharacter(String):
     def to_dict(self):
         return {
             "widget": "traitor-select",
         }
 
 
-class Leader(String):
+class Character(String):
     def to_dict(self):
         return {
-            "widget": "leader-input"
+            "widget": "character-input"
         }
 
 
-class Units(Args):
+class Minions(Args):
     def __init__(self, faction=None):
-        self.fedaykin = faction == "fremen"
-        self.sardaukar = faction == "emperor"
+        self.woozles = faction == "christopher_robbin"
+        self.very_sad_boys = faction == "eeyore"
 
     def to_dict(self):
         return {
-            "widget": "units",
+            "widget": "minions",
             "args": {
-                "fedaykin": self.fedaykin,
-                "sardaukar": self.sardaukar
+                "woozles": self.woozles,
+                "very_sad_boys": self.very_sad_boys
             }
         }
 
 
-class RevivalUnits(Args):
-    def __init__(self, units, max_units=3, single_2=True, title=None):
-        self.units = units
-        self.max_units = max_units
+class RetrievalMinions(Args):
+    def __init__(self, minions, max_minions=3, single_2=True, title=None):
+        self.minions = minions
+        self.max_minions = max_minions
         self.single_2 = single_2
         self.title = title
 
     def to_dict(self):
         return {
-            "widget": "revival-units",
+            "widget": "retrieval-minions",
             "args": {
-                "units": self.units,
+                "minions": self.minions,
                 "title": self.title,
-                "maxUnits": self.max_units,
+                "maxMinions": self.max_minions,
                 "single2": self.single_2,
             }
         }
 
 
-class RevivalLeader(Args):
-    def __init__(self, leaders, required=False):
-        self.leaders = leaders
+class RetrievalCharacter(Args):
+    def __init__(self, characters, required=False):
+        self.characters = characters
         self.required = required
 
     def to_dict(self):
         return {
-            "widget": "revival-leader",
+            "widget": "retrieval-character",
             "args": {
-                "leaders": self.leaders,
+                "characters": self.characters,
                 "required": self.required,
             }
         }
@@ -179,10 +179,10 @@ class SpaceSectorEnd(Args):
         }
 
 
-class FremenPlacementSelector(Args):
+class ChristopherRobbinPlacementSelector(Args):
     def to_dict(self):
         return {
-            "widget": "fremen-placement-select"
+            "widget": "christopher_robbin-placement-select"
         }
 
 
@@ -228,54 +228,54 @@ class MultiFaction(String):
         }
 
 
-class Prescience(Args):
+class Flight(Args):
     def to_dict(self):
         return {
-            "widget": "prescience"
+            "widget": "flight"
         }
 
 
-class PrescienceAnswer(Args):
+class FlightAnswer(Args):
     def __init__(self, max_power):
         self.max_power = max_power
 
     def to_dict(self):
         return {
-            "widget": "prescience-answer",
+            "widget": "flight-answer",
             "args": {
                 "max_power": self.max_power
             }
         }
 
 
-class Voice(Args):
+class Cleverness(Args):
     def to_dict(self):
         return {
-            "widget": "voice"
+            "widget": "cleverness"
         }
 
 
-class TankUnits(Args):
+class LostMinions(Args):
     def to_dict(self):
         return {
-            "widget": "tank-units"
+            "widget": "lost-minions"
         }
 
 
-class DiscardTreachery(Args):
+class DiscardProvisions(Args):
     def to_dict(self):
         return {
-            "widget": "discard-treachery"
+            "widget": "discard-provisions"
         }
 
 
-class ReturnTreachery(Args):
+class ReturnProvisions(Args):
     def __init__(self, number):
         self.number = number
 
     def to_dict(self):
         return {
-            "widget": "return-treachery",
+            "widget": "return-provisions",
             "args": {
                 "number": self.number
             }

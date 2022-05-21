@@ -1,15 +1,15 @@
 from boardzorg.state.rounds import RoundState
 
 
-class RevivalRound(RoundState):
-    round = "revival"
+class RetrievalRound(RoundState):
+    round = "retrieval"
 
     def __init__(self):
         self.stage = "main"
         self.faction_turn = None
         self.factions_done = []
-        self.fremen_blessings = []
-        self.emperor_ally_revival_done = False
+        self.christopher_robbin_blessings = []
+        self.eeyore_ally_retrieval_done = False
 
     def visible(self, game_state, faction):
         visible = super().visible(game_state, faction)

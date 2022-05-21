@@ -9,9 +9,9 @@ import Actions from './actions';
 import Bidding from './rounds/bidding';
 import Battle from './rounds/battle';
 import Movement from './rounds/movement';
-import Revival from './rounds/revival';
-import Nexus from './rounds/nexus';
-import Spice from './rounds/spice';
+import Retrieval from './rounds/retrieval';
+import Picnick from './rounds/picnick';
+import Hunny from './rounds/hunny';
 import Deck from './components/deck';
 import update from 'immutability-helper';
 
@@ -22,10 +22,10 @@ function titleCase(str) {
   }).join(' ');
 }
 
-const GetFactionOrder = (logoPositions, stormSector) => {
+const GetFactionOrder = (logoPositions, beesSector) => {
     const factionOrder = []
     for (let i=0; i<18; i++){
-        const sector = (stormSector + i + 1) % 18
+        const sector = (beesSector + i + 1) % 18
         logoPositions.forEach(([name, position]) => {
             if (position === sector) {
                 factionOrder.push(name);
@@ -44,15 +44,15 @@ const GetLogoPositions = (faction_state) => {
 }
 
 
-const RoundState = ({roundState, stormPosition, logoPositions, interaction, selection, winner}) => {
+const RoundState = ({roundState, beesPosition, logoPositions, interaction, selection, winner}) => {
     let text = roundState.round === undefined ? roundState + " round" : roundState.round + " round";
     if (roundState.stage !== undefined) {
         text += "» " + roundState.stage;
     }
     let stateDiv = null;
-    let factionOrder = GetFactionOrder(logoPositions, stormPosition);
-    if (roundState && roundState.round == "nexus"){
-        stateDiv = <Nexus roundState={roundState} />;
+    let factionOrder = GetFactionOrder(logoPositions, beesPosition);
+    if (roundState && roundState.round == "picnick"){
+        stateDiv = <Picnick roundState={roundState} />;
     }
     if (roundState && roundState.round == "bidding"){
         stateDiv = <Bidding factionOrder={factionOrder} roundstate={roundState} />;
@@ -63,11 +63,11 @@ const RoundState = ({roundState, stormPosition, logoPositions, interaction, sele
     if (roundState && roundState.round == "battle"){
         stateDiv = <Battle factionOrder={factionOrder} roundstate={roundState} interaction={interaction} selection={selection}/>;
     }
-    if (roundState && roundState.round == "revival") {
-        stateDiv = <Revival factionOrder={factionOrder} roundState={roundState} />;
+    if (roundState && roundState.round == "retrieval") {
+        stateDiv = <Retrieval factionOrder={factionOrder} roundState={roundState} />;
     }
-    if (roundState && roundState.round == "spice") {
-        stateDiv = <Spice roundState={roundState} />;
+    if (roundState && roundState.round == "hunny") {
+        stateDiv = <Hunny roundState={roundState} />;
     }
     if (roundState == "end") {
         stateDiv = <div className="winner">{winner} Wins!!</div>;
@@ -207,13 +207,13 @@ export default function Session({state, actions, history, me, error, sendCommand
         return <Faction key={faction} me={me} faction={faction} factionstate={state.faction_state[faction]} selection={selection}/>;
     });
 
-    let futureStorm = undefined;
-    if (state.storm_deck.next !== undefined) {
-        futureStorm = (state.storm_deck.next + state.storm_position) % 18;
+    let futureBees = undefined;
+    if (state.bees_deck.next !== undefined) {
+        futureBees = (state.bees_deck.next + state.bees_position) % 18;
     }
-    let futureSpice = undefined;
-    if (state.spice_deck.next !== undefined) {
-        futureSpice = state.spice_deck.next;
+    let futureHunny = undefined;
+    if (state.hunny_deck.next !== undefined) {
+        futureHunny = state.hunny_deck.next;
     }
     const logoPositions = GetLogoPositions(state.faction_state);
 
@@ -228,15 +228,15 @@ export default function Session({state, actions, history, me, error, sendCommand
                     backgroundColor: "white",
                     margin: 20
                 }}>
-                    <RoundState interaction={interaction} selection={selection} roundState={state.round_state} logoPositions={logoPositions} stormPosition={state.storm_position} winner={state.winner} />
+                    <RoundState interaction={interaction} selection={selection} roundState={state.round_state} logoPositions={logoPositions} beesPosition={state.bees_position} winner={state.winner} />
                     <Actions me={me} state={state} interaction={interaction} setInteraction={setInteraction} error={errorState} actions={actions} sendCommand={sendCommand} setInteractionFlow={setInteractionFlow} updateSelection={updateSelection} clearSelection={clearSelection}/>
                 </div>
                 <div style={{display:"flex"}}>
                     <Board me={me} interaction={interaction} selection={selection} logoPositions={logoPositions}
-                           stormSector={state.storm_position} futureStorm={futureStorm} futureSpice={futureSpice} state={state} />
+                           beesSector={state.bees_position} futureBees={futureBees} futureHunny={futureHunny} state={state} />
                     <div style={{display:"flex", flexDirection:"column", justifyContent:"space-between"}}>
-                        <Deck type="Treachery" facedown={state.treachery_deck} faceup={state.treachery_discard} />
-                        <Deck type="Spice" facedown={state.spice_deck} faceup={state.spice_discard} />
+                        <Deck type="Provisions" facedown={state.provisions_deck} faceup={state.provisions_discard} />
+                        <Deck type="Hunny" facedown={state.hunny_deck} faceup={state.hunny_discard} />
                     </div>
                 </div>
             </div>

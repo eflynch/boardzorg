@@ -9,8 +9,8 @@ from boardzorg.actions.battle import ops
 logger = getLogger(__name__)
 
 
-class TankUnits(Action):
-    name = "tank-units"
+class LostMinions(Action):
+    name = "lost-minions"
     ck_round = "battle"
     ck_stage = "battle"
     ck_substage = "winner"
@@ -19,15 +19,15 @@ class TankUnits(Action):
     def parse_args(cls, faction, args):
         groups = []
         for g in args.split(" "):
-            sector, units = g.split(":")
-            units = [int(u) for u in units.split(",")]
+            sector, minions = g.split(":")
+            minions = [int(u) for u in minions.split(",")]
             sector = int(sector)
-            groups.append((sector, units))
-        return TankUnits(faction, groups)
+            groups.append((sector, minions))
+        return LostMinions(faction, groups)
 
     @classmethod
     def get_arg_spec(cls, faction, game_state=None):
-        return args.TankUnits()
+        return args.LostMinions()
 
     def __init__(self, faction, groups):
         self.faction = faction
@@ -37,26 +37,26 @@ class TankUnits(Action):
     def _check(cls, game_state, faction):
         if faction != game_state.round_state.stage_state.winner:
             raise IllegalAction("You need to be the winner yo")
-        if not game_state.round_state.stage_state.substage_state.power_left_to_tank:
-            raise IllegalAction("No power left to tank")
+        if not game_state.round_state.stage_state.substage_state.power_left_to_lost:
+            raise IllegalAction("No power left to lost")
 
     def _execute(self, game_state):
         new_game_state = deepcopy(game_state)
         battle_id = new_game_state.round_state.stage_state.battle
         space = new_game_state.map_state[battle_id[2]]
-        for sector, units in self.groups:
+        for sector, minions in self.groups:
             if sector not in space.forces[self.faction]:
                 raise BadCommand("Bad sector {}".format(sector))
-            for u in units:
-                if new_game_state.round_state.stage_state.substage_state.power_left_to_tank <= 0:
-                    raise BadCommand("Tanking too many units")
-                new_game_state.round_state.stage_state.substage_state.power_left_to_tank -= u
-                ops.tank_unit(new_game_state, self.faction, space, sector, u)
+            for u in minions:
+                if new_game_state.round_state.stage_state.substage_state.power_left_to_lost <= 0:
+                    raise BadCommand("Losting too many minions")
+                new_game_state.round_state.stage_state.substage_state.power_left_to_lost -= u
+                ops.lost_minion(new_game_state, self.faction, space, sector, u)
 
         return new_game_state
 
 
-class DiscardTreachery(Action):
+class DiscardProvisions(Action):
     name = "discard"
     ck_round = "battle"
     ck_stage = "battle"
@@ -66,7 +66,7 @@ class DiscardTreachery(Action):
     def parse_args(cls, faction, args):
         weapon = "weapon" in args
         defense = "defense" in args
-        return DiscardTreachery(faction, weapon, defense)
+        return DiscardProvisions(faction, weapon, defense)
 
     def __init__(self, faction, weapon, defense):
         self.faction = faction
@@ -75,7 +75,7 @@ class DiscardTreachery(Action):
 
     @classmethod
     def get_arg_spec(cls, faction=None, game_state=None):
-        return args.DiscardTreachery()
+        return args.DiscardProvisions()
 
     @classmethod
     def _check(cls, game_state, faction):
@@ -94,9 +94,9 @@ class DiscardTreachery(Action):
         def _do_discard(do_it, kind):
             if do_it:
                 if winner_plan[kind] is not None:
-                    ops.discard_treachery(new_game_state, winner_plan[kind])
+                    ops.discard_provisions(new_game_state, winner_plan[kind])
             elif winner_plan[kind] is not None:
-                fs.treachery.append(winner_plan[kind])
+                fs.provisions.append(winner_plan[kind])
 
         _do_discard(self.weapon, "weapon")
         _do_discard(self.defense, "defense")
@@ -120,25 +120,25 @@ class ConcludeWinner(Action):
             winner_plan = ss.attacker_plan if (ss.winner == ss.battle[0]) else ss.defender_plan
             if winner_plan["weapon"] or winner_plan["defense"]:
                 raise IllegalAction("Winner must decide what to discard if anything")
-        if game_state.round_state.stage_state.substage_state.power_left_to_tank > 0:
-            raise IllegalAction("Winner must still tank some units")
+        if game_state.round_state.stage_state.substage_state.power_left_to_lost > 0:
+            raise IllegalAction("Winner must still lost some minions")
 
     def _execute(self, game_state):
         new_game_state = deepcopy(game_state)
 
-        # Return captured leader if used
+        # Return captured character if used
         [attacker, defender, space, _] = new_game_state.round_state.stage_state.battle
         attacker_plan = new_game_state.round_state.stage_state.attacker_plan
         defender_plan = new_game_state.round_state.stage_state.defender_plan
-        if attacker_plan["leader"] in new_game_state.faction_state[attacker].leaders_captured:
-            ops.return_leader(new_game_state, capturing_faction=attacker, leader=attacker_plan["leader"])
-        if defender_plan["leader"] in new_game_state.faction_state[defender].leaders_captured:
-            ops.return_leader(new_game_state, capturing_faction=defender, leader=defender_plan["leader"])
+        if attacker_plan["character"] in new_game_state.faction_state[attacker].characters_captured:
+            ops.return_character(new_game_state, capturing_faction=attacker, character=attacker_plan["character"])
+        if defender_plan["character"] in new_game_state.faction_state[defender].characters_captured:
+            ops.return_character(new_game_state, capturing_faction=defender, character=defender_plan["character"])
 
         space = new_game_state.map_state[space]
-        # If bene-gesserit not present or alone, there can be no advisors
-        if "bene-gesserit" not in space.forces or len(space.forces) == 1:
-            space.coexist = False
+        # If rabbit not present or alone, there can be no frends_and_raletions
+        if "rabbit" not in space.forces or len(space.forces) == 1:
+            space.chill_out = False
 
-        new_game_state.round_state.stage_state.substage = "karama-leader-capture"
+        new_game_state.round_state.stage_state.substage = "author-character-capture"
         return new_game_state

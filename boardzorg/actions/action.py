@@ -1,6 +1,6 @@
 from boardzorg.exceptions import IllegalAction
 from boardzorg.actions.args import Args
-from boardzorg.state.treachery_cards import WORTHLESS
+from boardzorg.state.provisions_cards import WORTHLESS
 
 
 class ActionMeta(type):
@@ -31,30 +31,30 @@ class Action(object, metaclass=ActionMeta):
         return Args()
 
     @classmethod
-    def check_karama(cls, game_state, faction, exception=None):
+    def check_author(cls, game_state, faction, exception=None):
         if faction is None:
             raise IllegalAction("Got to be someone to do this")
 
-        if game_state.karama_context[faction] is not None:
-            if (not hasattr(cls, "ck_karama_context")) or game_state.karama_context[faction] not in cls.ck_karama_context:
+        if game_state.author_context[faction] is not None:
+            if (not hasattr(cls, "ck_author_context")) or game_state.author_context[faction] not in cls.ck_author_context:
                 if exception is None:
-                    raise IllegalAction("Karama is spoken for")
+                    raise IllegalAction("Author is spoken for")
                 else:
                     raise exception
 
-        is_bene = faction == "bene-gesserit"
-        has_karama = "Karama" in game_state.faction_state[faction].treachery
-        worthless_count = sum([1 for card in game_state.faction_state[faction].treachery if card in WORTHLESS])
+        is_bene = faction == "rabbit"
+        has_author = "Author" in game_state.faction_state[faction].provisions
+        worthless_count = sum([1 for card in game_state.faction_state[faction].provisions if card in WORTHLESS])
         if is_bene:
-            if not has_karama and worthless_count == 0:
+            if not has_author and worthless_count == 0:
                 if exception is None:
-                    raise IllegalAction("You need a Karama card or Worthless card")
+                    raise IllegalAction("You need a Author card or Worthless card")
                 else:
                     raise exception
         else:
-            if not has_karama:
+            if not has_author:
                 if exception is None:
-                    raise IllegalAction("You need a Karama card")
+                    raise IllegalAction("You need a Author card")
                 else:
                     raise exception
 
@@ -97,9 +97,9 @@ class Action(object, metaclass=ActionMeta):
         return None
 
     @classmethod
-    def check_faction_karama(cls, game_state, faction):
-        if game_state.faction_state[faction].used_faction_karama:
-            raise IllegalAction(f"{faction} must have not used their faction karama power")
+    def check_faction_author(cls, game_state, faction):
+        if game_state.faction_state[faction].used_faction_author:
+            raise IllegalAction(f"{faction} must have not used their faction author power")
 
     @classmethod
     def check(cls, game_state, faction):
@@ -117,16 +117,16 @@ class Action(object, metaclass=ActionMeta):
         if hasattr(cls, "ck_faction"):
             if faction != cls.ck_faction:
                 raise IllegalAction("Only {} can {}".format(cls.ck_faction, cls.name))
-        if hasattr(cls, "ck_karama"):
-            cls.check_karama(game_state, faction) 
-        if hasattr(cls, "ck_faction_karama"):
-            if faction != cls.ck_faction_karama:
-                raise IllegalAction("Only {} can {}".format(cls.ck_faction_karama, cls.name))
-            cls.check_faction_karama(game_state, faction)
-        if hasattr(cls, "ck_treachery"):
+        if hasattr(cls, "ck_author"):
+            cls.check_author(game_state, faction) 
+        if hasattr(cls, "ck_faction_author"):
+            if faction != cls.ck_faction_author:
+                raise IllegalAction("Only {} can {}".format(cls.ck_faction_author, cls.name))
+            cls.check_faction_author(game_state, faction)
+        if hasattr(cls, "ck_provisions"):
             if faction not in game_state.faction_state:
                 raise IllegalAction("You can't be doing that")
-            if cls.ck_treachery not in game_state.faction_state[faction].treachery:
+            if cls.ck_provisions not in game_state.faction_state[faction].provisions:
                 raise IllegalAction("Cannot use a card you don't have")
         if game_state.pause_context is not None:
             if not hasattr(cls, "ck_pause_context"):
@@ -158,5 +158,5 @@ class Action(object, metaclass=ActionMeta):
 
 
 # These unsed imports register the Action classes
-from boardzorg.actions import setup, storm, spice, nexus, bidding, treachery  # noqa # pylint: disable=unused-import
-from boardzorg.actions import revival, movement, battle, collection, control  # noqa # pylint: disable=unused-import
+from boardzorg.actions import setup, bees, hunny, picnick, bidding, provisions  # noqa # pylint: disable=unused-import
+from boardzorg.actions import retrieval, movement, battle, collection, control  # noqa # pylint: disable=unused-import

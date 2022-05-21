@@ -1,23 +1,23 @@
-export const SpiceLocations = {
-    "Hagga-Basin": {top: 0.36, left: 0.39},
+export const HunnyLocations = {
+    "Rather-Boggy-And-Sad": {top: 0.36, left: 0.39},
     "Broken-Land": {top: 0.12, left: 0.35},
     "Old-Gap": {top: 0.10, left: 0.60},
     "Sihaya-Ridge": {top: 0.20, left: 0.79},
     "Red-Chasm": {top: 0.46, left: 0.905},
-    "Minor-Erg": {top: 0.43, left: 0.64},
-    "Cielago-North": {top: 0.64, left: 0.555},
-    "South-Mesa": {top: 0.66, left: 0.87},
+    "Nice-For-Picnick": {top: 0.43, left: 0.64},
+    "Big-Stones-And-Rox": {top: 0.64, left: 0.555},
+    "Meadowy-Pit-Where-Roo-Plays": {top: 0.66, left: 0.87},
     "Cielago-South": {top: 0.90, left: 0.51},
-    "Habbanya-Ridge-Flat": {top: 0.80, left: 0.25},
+    "Pooh-Trap-For-Heffalumps": {top: 0.80, left: 0.25},
     "Habbanya-Erg": {top: 0.60, left: 0.12},
-    "The-Great-Flat": {top: 0.475, left: 0.11},
-    "Wind-Pass-North": {top: 0.545, left: 0.41},
-    "Rock-Outcroppings": {top: 0.255, left: 0.17},
+    "My-House": {top: 0.475, left: 0.11},
+    "Crosstern-River-North": {top: 0.545, left: 0.41},
+    "Woods-Outcroppings": {top: 0.255, left: 0.17},
     "Funeral-Plain": {top: 0.395, left: 0.14}
 }
 
 export const TokenLocations = {
-  "Polar-Sink": {
+  "The-North-Pole": {
     "-1": {
       "1": {
         "top": 0.5,
@@ -269,7 +269,7 @@ export const TokenLocations = {
       }
     }
   },
-  "Hole-in-the-Rock": {
+  "Hole-in-the-Woods": {
     "8": {
       "1": {
         "top": 0.275,
@@ -297,7 +297,7 @@ export const TokenLocations = {
       }
     }
   },
-  "Minor-Erg": {
+  "Nice-For-Picnick": {
     "5": {
       "1": {
         "top": 0.5225,
@@ -403,7 +403,7 @@ export const TokenLocations = {
       }
     }
   },
-  "Plastic-Basin": {
+  "Rabbits-Frends-And-Raletions": {
     "11": {
       "1": {
         "top": 0.18,
@@ -725,7 +725,7 @@ export const TokenLocations = {
       }
     }
   },
-  "Pasty-Mesa": {
+  "Six-Pine-Trees": {
     "5": {
       "1": {
         "top": 0.55125,
@@ -859,7 +859,7 @@ export const TokenLocations = {
       }
     }
   },
-  "Meridian": {
+  "LowerRiver": {
     "1": {
       "1": {
         "top": 0.88125,
@@ -913,7 +913,7 @@ export const TokenLocations = {
       }
     }
   },
-  "South-Mesa": {
+  "Meadowy-Pit-Where-Roo-Plays": {
     "3": {
       "1": {
         "top": 0.785,
@@ -967,7 +967,7 @@ export const TokenLocations = {
       }
     }
   },
-  "Rock-Outcroppings": {
+  "Woods-Outcroppings": {
     "13": {
       "1": {
         "top": 0.27,
@@ -1075,7 +1075,7 @@ export const TokenLocations = {
       }
     }
   },
-  "Cielago-North": {
+  "Big-Stones-And-Rox": {
     "1": {
       "1": {
         "top": 0.6425,
@@ -1155,7 +1155,7 @@ export const TokenLocations = {
       }
     }
   },
-  "The-Great-Flat": {
+  "My-House": {
     "14": {
       "1": {
         "top": 0.47375,
@@ -1183,7 +1183,7 @@ export const TokenLocations = {
       }
     }
   },
-  "Carthag": {
+  "PigletsHouse": {
     "10": {
       "1": {
         "top": 0.25,
@@ -1211,7 +1211,7 @@ export const TokenLocations = {
       }
     }
   },
-  "Wind-Pass": {
+  "Crosstern-River": {
     "13": {
       "1": {
         "top": 0.4575,
@@ -1371,7 +1371,7 @@ export const TokenLocations = {
       }
     }
   },
-  "Tueks-Sietch": {
+  "Kangas-House": {
     "4": {
       "1": {
         "top": 0.66625,
@@ -1399,7 +1399,7 @@ export const TokenLocations = {
       }
     }
   },
-  "False-Wall-South": {
+  "Leftern-Woods": {
     "3": {
       "1": {
         "top": 0.69625,
@@ -1453,7 +1453,7 @@ export const TokenLocations = {
       }
     }
   },
-  "Wind-Pass-North": {
+  "Crosstern-River-North": {
     "17": {
       "1": {
         "top": 0.59625,
@@ -1507,7 +1507,7 @@ export const TokenLocations = {
       }
     }
   },
-  "Habbanya-Sietch": {
+  "Poohs-House": {
     "16": {
       "1": {
         "top": 0.71,
@@ -1535,7 +1535,7 @@ export const TokenLocations = {
       }
     }
   },
-  "Hagga-Basin": {
+  "Rather-Boggy-And-Sad": {
     "11": {
       "1": {
         "top": 0.3025,
@@ -1727,7 +1727,7 @@ export const TokenLocations = {
       }
     }
   },
-  "Habbanya-Ridge-Flat": {
+  "Pooh-Trap-For-Heffalumps": {
     "17": {
       "1": {
         "top": 0.80125,
@@ -1781,7 +1781,7 @@ export const TokenLocations = {
       }
     }
   },
-  "False-Wall-East": {
+  "Some-More-Woods": {
     "8": {
       "1": {
         "top": 0.43625,
@@ -1913,7 +1913,7 @@ export const TokenLocations = {
       }
     }
   },
-  "Gara-Kulon": {
+  "Gara-GorseBush": {
     "7": {
       "1": {
         "top": 0.275,
@@ -1941,7 +1941,7 @@ export const TokenLocations = {
       }
     }
   },
-  "Arrakeen": {
+  "OwlsHouse": {
     "9": {
       "1": {
         "top": 0.21625,
@@ -1969,7 +1969,7 @@ export const TokenLocations = {
       }
     }
   },
-  "Shield-Wall": {
+  "Bee-Tree": {
     "8": {
       "1": {
         "top": 0.35625,
@@ -2023,7 +2023,7 @@ export const TokenLocations = {
       }
     }
   },
-  "Rim-Wall-West": {
+  "Some-Woods": {
     "8": {
       "1": {
         "top": 0.23875,
@@ -2051,7 +2051,7 @@ export const TokenLocations = {
       }
     }
   },
-  "Cielago-West": {
+  "Upper-River": {
     "0": {
       "1": {
         "top": 0.77625,
@@ -2139,7 +2139,7 @@ export const TokenLocations = {
       }
     }
   },
-  "False-Wall-West": {
+  "Where-The-Woozle-Wasnt": {
     "15": {
       "1": {
         "top": 0.54625,
@@ -2219,7 +2219,7 @@ export const TokenLocations = {
       }
     }
   },
-  "Imperial-Basin": {
+  "Eeyores-Gloomy-Place": {
     "9": {
       "1": {
         "top": 0.32625,
@@ -2299,7 +2299,7 @@ export const TokenLocations = {
       }
     }
   },
-  "Sietch-Tabr": {
+  "Rabbits-House": {
     "13": {
       "1": {
         "top": 0.32125,

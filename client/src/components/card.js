@@ -9,7 +9,7 @@ export default function Card({type, name, selected, onClick, width, children, pe
     if (width === undefined) {
         width = 125;
     }
-    if (name === "Cheap-Hero/Heroine"){
+    if (name === "Stuffed-Animal"){
         name = ["Cheap-Hero", "Cheap-Heroine"][randInt(0,1)];
     }
     let examineStyle = {

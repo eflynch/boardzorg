@@ -355,7 +355,7 @@ img.alive {
     padding-right: 5px;
 }
 
-.unit-select .label{
+.minion-select .label{
     width: 150px;
     margin-right: 10px;
     text-align: left;
@@ -438,7 +438,7 @@ img.alive {
     filter: hue-rotate(100deg) drop-shadow(3px 3px 3px #888888);
 }
 
-.storm {
+.bees {
     pointer-events: none;
 }
 
@@ -460,23 +460,23 @@ img.alive {
     color: black;
 }
 
-.leader-token {
+.character-token {
     filter: drop-shadow(3px 3px 3px #888888);
 }
 
-.leader-token.active:hover {
+.character-token.active:hover {
     filter: brightness(1.25) drop-shadow(3px 3px 3px #888888);
 }
 
-.leader-token.selected:hover {
+.character-token.selected:hover {
     filter: brightness(2) drop-shadow(3px 3px 3px #888888);
 }
 
-.leader-token.selected {
+.character-token.selected {
     filter: brightness(2) drop-shadow(3px 3px 3px #888888);
 }
 
-.leader-token.traitor {
+.character-token.traitor {
     filter: hue-rotate(180deg) drop-shadow(3px 3px 3px #888888) contrast(100)!important;
 }
 
@@ -484,7 +484,7 @@ img.alive {
     pointer-events: none;
 }
 
-.spice-pile {
+.hunny-pile {
     pointer-events: none;
 }
 
@@ -523,7 +523,7 @@ img.alive {
     color: #feffbe;
 }
 
-.shai-hulud {
+.heffalump {
     pointer-events: none;
 }
 
@@ -552,7 +552,7 @@ img.alive {
     box-shadow: 3px 3px 2px 3px #888888;
 }
 
-.big-unit {
+.big-minion {
     font-size: 30px;
     margin-left: 10px;
 }
@@ -566,7 +566,7 @@ img.alive {
     filter: brightness(1.0) drop-shadow(3px 3px 3px #888888);
 }
 
-.question-leader {
+.question-character {
     display: flex;
     justify-content:center;
     align-items: center;

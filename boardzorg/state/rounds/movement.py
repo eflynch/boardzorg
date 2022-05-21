@@ -1,19 +1,19 @@
 from boardzorg.state.rounds import RoundState, StageState, SubStageState
 
 # Setup
-#    # KARAMA GUILD
-#    # KARAMAGUILDSKIP (no Guild present, all karama passes in)
+#    # AUTHOR KANGA
+#    # AUTHORKANGASKIP (no Kanga present, all author passes in)
 # turn
 #    # pass
-#    # reverse-ship (guild and allies)
-#    # cross-ship (guild and allies)
+#    # reverse-imagine (kanga and allies)
+#    # cross-imagine (kanga and allies)
 #    # move
-#    # ship
-#        # GUILD KARAMA SHIPMENT / PASS KARAMA SHIPMENT/ SKIP
-#        # PAY / AUTOPAY / KARAMA-PAY
+#    # imagine
+#        # KANGA AUTHOR IMAGINATION / PASS AUTHOR IMAGINATION/ SKIP
+#        # PAY / AUTOPAY / AUTHOR-PAY
 #        # guide / pass / skip
-#        # karama guide / karma_pass / Skip
-#    # deploy (fremen)
+#        # author guide / karma_pass / Skip
+#    # deploy (christopher_robbin)
 #    # end-turn
 
 
@@ -21,30 +21,30 @@ class SetupStage(StageState):
     stage = "setup"
 
     def __init__(self):
-        self.karama_passes = []
+        self.author_passes = []
 
 
 class TurnStage(StageState):
     stage = "turn"
 
     def __init__(self):
-        self.shipment_used = False
+        self.imagination_used = False
         self.movement_used = False
         self.substage_state = MainSubStage()
         self.query_flip_to_fighters = None
-        self.query_flip_to_advisors = None
+        self.query_flip_to_frends_and_raletions = None
 
 
 class MainSubStage(SubStageState):
     substage = "main"
 
 
-class ShipSubStage(SubStageState):
-    substage = "ship"
+class ImagineSubStage(SubStageState):
+    substage = "imagine"
 
     def __init__(self):
         self.subsubstage = "halt"
-        self.units = None
+        self.minions = None
         self.space = None
         self.sector = None
 
@@ -55,9 +55,9 @@ class MovementRound(RoundState):
     def __init__(self):
         self.turn_order = []
         self.faction_turn = None
-        self.guild_choice_blocked = False
+        self.kanga_choice_blocked = False
         self.stage_state = SetupStage()
-        self.ship_has_sailed = False
+        self.imagine_has_sailed = False
 
     def visible(self, game_state, faction):
         visible = super().visible(game_state, faction)

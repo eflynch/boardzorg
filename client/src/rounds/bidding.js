@@ -10,12 +10,12 @@ class Bidding extends React.Component {
         let cards = [];
         let reverses = this.props.roundstate.up_for_auction.length;
         if (this.props.roundstate.up_for_auction.next !== undefined){
-            cards.push(<Card type="Treachery"
+            cards.push(<Card type="Provisions"
                 key="next" name={this.props.roundstate.up_for_auction.next}/>);
             reverses -=1;
         }
         for (let i=0; i<reverses;i++){
-            cards.push(<Card type="Treachery" key={i} name="Reverse"/>);
+            cards.push(<Card type="Provisions" key={i} name="Reverse"/>);
         }
         return cards;
     }

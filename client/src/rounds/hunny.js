@@ -2,8 +2,8 @@ import React from 'react';
 
 import FactionOrder from '../components/faction-order';
 
-export default function Spice({roundState}) {
-    if (!roundState.stage_state || roundState.stage_state.stage !== "worm") {
+export default function Hunny({roundState}) {
+    if (!roundState.stage_state || roundState.stage_state.stage !== "heffalump") {
         return [];
     }
 

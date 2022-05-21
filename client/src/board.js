@@ -2,9 +2,9 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import update from 'immutability-helper';
 
-import {SpiceLocations, TokenLocations, LogoLocations} from './board-data';
+import {HunnyLocations, TokenLocations, LogoLocations} from './board-data';
 
-import Spice from './components/spice';
+import Hunny from './components/hunny';
 import TokenPile from './components/token-pile';
 import {spacePaths, spaceSectorPaths, sectorPaths} from './paths';
 
@@ -44,8 +44,8 @@ const MapPart = ({className, selected, onClick, paths, ...props}) => {
     );
 }
 
-const Storm = ({sector, color}) => {
-    return <MapPart className="storm"
+const Bees = ({sector, color}) => {
+    return <MapPart className="bees"
         style={{
             fill: color
         }}
@@ -124,7 +124,7 @@ class Board extends React.Component {
                                        number={number}
                                        bonus={number !== power ? power - number : null}
                                        width={0.05}
-                                       coexist={space.coexist}
+                                       chill_out={space.chill_out}
                                        faction={faction}/>
                         ]
                     );
@@ -135,20 +135,20 @@ class Board extends React.Component {
         return tokens.map(([top, pile])=>pile);
     }
 
-    getSpice () {
+    getHunny () {
         let {map_state} = this.props.state;
-        let spice = [];
+        let hunny = [];
         for (let i=0; i < map_state.length; i++){
             let space = map_state[i];
-            if (!space.spice){
+            if (!space.hunny){
                 continue;
             }
-            const {left, top} = SpiceLocations[space.name];
-            spice.push(
-                <Spice key={space.name+"spice"} x={left - 0.04} y={top - 0.04} amount={space.spice} width={0.08} height={0.08}/>
+            const {left, top} = HunnyLocations[space.name];
+            hunny.push(
+                <Hunny key={space.name+"hunny"} x={left - 0.04} y={top - 0.04} amount={space.hunny} width={0.08} height={0.08}/>
             );
         }
-        return spice;
+        return hunny;
     }
 
     getLogos () {
@@ -266,23 +266,23 @@ class Board extends React.Component {
         return this._getMapParts(sectorPaths, "sector", onClick, selectedParts);
     }
 
-    getShaiHulud () {
-        let {shai_hulud, map_state} = this.props.state;
-        if (shai_hulud) {
-            const space = map_state.filter((s)=>s.name === shai_hulud)[0];
-            let wormLocation = TokenLocations[shai_hulud][space.sectors[0]][3];
-            if (space.spice_sector != undefined) {
-                wormLocation = SpiceLocations[shai_hulud];
+    getHeffalump () {
+        let {heffalump, map_state} = this.props.state;
+        if (heffalump) {
+            const space = map_state.filter((s)=>s.name === heffalump)[0];
+            let heffalumpLocation = TokenLocations[heffalump][space.sectors[0]][3];
+            if (space.hunny_sector != undefined) {
+                heffalumpLocation = HunnyLocations[heffalump];
             }
             return (
-                <image className={"shai-hulud"} xlinkHref={`/static/app/png/shai-hulud.png`} x={wormLocation.left - 0.09} y={wormLocation.top - 0.12} width={0.2} height={0.2}/>
+                <image className={"heffalump"} xlinkHref={`/static/app/png/heffalump.png`} x={heffalumpLocation.left - 0.09} y={heffalumpLocation.top - 0.12} width={0.2} height={0.2}/>
             );
         }
     }
 
     getAtomics() {
-        let {shield_wall} = this.props.state;
-        if (!shield_wall) {
+        let {umbrella_wall} = this.props.state;
+        if (!umbrella_wall) {
             return (
                 <image xlinkHref={`/static/app/png/atomics.png`} x={0.5} y={0.24} width={0.2} height={0.2} style={{opacity:0.8}}/>
             );
@@ -302,17 +302,17 @@ class Board extends React.Component {
                 </g>
             });
 
-        let futureStorm = <g/>;
-        if (this.props.futureStorm !== undefined) {
-            futureStorm = <Storm sector={this.props.futureStorm} color="rgba(0, 0, 255, 0.2)"/>;
+        let futureBees = <g/>;
+        if (this.props.futureBees !== undefined) {
+            futureBees = <Bees sector={this.props.futureBees} color="rgba(0, 0, 255, 0.2)"/>;
         }
-        let futureSpice = <g/>;
-        if (this.props.futureSpice !== undefined && this.props.futureSpice !== "Shai-Hulud") {
-            const spiceSector = map_state.filter((s)=>s.name === this.props.futureSpice)[0].spice_sector;
-            futureSpice = <MapPart style={{
+        let futureHunny = <g/>;
+        if (this.props.futureHunny !== undefined && this.props.futureHunny !== "Heffalump") {
+            const hunnySector = map_state.filter((s)=>s.name === this.props.futureHunny)[0].hunny_sector;
+            futureHunny = <MapPart style={{
                 fill: "green",
                 opacity: 0.4
-            }} paths={spaceSectorPaths[[this.props.futureSpice, spiceSector].join("-")]}/>;
+            }} paths={spaceSectorPaths[[this.props.futureHunny, hunnySector].join("-")]}/>;
         }
         return (
             <div className="board">
@@ -322,16 +322,16 @@ class Board extends React.Component {
                     {alliances.filter(alliance=>alliance.length > 1).map((alliance, i)=> {
                         return <Alliance factions={alliance} key={alliance.join("-")} diameter={0.04} overlap={0.004} cx={0.08} cy={0.08 + 0.05 * i}/>;
                     })}
-                    {futureStorm}
-                    {futureSpice}
+                    {futureBees}
+                    {futureHunny}
                     {this.getSpaces()}
                     {this.getSpaceSectors()}
-                    <Storm sector={this.props.stormSector} color="rgba(255, 0, 0, 0.5)"/>
+                    <Bees sector={this.props.beesSector} color="rgba(255, 0, 0, 0.5)"/>
                     {this.getMovementArrows()}
                     {this.getLogos()}
-                    {this.getSpice()}
+                    {this.getHunny()}
                     {this.getTokenPiles()}
-                    {this.getShaiHulud()}
+                    {this.getHeffalump()}
                     {this.getAtomics()}
                 </svg>
             </div>

@@ -11,7 +11,7 @@ const interactionWidgets = [
     "space-sector-select-end",
     "sector-select",
     "space-select",
-    "leader-input",
+    "character-input",
     "battle-select",
 ];
 
@@ -21,7 +21,7 @@ const defaultArgsForAction = (state, me, actionName, argSpec) => {
         return [factions.length ? factions[0] : me, "2"];
     }
 
-    if (actionName === "fremen-placement") {
+    if (actionName === "christopher_robbin-placement") {
         return ":::16:3";
     }
     if (actionName === "movement-select") {
@@ -33,21 +33,21 @@ const defaultArgsForAction = (state, me, actionName, argSpec) => {
         const iAmAttacker = me === attacker;
         const mePlan = iAmAttacker ? stageState.attacker_plan : stageState.defender_plan;
 
-        const defaultArg =`${mePlan.leader ? mePlan.leader[0] : "-"} ${mePlan.number ? mePlan.number : "0"} ${mePlan.weapon ? mePlan.weapon : "-"} ${mePlan.defense ? mePlan.defense : "-"} -`;
+        const defaultArg =`${mePlan.character ? mePlan.character[0] : "-"} ${mePlan.number ? mePlan.number : "0"} ${mePlan.weapon ? mePlan.weapon : "-"} ${mePlan.defense ? mePlan.defense : "-"} -`;
         return defaultArg;
     }
-    if (actionName === "answer-prescience") {
-        const prescience_query = state.round_state.stage_state.prescience;
-        if (prescience_query === "leader") {
+    if (actionName === "answer-flight") {
+        const flight_query = state.round_state.stage_state.flight;
+        if (flight_query === "character") {
             return "";
-        } else if (prescience_query === "number") {
+        } else if (flight_query === "number") {
             return "0";
         } else {
             return "-";
         }
     }
 
-    if (argSpec.widget === "revival-leader") {
+    if (argSpec.widget === "retrieval-character") {
         return "-";
     }
 
@@ -139,7 +139,7 @@ to ensure that all $interaction props will be present at submit time.
 
 
 const passStubs = [
-    "karama-pass-",
+    "author-pass-",
     "pass-"
 ];
 
