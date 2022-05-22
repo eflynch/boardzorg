@@ -1,3 +1,13 @@
+import {spacePaths, spaceSectorPaths, sectorPaths} from './paths';
+
+export const Paths = {
+  spaces: spacePaths,
+  spaceSectors: spaceSectorPaths,
+  sectors: sectorPaths
+};
+
+export const TRANSFORM=`translate(0.000000,1.000000) scale(${0.100000/848},${-0.100000/848})`;
+
 export const SpiceLocations = {
     "Hagga-Basin": {top: 0.36, left: 0.39},
     "Broken-Land": {top: 0.12, left: 0.35},

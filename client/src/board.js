@@ -2,13 +2,10 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import update from 'immutability-helper';
 
-import {SpiceLocations, TokenLocations, LogoLocations} from './board-data';
+import {SpiceLocations, TokenLocations, LogoLocations, TRANSFORM, Paths} from './board-data';
 
 import Spice from './components/spice';
 import TokenPile from './components/token-pile';
-import {spacePaths, spaceSectorPaths, sectorPaths} from './paths';
-
-const TRANSFORM=`translate(0.000000,1.000000) scale(${0.100000/848},${-0.100000/848})`;
 
 
 const Logo = ({faction, diameter, x, y}) => {
@@ -49,7 +46,7 @@ const Storm = ({sector, color}) => {
         style={{
             fill: color
         }}
-        paths={sectorPaths[sector]}
+        paths={Paths.sectors[sector]}
     />
 };
 
@@ -210,7 +207,7 @@ class Board extends React.Component {
             interaction.action(space);
         } : null;
 
-        return this._getMapParts(spacePaths, "space", onClick, selectedParts);
+        return this._getMapParts(Paths.spaces, "space", onClick, selectedParts);
     }
 
     getSpaceSectors () {
@@ -233,7 +230,7 @@ class Board extends React.Component {
             interaction.action(`${space} ${sector !== "" ? sector : -1}`);
         } : null;
 
-        return  this._getMapParts(spaceSectorPaths, "spaceSector", onClick, selectedParts);
+        return  this._getMapParts(Paths.spaceSectors, "spaceSector", onClick, selectedParts);
     }
 
     getMovementArrows () {
@@ -263,7 +260,7 @@ class Board extends React.Component {
             interaction.action(space);
         } : null;
 
-        return this._getMapParts(sectorPaths, "sector", onClick, selectedParts);
+        return this._getMapParts(Paths.sectors, "sector", onClick, selectedParts);
     }
 
     getShaiHulud () {
@@ -291,13 +288,12 @@ class Board extends React.Component {
 
     render () {
         let {round_state, turn, map_state, alliances} = this.props.state;
-        let AllSpaces = Object.keys(spaceSectorPaths);
-        let transform=`translate(0.000000,1.000000) scale(${0.100000/848},${-0.100000/848})`;
+        let AllSpaces = Object.keys(Paths.spaceSectors);
         let spaces = AllSpaces.map((territory) => {
                 return <g className="space"
                     onClick={()=>{}}
-                    key={territory +"path"} transform={transform}>
-                    {spaceSectorPaths[territory].map((p, i)=><path key={i} d={p}/>)}
+                    key={territory +"path"} transform={TRANSFORM}>
+                    {Paths.spaceSectors[territory].map((p, i)=><path key={i} d={p}/>)}
                 }}
                 </g>
             });
@@ -312,7 +308,7 @@ class Board extends React.Component {
             futureSpice = <MapPart style={{
                 fill: "green",
                 opacity: 0.4
-            }} paths={spaceSectorPaths[[this.props.futureSpice, spiceSector].join("-")]}/>;
+            }} paths={Paths.spaceSectors[[this.props.futureSpice, spiceSector].join("-")]}/>;
         }
         return (
             <div className="board">
