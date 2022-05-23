@@ -39,7 +39,12 @@ def run_console(seed=0, treachery_cards=None, factions_playing=None, output_file
             continue
 
         faction, cmd = parts
-        logger.info(list(session.get_valid_actions(translate_faction(faction)).keys()))
+
+        valid_actions = session.get_valid_actions(translate_faction(faction))
+        if cmd == "?":
+            print([a['name'] for a in valid_actions])
+            continue
+
         try:
             session.handle_cmd(translate_faction(faction), cmd)
         except IllegalAction as e:
