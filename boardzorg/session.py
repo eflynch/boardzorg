@@ -40,11 +40,12 @@ class Session:
         supervisor_actions = Action.get_valid_actions(self.game_log[-1], None)
         if len(supervisor_actions) > 1:
             logger.critical("SUPERVISOR ERROR: {}".format(supervisor_actions))
-        for s in supervisor_actions:
-            self.execute_action(supervisor_actions[s]())
-            if self._next_command_index not in self.su_commands:
-                self.su_commands[self._next_command_index] = []
-            self.su_commands[self._next_command_index].append(supervisor_actions[s].name)
+            return
+        su_action = supervisor_actions.values()[0]
+        self.execute_action(su_action())
+        if self._next_command_index not in self.su_commands:
+            self.su_commands[self._next_command_index] = []
+        self.su_commands[self._next_command_index].append(su_action.name)
 
     def execute_action(self, action):
         old_state = self.game_log[-1]

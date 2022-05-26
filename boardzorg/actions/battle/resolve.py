@@ -198,7 +198,6 @@ class AutoResolveWithTraitor(Action):
 
     @classmethod
     def _check(cls, game_state, faction):
-        battle_id = game_state.round_state.stage_state.battle
         if len(game_state.round_state.stage_state.traitor_passes) != 1:
             raise IllegalAction("Still have to see if there is another traitor")
         if len(game_state.round_state.stage_state.traitor_revealers) != 1:
