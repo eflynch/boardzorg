@@ -293,12 +293,13 @@ class AutoResolveDisaster(Action):
 
     @classmethod
     def _check(cls, game_state, faction):
-        single_traitor = game_state.round_state.stage_state.traitor_revealers == 1
-        if single_traitor:
-            raise IllegalAction("No auto disaster if we had a traitor")
-        double_traitor = game_state.round_state.stage_state.traitor_revealers == 2
-
         stage_state = game_state.round_state.stage_state
+
+        if len(stage_state.traitor_revealers) == 1:
+            raise IllegalAction("No auto disaster if we had a traitor")
+
+        double_traitor = len(stage_state.traitor_revealers) == 2
+
         # Check for Lasgun-Shield Explosion
         has_lasgun = "Lasgun" in stage_state.attacker_plan.values() or "Lasgun" in stage_state.defender_plan.values()
         has_shield = "Shield" in stage_state.attacker_plan.values() or "Shield" in stage_state.defender_plan.values()
