@@ -222,19 +222,18 @@ export default function Session({state, actions, history, me, error, sendCommand
     return (
         <div className="session">
             <div className="board-layer">
-                <div style={{
-                    padding: 10,
-                    borderRadius: 4,
-                    textAlign: "center",
-                    minWidth: 350,
-                    maxWidth: 550,
+                <div className="panel" style={{
                     backgroundColor: "white",
-                    margin: 20
+                    flexGrow:1,
+                    display:"flex",
+                    justifyContent:'center'
                 }}>
-                    <RoundState interaction={interaction} selection={selection} roundState={state.round_state} logoPositions={logoPositions} stormPosition={state.storm_position} winner={state.winner} />
-                    <Actions me={me} state={state} interaction={interaction} setInteraction={setInteraction} error={errorState} actions={actions} sendCommand={sendCommand} setInteractionFlow={setInteractionFlow} updateSelection={updateSelection} clearSelection={clearSelection}/>
+                    <div style={{padding:10, borderRadius:4, textAlign:"center", maxWidth:550, minWidth:350}}>
+                        <RoundState interaction={interaction} selection={selection} roundState={state.round_state} logoPositions={logoPositions} stormPosition={state.storm_position} winner={state.winner} />
+                        <Actions me={me} state={state} interaction={interaction} setInteraction={setInteraction} error={errorState} actions={actions} sendCommand={sendCommand} setInteractionFlow={setInteractionFlow} updateSelection={updateSelection} clearSelection={clearSelection}/>
+                    </div>
                 </div>
-                <div style={{display:"flex"}}>
+                <div className="panel board-table">
                     <Board me={me} interaction={interaction} selection={selection} logoPositions={logoPositions}
                            stormSector={state.storm_position} futureStorm={futureStorm} futureSpice={futureSpice} state={state} />
                     <div style={{display:"flex", flexDirection:"column", justifyContent:"space-between"}}>

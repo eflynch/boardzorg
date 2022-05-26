@@ -50,28 +50,6 @@ const Storm = ({sector, color}) => {
 
 
 class Board extends React.Component {
-    constructor(props) {
-      super(props);
-      this.state = { size: '0' };
-      this.updateWindowDimensions = this.updateWindowDimensions.bind(this);
-    }
-
-    componentDidMount() {
-      this.updateWindowDimensions();
-      window.addEventListener('resize', this.updateWindowDimensions);
-    }
-
-    componentWillUnmount() {
-      window.removeEventListener('resize', this.updateWindowDimensions);
-    }
-
-    updateWindowDimensions() {
-        const limitingDimension = window.innerWidth;
-        const maxSize = 700;
-        const minSize = 400;
-        this.setState({size: Math.max(Math.min(limitingDimension - 100, maxSize), minSize)});
-    }
-
     getTokenPiles () {
         let {map_state} = this.props.state;
         let tokens = [];
@@ -310,7 +288,7 @@ class Board extends React.Component {
         }
         return (
             <div className="board">
-                <svg width={this.state.size} height={this.state.size} viewBox={`0 0 1 1`}>
+                <svg width={"100%"} viewBox={`0 0 1 1`}>
                     <text x={0.11} y={0.11} style={{fill: "white", font: "normal 0.1px Optima"}}>{turn}</text>
                     <image xlinkHref="/static/app/png/board.png" x="0" y="0" width="1" height="1"/>
                     {alliances.filter(alliance=>alliance.length > 1).map((alliance, i)=> {

@@ -13,7 +13,7 @@ export default function Faction({factionstate, faction, me}) {
 
     if (!show) {
         return (
-            <div className={"menu faction" + (me === faction ? " me" : "")}>
+            <div className={"panel menu faction" + (me === faction ? " me" : "")}>
                 <b className="menu-toggle" onClick={(e)=>{setShow(true);}} >{faction}</b>
             </div>
         );
@@ -104,7 +104,7 @@ export default function Faction({factionstate, faction, me}) {
     };
 
     return (
-        <div className={"menu faction" + (me === faction ? " me" : "")}>
+        <div className={"panel menu faction" + (me === faction ? " me" : "")}>
             <b className="menu-toggle" onClick={(e)=>{setShow(false);}}>{faction}</b>
             <div className="faction-content">
                 {getLeaders()}

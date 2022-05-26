@@ -13,13 +13,13 @@ export default History = ({showLog, setShowLog, state, error, actions, sendComma
     const [showSu, setShowSu] = useState(false);
     if (!showLog) {
         return (
-            <div className="menu history" >
+            <div className="panel menu history" >
                 <b className="menu-toggle" onClick={(e)=>{setShowLog(true);}}>Actions Log</b>
             </div>
         );
     }
     return (    
-        <div className="menu history" >
+        <div className="panel menu history" >
             <b className="menu-toggle" onClick={(e)=>{setShowLog(false);}}>Actions Log</b>
             <div style={{display:'flex', flexDirection:'column'}}>
                 <b className="su-button" onClick={()=>{setShowSu(!showSu);}}>{showSu ? "hide auto" : "show auto"}</b>
