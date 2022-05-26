@@ -164,25 +164,6 @@ a {
     z-index: 2;
 }
 
-.session .log {
-    margin: 5px;
-    text-align: left;
-    max-height: 200px;
-    overflow-y: scroll;
-    border: 1px solid red;
-    padding: 10px;
-}
-
-.session .log ul {
-    margin: 0px;
-    padding: 0px;
-    font-size: 12px;
-}
-
-.session .log li {
-    list-style: none;
-}
-
 .actions {
     margin-top: 5px;
     margin-left: 10px;
@@ -299,18 +280,14 @@ img.alive {
     margin-bottom: 5px;
 }
 
-
-.factions {
-    position:fixed;
-    top: 40px;
-    right: 0;
+.menu {
+    border-radius: 4px;
+    padding: 10px;
     display: flex;
-    align-items: flex-end;
-    flex-direction: column;
-    flex-wrap: wrap;
+    align-items: flex-start;
 }
 
-.faction h2 {
+.menu-toggle {
     cursor: pointer;
     user-select: none;
     margin: 0;
@@ -323,10 +300,10 @@ img.alive {
 .faction {
     background-color: #521c00;
     color: white;
-    border-radius: 4px;
-    padding: 10px;
-    display: flex;
-    align-items: flex-start;
+}
+.faction.me {
+    background-color: #feffbe;
+    color: black;
 }
 
 .faction .faction-content {
@@ -335,21 +312,14 @@ img.alive {
     justify-content: center;
     flex-wrap: wrap;
 }
-
-.faction svg {
+.faction .faction-content svg {
     flex-shrink: 0;
 }
-
-
-.faction img {
+.faction .faction-content img {
     padding-left: 2px;
     padding-right: 2px;
 }
 
-.faction.me {
-    background-color: #feffbe;
-    color: black;
-}
 
 .select-on-map.on {
     background-color: green;
@@ -499,24 +469,34 @@ img.alive {
 }
 
 .history {
-    width: 340px;
-    border-radius: 4px;
-    background-color: #521c00;
-    padding: 10px;
+    background-color: #8a4f32;
     border: 1px solid white;
     color: white;
-    position: fixed;
-    bottom: 0;
-    right: 10;
 }
 
-.history b {
-    cursor: pointer;
-    user-select: none;
+.history .log {
+    margin: 10px;
+    text-align: left;
+    max-height: 400px;
+    min-width:200px;
+    overflow-y: scroll;
+    border: 1px solid red;
+    padding: 10px;
+}
+
+.history .log ul {
+    margin: 0px;
+    padding: 0px;
+}
+
+.history-item span {
+    display:inline-block;
+    width:100px;
 }
 
 .history-item {
-
+    list-style: none;
+    font-size: 12px;
 }
 
 .history-item.mine {
@@ -543,15 +523,8 @@ img.alive {
 }
 
 .su-button {
-    border: none;
-    cursor: pointer;
-    outline:none;
-    position:absolute;
-    right: 2px;
-    top: 1px;
-}
-
-.su-button:hover {
+    align-self:flex-end;
+    cursor:pointer;
 }
 
 .battle-plan {

@@ -13,23 +13,23 @@ export default History = ({showLog, setShowLog, state, error, actions, sendComma
     const [showSu, setShowSu] = useState(false);
     if (!showLog) {
         return (
-            <div className="history" >
-                <b onClick={(e)=>{setShowLog(true);}}>Actions Log</b>
+            <div className="menu history" >
+                <b className="menu-toggle" onClick={(e)=>{setShowLog(true);}}>Actions Log</b>
             </div>
         );
     }
     return (    
-        <div className="history" >
-            <div className="log">
-                <ul>
-                    {commandLog.filter((command)=>{
-                        return showSu || command[0] !== "su";
-                    }).reverse().map((command, i) => <Command key={i} me={me} faction={command[0]} cmd={command[1]}/>)}
-                </ul>
-            </div>
-            <div style={{position:"relative"}} >
-                <b onClick={(e)=>{setShowLog(false);}}>Actions Log</b>
-                <button className="su-button" onClick={()=>{setShowSu(!showSu);}}>{showSu ? "hide su" : "show su"}</button>
+        <div className="menu history" >
+            <b className="menu-toggle" onClick={(e)=>{setShowLog(false);}}>Actions Log</b>
+            <div style={{display:'flex', flexDirection:'column'}}>
+                <b className="su-button" onClick={()=>{setShowSu(!showSu);}}>{showSu ? "hide auto" : "show auto"}</b>
+                <div className="log">
+                    <ul>
+                        {commandLog.filter((command)=>{
+                            return showSu || command[0] !== "su";
+                        }).reverse().map((command, i) => <Command key={i} me={me} faction={command[0]} cmd={command[1]}/>)}
+                    </ul>
+                </div>
             </div>
         </div>
     );

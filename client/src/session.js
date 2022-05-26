@@ -186,7 +186,7 @@ export default function Session({state, actions, history, me, error, sendCommand
     };
 
     const [errorState, setErrorState] = useState(error);
-    const [showLog, setShowLog] = useState(false);
+    const [showLog, setShowLog] = useState(true);
 
     useEffect(()=>{
         if (error !== undefined) {
@@ -201,11 +201,13 @@ export default function Session({state, actions, history, me, error, sendCommand
         }
     }, [error])
 
-    const fs = Object.keys(state.faction_state).sort((x,y)=>{ return x == me ? -1 : y == me ? 1 : 0; });;
+    const fs = Object.keys(state.faction_state).filter((x)=>{ return x !== me; });
 
     const factions = fs.map((faction)=> {
         return <Faction key={faction} me={me} faction={faction} factionstate={state.faction_state[faction]} selection={selection}/>;
     });
+    
+    const meFaction = <Faction me={me} faction={me} factionstate={state.faction_state[me]} selection={selection}/>;
 
     let futureStorm = undefined;
     if (state.storm_deck.next !== undefined) {
@@ -241,8 +243,11 @@ export default function Session({state, actions, history, me, error, sendCommand
                     </div>
                 </div>
             </div>
-            <History showLog={showLog} setShowLog={setShowLog} state={state} me={me} setInteraction={setInteraction} commandLog={history} />
             <div className="factions">
+            </div>
+            <div style={{display:"flex", justifyContent:"flex-start", alignItems:"stretch"}}>
+                <History showLog={showLog} setShowLog={setShowLog} state={state} me={me} setInteraction={setInteraction} commandLog={history} />
+                {meFaction}
                 {factions}
             </div>
         </div>

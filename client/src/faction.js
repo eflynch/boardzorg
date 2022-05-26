@@ -9,12 +9,12 @@ import update from 'immutability-helper';
 
 export default function Faction({factionstate, faction, me}) {
 
-    const [show, setShow] = useState(false);
+    const [show, setShow] = useState(faction === me);
 
     if (!show) {
         return (
-            <div className={"faction" + (me === faction ? " me" : "")}>
-                <h2 onClick={(e)=>{setShow(true);}} >{faction}</h2>
+            <div className={"menu faction" + (me === faction ? " me" : "")}>
+                <b className="menu-toggle" onClick={(e)=>{setShow(true);}} >{faction}</b>
             </div>
         );
     }
@@ -82,10 +82,10 @@ export default function Faction({factionstate, faction, me}) {
     };
 
     const getSpice = () => {
-        if (factionstate.spice !== undefined){
+        if (factionstate.spice){
             return (
                 <div style={{display: "flex", flexDirection: "column", alignItems:"center"}}>
-                    Spice<Spice width={75} amount={factionstate.spice}/>
+                    Available<Spice width={75} amount={factionstate.spice}/>
                 </div>
             );
         }
@@ -93,10 +93,10 @@ export default function Faction({factionstate, faction, me}) {
     };
 
     const getBribeSpice = () => {
-        if (factionstate.bribe_spice !== undefined){
+        if (factionstate.bribe_spice){
             return (
                 <div style={{display: "flex", flexDirection: "column", alignItems:"center"}}>
-                    Bribe<Spice width={75} amount={factionstate.bribe_spice}/>
+                    Incoming<Spice width={75} amount={factionstate.bribe_spice}/>
                 </div>
             );
         }
@@ -104,18 +104,18 @@ export default function Faction({factionstate, faction, me}) {
     };
 
     return (
-        <div className={"faction" + (me === faction ? " me" : "")}>
+        <div className={"menu faction" + (me === faction ? " me" : "")}>
+            <b className="menu-toggle" onClick={(e)=>{setShow(false);}}>{faction}</b>
             <div className="faction-content">
                 {getLeaders()}
                 {getTokens()}
                 {getSpice()}
+                {getBribeSpice()}
                 <div style={{display:"flex", flexWrap: "wrap"}}>
                     {getTreachery()}
                     {getTraitors()}
                 </div>
-                {getBribeSpice()}
             </div>
-            <h2 onClick={(e)=>{setShow(false);}}>{faction}</h2>
         </div>
     );
 }
