@@ -30,25 +30,26 @@ const Plan = ({faction, traitor, isAttacker, leader, number, weapon, defense, de
         leaderToken = <span className="question-leader">?</span>;
     }
     const cardWidth = 100;
-    const numberText = number !== undefined ? number : <span>?</span>;
+    const numberText = number !== undefined ? <span>{number}</span> : <span>?</span>;
     const resultText = (number !== undefined && leader !== undefined) ? <span>{number + (dead ? 0 : leaderValue + (kwisatz_haderach ? 2 : 0))}</span> : <span>?</span>;
     const weaponShow = weapon !== undefined ? <Card type="Treachery" name={weapon ? weapon : "Reverse"} width={cardWidth} /> : <span className="question-card">?</span>;
     const defenseShow = defense !== undefined ? <Card type="Treachery" name={defense ? defense : "Reverse"} width={cardWidth} /> : <span className="question-card">?</span>;
     return (
-        <div style={{display:"flex", alignItems: "center"}}>
+        <div style={{display:"flex", flexDirection:"column", alignItems: "center", fontSize:30}}>
             <div style={{display:"flex", alignItems: "center"}}>
-                <div style={{display:"flex", flexDirection:"column", alignItems:"center"}}>
+                <div style={{display:"flex", flexDirection:"column", alignItems:"center", marginRight:10}}>
                     {leaderToken}
                     {kwisatz_haderach ? <LeaderToken name="Kwisatz-Haderach"/> : null}
                 </div>
-                    <div className="big-unit"> + {numberText} = {resultText} : </div>
-            </div><div style={{width:5, height:1}}/>{weaponShow} {defenseShow}
+                <div className="big-unit"> + {numberText} = {resultText}</div>
+            </div>
+            <div style={{display:"flex", marginTop:10}}>{weaponShow}{defenseShow}</div>
         </div>
     );
 }
 
 export default function Battle({roundstate, factionOrder, interaction, selection}) {
-    const battlesToPick = () => {
+    const antagonists = () => {
         const pickable = roundstate.battles.filter((battle)=>{
             return battle[0] == roundstate.faction_turn;
         });
@@ -58,18 +59,17 @@ export default function Battle({roundstate, factionOrder, interaction, selection
             active = true;
         }
 
+        if (roundstate.stage === "battle") {
+            return <Logo diameter={80} faction={roundstate.stage_state.battle[1]} />
+        }
+
 
         const pickers = pickable.map((battle)=> {
             let selected = false;
             if (selection["battle-select"] === battle.slice(1).join(" ")){
                 selected = true;
             }
-            if (roundstate.stage === "battle") {
-                const activeBattle = roundstate.stage_state.battle;
-                if (activeBattle.join(" ") === battle.join(" ")) {
-                    selected = true;
-                }
-            }
+
             return (
                 <div className={"picker" + (active ? " active" : "") + (selected ? " selected": "")} 
                      key={battle.join("-")} onClick={()=>{
@@ -80,7 +80,7 @@ export default function Battle({roundstate, factionOrder, interaction, selection
                     <Logo faction={battle[1]} diameter={80}/>
                     <div style={{display:"flex", flexDirection: "column", alignItems:"center", marginLeft:5}}>
                         <div>{battle[2]}</div>
-                        <div>{battle[3]}</div>
+                        <div style={{fontSize:10}}>(sector: {battle[3]})</div>
                     </div>
                 </div>
             );
@@ -100,9 +100,9 @@ export default function Battle({roundstate, factionOrder, interaction, selection
             const traitor_revealers = roundstate.stage_state.traitor_revealers;
             return (
                 <div>
-                    Plans Revealed:
-                    <div style={{display:"flex", justifyContent:"space-around"}}>
+                    <div style={{display:"flex", justifyContent:"space-evenly", margin:10}}>
                         <Plan faction={attacker} traitor={traitor_revealers.indexOf(defender) !== -1} isAttacker={true} {...roundstate.stage_state.attacker_plan}/>
+                        <div style={{backgroundColor:"white", flexShrink:0, width:1, margin:15}} />
                         <Plan faction={defender} traitor={traitor_revealers.indexOf(attacker) !== -1} isAttacker={false} {...roundstate.stage_state.defender_plan}/>
                     </div>
                 </div>
@@ -120,7 +120,7 @@ export default function Battle({roundstate, factionOrder, interaction, selection
         }
     }
 
-    const attackerOrder = () => {
+    const protagonistOrder = () => {
         const allFactionsInBattle = {};
         roundstate.battles.forEach((battle)=>{
             allFactionsInBattle[battle[0]] = true;
@@ -129,7 +129,7 @@ export default function Battle({roundstate, factionOrder, interaction, selection
             return allFactionsInBattle[faction] !== undefined;
         });
         const turnIndex = relevantFactionOrder.indexOf(roundstate.faction_turn);
-        return <FactionOrder factions={relevantFactionOrder.map((faction, i)=>{
+        return <FactionOrder style={{display:"inline-block"}}diameter={30} factions={relevantFactionOrder.map((faction, i)=>{
             return {
                 faction: faction,
                 label: turnIndex > i ? "done" : "",
@@ -164,7 +164,7 @@ export default function Battle({roundstate, factionOrder, interaction, selection
         let voiceText = "";
         if (stage_state.voice) {
             const [no, proj_pois, weap_def] = stage_state.voice;
-            voiceText = [no ? "no" : "yes", proj_pois, weap_def].join(" ")
+            voiceText = [no ? "do not use a" : "use a", proj_pois, weap_def].join(" ")
         }
         
         return (
@@ -179,13 +179,19 @@ export default function Battle({roundstate, factionOrder, interaction, selection
 
     return (
         <div style={{display:"flex", flexDirection:"column", justifyContent:"space-between", alignItems:"stretch"}}>
+            <div style={{display:"flex", alignItems:"center"}}>
+                <span style={{marginRight:10}}>Battling Order: </span>
+                {protagonistOrder()}
+            </div>
             <div style={{display:"flex", justifyContent: "space-around", alignItems:"center"}}>
-                {attackerOrder()} <span style={{fontSize:30, fontWeight:"bold"}}>vs</span> {battlesToPick()}
+                {<Logo diameter={80} faction={roundstate.faction_turn} />} <span style={{fontSize:30, fontWeight:"bold"}}>vs</span> {antagonists()}
+            </div>
+            <div style={{}}>
+                {roundstate.stage === "battle" ? `in ${roundstate.stage_state.battle[2]} (sector ${roundstate.stage_state.battle[3]})` : ""}
             </div>
             {factors()}
             {plansRevealed()}
             {winner()}
-            {/*JSON.stringify(roundstate).replace(",", ", ").replace(":", ": ")*/}
         </div>
     );
 };

@@ -1,6 +1,4 @@
 import React from 'react';
-import ReactDOM from 'react-dom';
-import update from 'immutability-helper';
 
 import {SpiceLocations, TokenLocations, LogoLocations, TRANSFORM, Paths} from './board-data';
 
@@ -69,7 +67,7 @@ class Board extends React.Component {
 
     updateWindowDimensions() {
         const limitingDimension = window.innerWidth;
-        const maxSize = 800;
+        const maxSize = 700;
         const minSize = 400;
         this.setState({size: Math.max(Math.min(limitingDimension - 100, maxSize), minSize)});
     }

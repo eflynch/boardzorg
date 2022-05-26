@@ -54,25 +54,35 @@ a {
 }
 
 .main-header {
-    position:absolute;
     display: flex;
     width: 100%;
+    height: 100%;
     align-items: center;
     z-index: 3;
 }
 
 .main-header .site-title {
-    font-size: 30px;
+    font-size: 18px;
     font-family: Optima;
-    font-weight: bold;
+    font-weight: lighter;
     margin-left: 10px;
     margin-right: 20px;
     color: #b14f14;
+    text-transform: uppercase;
 }
 
 .main-header .session-title {
     font-size: 18px;
-    text-transform: uppercase;
+    font-family: Optima;
+    font-weight: lighter;
+}
+
+
+.main-header .session-role {
+    margin-left: 30px;
+    font-size: 18px;
+    font-family: Optima;
+    font-style: italic;
 }
 
 .sessioncreator {
@@ -552,9 +562,11 @@ img.alive {
     box-shadow: 3px 3px 2px 3px #888888;
 }
 
-.big-unit {
-    font-size: 30px;
-    margin-left: 10px;
+.big-unit span {
+    border:1px white solid;
+    border-radius:9999px;
+    min-width:35px;
+    display:inline-block;
 }
 
 .select-faction {

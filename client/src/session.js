@@ -225,6 +225,7 @@ export default function Session({state, actions, history, me, error, sendCommand
                     borderRadius: 4,
                     textAlign: "center",
                     minWidth: 350,
+                    maxWidth: 550,
                     backgroundColor: "white",
                     margin: 20
                 }}>

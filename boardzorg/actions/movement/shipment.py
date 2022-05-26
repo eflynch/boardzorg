@@ -585,4 +585,4 @@ class Deploy(Action):
 
         new_game_state.round_state.stage_state.shipment_used = True
 
-        return new_game_stat
+        return new_game_state

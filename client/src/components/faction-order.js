@@ -6,7 +6,7 @@ const Logo = ({faction, diameter, ...props}) => {
 
 const PASS_LABELS = ["pass", "done", "moved"];
 
-export default function FactionOrder({factions, diameter, margin}) {
+export default function FactionOrder({factions, diameter, margin, ...other}) {
     if (diameter === undefined) {
         diameter = 80;
     }
@@ -14,7 +14,7 @@ export default function FactionOrder({factions, diameter, margin}) {
         margin = 3;
     }
     return (
-        <div style={{display:"flex"}}>
+        <div {...other} style={{display:"flex"}}>
             {factions.map((factionInfo, i)=> {
                 const passed = PASS_LABELS.indexOf(factionInfo.label) !== -1;
                 const opacity = passed ? 0.2 : 1.0;

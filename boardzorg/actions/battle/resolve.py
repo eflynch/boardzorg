@@ -355,6 +355,7 @@ class AutoResolveDisaster(Action):
 
         new_game_state.pause.extend(battle_id[:2])
         new_game_state.round_state.stage = "main"
+        new_game_state.round_state.battles = ops.find_battles(new_game_state)
         return new_game_state
 
 

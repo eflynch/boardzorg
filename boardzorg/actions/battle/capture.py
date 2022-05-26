@@ -45,8 +45,8 @@ class LeaderCapture(Action):
         new_game_state.faction_state[loser].leaders.remove(leader_to_capture)
         new_game_state.faction_state["harkonnen"].leaders.append(leader_to_capture)
         new_game_state.faction_state["harkonnen"].leaders_captured.append(leader_to_capture)
-        new_game_state.round_state.battles.remove(new_game_state.round_state.stage_state.battle)
         new_game_state.round_state.stage = "main"
+        new_game_state.round_state.battles = ops.find_battles(new_game_state)
         return new_game_state
 
 
@@ -70,8 +70,8 @@ class LeaderCaptureTank(Action):
         leader_to_tank = capturable_leaders[choice % len(capturable_leaders)]
         ops.tank_leader(new_game_state, loser, leader_to_tank)
         game_state.faction_state["harkonnen"].spice += 2
-        new_game_state.round_state.battles.remove(new_game_state.round_state.stage_state.battle)
         new_game_state.round_state.stage = "main"
+        new_game_state.round_state.battles = ops.find_battles(new_game_state)
         return new_game_state
 
 
@@ -89,8 +89,8 @@ class PassLeaderCapture(Action):
 
     def _execute(self, game_state):
         new_game_state = deepcopy(game_state)
-        new_game_state.round_state.battles.remove(new_game_state.round_state.stage_state.battle)
         new_game_state.round_state.stage = "main"
+        new_game_state.round_state.battles = ops.find_battles(new_game_state)
         return new_game_state
 
 
@@ -108,8 +108,8 @@ class SkipLeaderCapture(Action):
 
     def _execute(self, game_state):
         new_game_state = deepcopy(game_state)
-        new_game_state.round_state.battles.remove(new_game_state.round_state.stage_state.battle)
         new_game_state.round_state.stage = "main"
+        new_game_state.round_state.battles = ops.find_battles(new_game_state)
         return new_game_state
 
 
@@ -128,7 +128,7 @@ class KaramaLeaderCapture(Action):
     def _execute(self, game_state):
         new_game_state = deepcopy(game_state)
         new_game_state.round_state.battles.remove(new_game_state.round_state.stage_state.battle)
-        new_game_state.round_state.stage = "main"
+        new_game_state.round_state.battles = ops.find_battles(new_game_state)
         discard_karama(new_game_state, self.faction)
         return new_game_state
 

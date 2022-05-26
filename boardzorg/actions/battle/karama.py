@@ -90,7 +90,7 @@ class KaramaSardaukar(Action):
         new_game_state = deepcopy(game_state)
         new_game_state.round_state.stage_state.karama_sardaukar = True
         new_game_state.round_state.stage_state.substage = "karama-fedaykin"
-        discard_karma(new_game_state, self.faction)
+        discard_karama(new_game_state, self.faction)
         return new_game_state
 
 
