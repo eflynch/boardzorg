@@ -207,7 +207,10 @@ export default function Session({state, actions, history, me, error, sendCommand
         return <Faction key={faction} me={me} faction={faction} factionstate={state.faction_state[faction]} selection={selection}/>;
     });
     
-    const meFaction = <Faction me={me} faction={me} factionstate={state.faction_state[me]} selection={selection}/>;
+    let meFaction = <div/>;
+    if (me !== "host") {
+        meFaction = <Faction me={me} faction={me} factionstate={state.faction_state[me]} selection={selection}/>;
+    }
 
     let futureStorm = undefined;
     if (state.storm_deck.next !== undefined) {
