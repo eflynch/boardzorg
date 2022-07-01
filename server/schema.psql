@@ -4,3 +4,10 @@ CREATE TABLE sessions (
     serialized JSONB,
     roles JSONB 
 );
+
+CREATE TABLE trunk (
+    id SERIAL PRIMARY KEY,
+    value JSONB
+);
+
+INSERT INTO trunk (id, value) VALUES (1, "{}");

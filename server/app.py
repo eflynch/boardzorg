@@ -8,10 +8,12 @@ from flask_basicauth import BasicAuth
 from reactstub import reactstub
 
 from api import api
+from zorg import zorg
 from socketapi import connect_socketio
 
 app = Flask(__name__)
 app.register_blueprint(api, url_prefix="/api")
+app.register_blueprint(zorg, url_prefix="/zorg")
 
 socketio = SocketIO(app)
 
