@@ -6,3 +6,4 @@ eventlet
 dataclasses
 cachetools
 Flask-BasicAuth
+flask-cors

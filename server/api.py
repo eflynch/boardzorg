@@ -8,8 +8,11 @@ import rolewrapper
 
 api = Blueprint("api", __name__)
 
+from app import basic_auth
+
 
 @api.route("/sessions", methods=['POST'])
+@basic_auth.required
 def insert():
     r_dict = request.get_json()
     session_id = r_dict["session_id"]
@@ -19,6 +22,7 @@ def insert():
 
 
 @api.errorhandler(ValueError)
+@basic_auth.required
 def handle_value_error(error):
     response = jsonify({"BadCommand": "You did something bad related to a number"})
     response.status_code = 400
@@ -26,6 +30,7 @@ def handle_value_error(error):
 
 
 @api.errorhandler(IllegalAction)
+@basic_auth.required
 def handle_illegal_action(error):
     response = jsonify({"IllegalAction": str(error)})
     response.status_code = 400
@@ -33,6 +38,7 @@ def handle_illegal_action(error):
 
 
 @api.errorhandler(BadCommand)
+@basic_auth.required
 def handle_bad_command(error):
     response = jsonify({"BadCommand": str(error)})
     response.status_code = 400
@@ -40,6 +46,7 @@ def handle_bad_command(error):
 
 
 @api.errorhandler(SessionConflict)
+@basic_auth.required
 def handle_session_conflict(error):
     response = jsonify({"SessionConflict": str(error)})
     response.status_code = 400
@@ -47,6 +54,7 @@ def handle_session_conflict(error):
 
 
 @api.errorhandler(rolewrapper.RoleException)
+@basic_auth.required
 def handle_role_exception(error):
     response = jsonify({"RoleException": str(error)})
     response.status_code = 400
@@ -54,6 +62,7 @@ def handle_role_exception(error):
 
 
 @api.route("/sessions/<session_id>/roles", methods=['POST'])
+@basic_auth.required
 def assign_role(session_id):
     pay_load = request.get_json()
     role = pay_load["role"]
@@ -73,6 +82,7 @@ def assign_role(session_id):
 
 
 @api.route("/sessions/<session_id>", methods=['POST'])
+@basic_auth.required
 def command(session_id):
     pay_load = request.get_json()
 
@@ -94,6 +104,7 @@ def command(session_id):
 
 
 @api.route("/sessions/<session_id>/roles", methods=['GET'])
+@basic_auth.required
 def get_assigned_roles(session_id):
     with SessionWrapper(session_id) as (session, roles):
         assigned_roles = list(roles.values())
@@ -106,6 +117,7 @@ def get_assigned_roles(session_id):
 
 
 @api.route("/sessions/<session_id>", methods=['GET'])
+@basic_auth.required
 def state(session_id):
     role_id = request.args.get("role_id")
     with SessionWrapper(session_id) as (session, roles):

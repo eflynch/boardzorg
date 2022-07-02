@@ -7,11 +7,13 @@ from flask_basicauth import BasicAuth
 
 from reactstub import reactstub
 
+app = Flask(__name__)
+basic_auth = BasicAuth(app)
+
 from api import api
 from zorg import zorg
 from socketapi import connect_socketio
 
-app = Flask(__name__)
 app.register_blueprint(api, url_prefix="/api")
 app.register_blueprint(zorg, url_prefix="/zorg")
 
@@ -24,24 +26,25 @@ if os.path.exists('/etc/config.json'):
     app.config['SECRET_KEY'] = config.get('SECRET_KEY')
     app.config['BASIC_AUTH_USERNAME'] = config.get('BASIC_AUTH_USERNAME')
     app.config['BASIC_AUTH_PASSWORD'] = config.get('BASIC_AUTH_PASSWORD')
-    app.config['BASIC_AUTH_FORCE'] = True
 else:
     print("Warning, running without a secret")
 
 
-back_auth = BasicAuth(app)
 
 @app.route("/", methods=['GET'])
+@basic_auth.required
 def index():
     return reactstub("Shai-Hulud", ["app/css/styles.css", "app/css/slider.css"], ["app/main.js"], bootstrap=json.dumps({"sessionID": None}))
 
 
 @app.route("/<session_id>", methods=['GET'], strict_slashes=False)
+@basic_auth.required
 def role_assignment(session_id):
     return reactstub("Shai-Hulud", ["app/css/styles.css", "app/css/slider.css"], ["app/main.js"], bootstrap=json.dumps({"sessionID": session_id, "roleID": None}))
 
 
 @app.route("/<session_id>/<role_id>", methods=['GET'], strict_slashes=False)
+@basic_auth.required
 def view(session_id, role_id):
     return reactstub("Shai-Hulud", ["app/css/styles.css", "app/css/slider.css"], ["app/main.js"], bootstrap=json.dumps({"sessionID": session_id, "roleID": role_id}))
 
